@@ -1,0 +1,43 @@
+.costum-sidebar {
+  background: #0d47a1;
+  padding: 6rem 0.25rem 0.25rem 0.25rem;
+  position: absolute;
+  border-right: #0d47a1 solid 0.0625rem;
+  left: 0px;
+  height: 100%;
+  z-index: 2;
+  font-size: 0rem;
+  transition: font-size 0.7s;
+  transition-delay: 600ms;
+  transition-timing-function: ease-out;
+}
+.costum-sidebar:hover {
+  font-size: 1rem;
+}
+
+.costum-sidebar a {
+  text-transform: uppercase;
+  color: #42a5f5;
+  border: 0.125rem solid transparent;
+  display: flex;
+  font-size: inherit;
+  justify-self: center;
+}
+
+.costum-sidebar a.nav-link.active {
+  color: #bbdefb;
+  border: 0.0625rem solid #2979ff;
+  border-radius: 13%;
+  background: #1565c0;
+}
+
+.costum-sidebar a:hover {
+  color: #bbdefb;
+}
+
+.costum-sidebar span.text-normal {
+  margin: 0px 0.3125rem;
+  font-size: 1.5rem;
+  display: flex;
+  justify-self: center;
+}
