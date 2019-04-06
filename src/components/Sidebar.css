@@ -6,22 +6,18 @@
   left: 0px;
   height: 100%;
   z-index: 2;
-  font-size: 0rem;
-  transition: font-size 0.7s;
+  /* font-size: 0rem; */
+  transition: width 5s;
   transition-delay: 600ms;
   transition-timing-function: ease-out;
-}
-.costum-sidebar:hover {
-  font-size: 1rem;
 }
 
 .costum-sidebar a {
   text-transform: uppercase;
   color: #42a5f5;
   border: 0.125rem solid transparent;
-  display: flex;
-  font-size: inherit;
-  justify-self: center;
+  line-height: 2rem;
+  height: 3rem;
 }
 
 .costum-sidebar a.nav-link.active {
@@ -35,9 +31,11 @@
   color: #bbdefb;
 }
 
-.costum-sidebar span.text-normal {
+.costum-sidebar i {
   margin: 0px 0.3125rem;
   font-size: 1.5rem;
-  display: flex;
-  justify-self: center;
+  display: inline-block;
+  line-height: 2rem;
+  text-align: center;
+  vertical-align: bottom;
 }

@@ -1,11 +1,12 @@
 import React, { Component } from "react";
 import { NavLink } from "react-router-dom";
 
-const SideBarItem = ({ text, path, icon }) => {
+const SideBarItem = ({ text, path, icon, showTextSidebarItem }) => {
   return (
     <li className="nav-item">
       <NavLink className="nav-link" to={path} activeClassName="active">
-        <span className={`fas fa-${icon} text-normal`} /> {text}
+        <i className={`fas fa-${icon} fa-lg`} />{" "}
+        {showTextSidebarItem ? text : ""}
       </NavLink>
     </li>
   );
