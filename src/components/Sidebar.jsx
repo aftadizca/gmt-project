@@ -1,7 +1,6 @@
 import React, { Component } from "react";
 import { NavLink } from "react-router-dom";
 import "../components/Sidebar.css";
-import SideBarItem from "./SideBarItem";
 
 const SideBar = ({ children, onMouseEnter, onMouseLeave }) => {
   return (
