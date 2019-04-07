@@ -1,15 +1,16 @@
 import React, { Component } from "react";
 import { NavLink } from "react-router-dom";
-import "../components/Sidebar.css";
+import { Menu } from "semantic-ui-react";
+// import "../components/Sidebar.css";
 
 const SideBar = ({ children, onMouseEnter, onMouseLeave }) => {
   return (
     <div
-      className="costum-sidebar"
+      className="position-fixed pt-5 p-1 bg-primary h-100 border-right border-dark"
       onMouseEnter={onMouseEnter}
       onMouseLeave={onMouseLeave}
     >
-      <ul className="list-group">{children}</ul>
+      <div className="list-group mt-5 shadow-sm">{children}</div>
     </div>
   );
 };
