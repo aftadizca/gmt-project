@@ -94,7 +94,7 @@ class MyTable extends Component {
           </Grid.Row>
           <Grid.Row textAlign="center">
             <Grid.Column>
-              {paginatedData.length === 0 ? (
+              {pageLength === 1 ? (
                 ""
               ) : (
                 <Pagination

@@ -66,7 +66,7 @@ class Material extends Component {
   };
 
   render() {
-    const { materials, pageSize, tablePagination } = this.state;
+    const { materials, tablePagination } = this.state;
     const headerRow = ["MATERIAL ID", "MATERIAL NAME", "SUPLIER", "UNIT", ""];
     const renderBodyRow = ({ id, name, suplier, unit }, i) => ({
       key: `row-${i}`,
@@ -77,10 +77,20 @@ class Material extends Component {
         unit,
         {
           key: i,
+          width: 3,
           content: (
-            <Button.Group icon>
-              <Button onClick={() => this.handleDelete(id)}>
-                <Icon name="delete" />
+            <Button.Group>
+              <Button animated="vertical" size="mini">
+                <Button.Content hidden>Edit</Button.Content>
+                <Button.Content visible>
+                  <Icon name="edit" />
+                </Button.Content>
+              </Button>
+              <Button animated="vertical" onClick={() => this.handleDelete(id)}>
+                <Button.Content hidden>Delete</Button.Content>
+                <Button.Content visible>
+                  <Icon name="delete" />
+                </Button.Content>
               </Button>
             </Button.Group>
           )
@@ -95,7 +105,6 @@ class Material extends Component {
           headerRow={headerRow}
           renderBodyRow={renderBodyRow}
           data={Filtering(materials, this.state.searchValue)}
-          pageSize={pageSize}
           onPageChange={this.handlePageChange}
           pagination={tablePagination}
           onSearch={this.handleOnSearch}
