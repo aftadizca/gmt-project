@@ -1,9 +1,14 @@
 import React, { Component } from "react";
+import { Grid, Statistic } from "semantic-ui-react";
 
 class Home extends Component {
   state = {};
   render() {
-    return <h1>HOME PAGE</h1>;
+    return (
+      <Grid columns={3} divided>
+        <Grid.Row />
+      </Grid>
+    );
   }
 }
 

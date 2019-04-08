@@ -6,6 +6,7 @@ import SideBarItem from "./_common/SideBarItem";
 import Home from "./components/Home";
 import Material from "./components/Material";
 import Transaction from "./components/Transaction";
+import Other from "./components/Other";
 import { Grid } from "semantic-ui-react";
 
 class App extends Component {
@@ -24,42 +25,32 @@ class App extends Component {
     return (
       <React.Fragment>
         <BrowserRouter>
+          <div style={{ marginTop: 20 }} />
           <Grid>
-            <Grid.Column width={3}>
-              <SideBar
-                onMouseEnter={this.handleMouseEnterSideBar}
-                onMouseLeave={this.handleMouseLeaveSideBar}
-              >
-                <SideBarItem
-                  path="/home"
-                  icon="home"
-                  text="Home"
-                  showTextSidebarItem={this.state.showTextSidebarItem}
-                />
-                <SideBarItem
-                  path="/material"
-                  icon="boxes"
-                  text="Material"
-                  showTextSidebarItem={this.state.showTextSidebarItem}
-                />
+            <Grid.Column width={2}>
+              <SideBar>
+                <SideBarItem path="/home" icon="home" text="Home" />
+                <SideBarItem path="/material" icon="boxes" text="Material" />
                 <SideBarItem
                   path="/transaction"
-                  icon="exchange-alt"
+                  icon="exchange"
                   text="Transaction"
-                  showTextSidebarItem={this.state.showTextSidebarItem}
                 />
+                <SideBarItem path="/other" icon="settings" text="Other" />
               </SideBar>
             </Grid.Column>
-            <Grid.Column width={12}>
+            <Grid.Column width={13}>
               <Route>
                 <Switch>
                   <Route path="/home" component={Home} />
                   <Route path="/material" component={Material} />
                   <Route path="/transaction" component={Transaction} />
+                  <Route path="/other" component={Other} />
                   <Redirect from="/" to="/home" />
                 </Switch>
               </Route>
             </Grid.Column>
+            <Grid.Column width={1} />
           </Grid>
         </BrowserRouter>
       </React.Fragment>

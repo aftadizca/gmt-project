@@ -1,16 +1,15 @@
 import React from "react";
 import { NavLink } from "react-router-dom";
+import { Menu, Icon } from "semantic-ui-react";
 
-const SideBarItem = ({ text, path, icon, showTextSidebarItem }) => {
+const SideBarItem = ({ text, path, icon }) => {
   return (
-    <NavLink
-      className="list-group-item list-group-item-action list-group-item-primary"
-      to={path}
-      activeClassName="active"
-    >
-      <i className={`fas fa-${icon} fa-lg`} />
-      {showTextSidebarItem ? <div className="ml-4 d-inline">{text}</div> : ""}
-    </NavLink>
+    <React.Fragment>
+      <Menu.Item as={NavLink} to={path} activeClassName="active">
+        <Icon name={icon} />
+        {text}
+      </Menu.Item>
+    </React.Fragment>
   );
 };
 

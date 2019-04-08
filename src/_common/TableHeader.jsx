@@ -1,20 +1,21 @@
 import React from "react";
+import { Table } from "semantic-ui-react";
 
 const TableHeader = ({ data }) => {
   return (
-    <thead>
-      <tr>
+    <Table.Header>
+      <Table.Row>
         {data.map(header => (
-          <th
+          <Table.HeaderCell
             className="text-uppercase text-center bg-primary  text-white"
             key={header.key || header.name}
             scope="col"
           >
             {header.label || header.name}
-          </th>
+          </Table.HeaderCell>
         ))}
-      </tr>
-    </thead>
+      </Table.Row>
+    </Table.Header>
   );
 };
 

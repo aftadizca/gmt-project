@@ -1,61 +1,116 @@
 import React, { Component } from "react";
-import TableHeader from "./TableHeader";
 import _ from "lodash";
+import Paginate from "../_helper/paginate";
+import {
+  Grid,
+  Header,
+  Segment,
+  Search,
+  Icon,
+  Menu,
+  Input,
+  Popup,
+  Button,
+  Table,
+  Pagination
+} from "semantic-ui-react";
 
-class Table extends Component {
+class MyTable extends Component {
+  state = {
+    searchValue: ""
+  };
+
   render() {
-    const { header, data, title, pageSize, onPageChange } = this.props;
-    const pageNumber = _.range(1, pageSize + 1);
+    const {
+      headerRow,
+      renderBodyRow,
+      data,
+      title,
+      pagination,
+      onPageChange,
+      onSearch,
+      button
+    } = this.props;
+
+    //render when no data in table
+    const noData = [{ name: "No data available" }];
+    const renderBodyRowEmpty = ({ name }, i) => ({
+      key: i,
+      cells: [
+        {
+          key: i,
+          colSpan: headerRow.length,
+          content: name
+        }
+      ],
+      textAlign: "center"
+    });
+
+    const pageLength = Math.ceil(data.length / pagination.pageSize);
+    const currentPage =
+      pagination.currentPage > pageLength ? pageLength : pagination.currentPage;
+
+    //Pagination
+    const paginatedData = Paginate(data, currentPage, pagination.pageSize);
 
     return (
       <React.Fragment>
-        <div className="card">
-          <div className="card-body bg-primary">
-            <h5 className="text-white">{title}</h5>
-          </div>
-        </div>
-        <div className="card border-primary">
-          <div className="card-body">
-            <table className="table table-striped table-hover">
-              <TableHeader data={header} />
-              <tbody>
-                {data.map(rows => (
-                  <tr key={rows.id}>
-                    {header.map((label, i) => (
-                      <td className="text-center" key={i}>
-                        {rows[label.name] || label.content(rows)}
-                      </td>
-                    ))}
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-          <div className="card-footer bg-primary">
-            <nav aria-label="Page navigation example">
-              <ul className="pagination">
-                {pageNumber.map(x => (
-                  <li
-                    key={x}
-                    className="page-item"
-                    onClick={() => onPageChange(x)}
-                  >
-                    <a
-                      key={x}
-                      className="page-link"
-                      style={{ cursor: "pointer" }}
-                    >
-                      {x}
-                    </a>
-                  </li>
-                ))}
-              </ul>
-            </nav>
-          </div>
-        </div>
+        <Grid padded>
+          <Grid.Row columns={2}>
+            <Grid.Column>
+              <Segment secondary color="blue">
+                <Header as="h1">{title}</Header>
+              </Segment>
+            </Grid.Column>
+            <Grid.Column verticalAlign="middle">
+              <Menu icon floated="right">
+                <Menu.Item name="home">{button}</Menu.Item>
+                <Menu.Item>
+                  <Input
+                    icon="search"
+                    placeholder="Search..."
+                    onInput={onSearch}
+                  />
+                </Menu.Item>
+              </Menu>
+            </Grid.Column>
+          </Grid.Row>
+
+          <Grid.Row>
+            <Grid.Column>
+              <Table
+                color="blue"
+                celled
+                textAlign="center"
+                headerRow={headerRow}
+                renderBodyRow={
+                  paginatedData.length !== 0
+                    ? renderBodyRow
+                    : renderBodyRowEmpty
+                }
+                tableData={paginatedData.length !== 0 ? paginatedData : noData}
+              />
+            </Grid.Column>
+          </Grid.Row>
+          <Grid.Row textAlign="center">
+            <Grid.Column>
+              {paginatedData.length === 0 ? (
+                ""
+              ) : (
+                <Pagination
+                  activePage={currentPage}
+                  boundaryRange={1}
+                  onPageChange={onPageChange}
+                  siblingRange={1}
+                  totalPages={pageLength}
+                />
+              )}
+            </Grid.Column>
+          </Grid.Row>
+        </Grid>
       </React.Fragment>
     );
   }
 }
 
-export default Table;
+export default MyTable;
