@@ -1,21 +1,23 @@
 import React, { Component } from "react";
-import { Tab, Button, Icon } from "semantic-ui-react";
+import { Tab, Button, Icon, Popup } from "semantic-ui-react";
 import MyTable from "./../_common/Table";
 import Filtering from "./../_helper/filtering";
 
 class Other extends Component {
   state = {
     statusQC: [
-      { id: 1, name: "Unapprove" },
-      { id: 2, name: "Approve" },
-      { id: 3, name: "Quarantine" },
-      { id: 4, name: "Block" }
+      { id: 1, total: 1250, name: "Unapprove" },
+      { id: 2, total: 564, name: "Approve" },
+      { id: 3, total: 564, name: "Quarantine" },
+      { id: 4, total: 564, name: "Block" }
     ],
     tablePagination: { pageSize: 10, currentPage: 1 },
     searchValue: ""
   };
 
-  handleDelete = () => {};
+  handleDeleteStatusQC = id => {
+    console.log(id);
+  };
 
   handleOnSearch = () => {};
 
@@ -23,8 +25,8 @@ class Other extends Component {
 
   render() {
     const { statusQC, searchValue, tablePagination } = this.state;
-    const headerRow = ["STATUS ID", "STATUS", ""];
-    const renderBodyRow = ({ id, name }, i) => ({
+    const statusQCHeader = ["STATUS ID", "STATUS", ""];
+    const statusQCRow = ({ id, name }, i) => ({
       key: `row-${i}`,
       cells: [
         { key: id, content: id, width: 2 },
@@ -33,19 +35,22 @@ class Other extends Component {
           key: i,
           width: 2,
           content: (
-            <Button.Group floated="right">
-              <Button animated="vertical" size="mini">
-                <Button.Content hidden>Edit</Button.Content>
-                <Button.Content visible>
-                  <Icon name="edit" />
-                </Button.Content>
-              </Button>
-              <Button animated="vertical" onClick={() => this.handleDelete(id)}>
-                <Button.Content hidden>Delete</Button.Content>
-                <Button.Content visible>
-                  <Icon name="delete" />
-                </Button.Content>
-              </Button>
+            <Button.Group basic size="small">
+              <Popup
+                inverted
+                trigger={<Button icon="edit" />}
+                content="Change me!!"
+              />
+              <Popup
+                inverted
+                trigger={
+                  <Button
+                    icon="trash"
+                    onClick={() => this.handleDeleteStatusQC(id)}
+                  />
+                }
+                content="Delete me!!"
+              />
             </Button.Group>
           )
         }
@@ -59,8 +64,8 @@ class Other extends Component {
           <Tab.Pane attached={false}>
             <MyTable
               title="STATUS QC"
-              headerRow={headerRow}
-              renderBodyRow={renderBodyRow}
+              headerRow={statusQCHeader}
+              renderBodyRow={statusQCRow}
               data={Filtering(statusQC, searchValue)}
               onPageChange={this.handlePageChange}
               pagination={tablePagination}

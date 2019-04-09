@@ -55,24 +55,16 @@ class MyTable extends Component {
 
     return (
       <React.Fragment>
-        <Grid padded>
+        <Grid padded textAlign="center">
           <Grid.Row columns={2}>
             <Grid.Column>
-              <Segment secondary color="blue">
+              <Segment inverted color="blue" stacked>
                 <Header as="h1">{title}</Header>
               </Segment>
             </Grid.Column>
-            <Grid.Column verticalAlign="middle">
-              <Menu icon floated="right">
-                <Menu.Item name="home">{button}</Menu.Item>
-                <Menu.Item>
-                  <Input
-                    icon="search"
-                    placeholder="Search..."
-                    onInput={onSearch}
-                  />
-                </Menu.Item>
-              </Menu>
+            <Grid.Column verticalAlign="middle" textAlign="right">
+              {button}{" "}
+              <Input icon="search" placeholder="Search..." onInput={onSearch} />
             </Grid.Column>
           </Grid.Row>
 

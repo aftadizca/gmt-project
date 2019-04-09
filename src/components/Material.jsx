@@ -1,7 +1,17 @@
 import React, { Component } from "react";
 import API from "../_helper/api";
 import MyTable from "./../_common/Table";
-import { Segment, Button, Icon, Popup } from "semantic-ui-react";
+import _ from "lodash";
+import {
+  Segment,
+  Button,
+  Icon,
+  Popup,
+  Modal,
+  Form,
+  Label,
+  Message
+} from "semantic-ui-react";
 import { DeleteAlert, Toast, Loading } from "../_helper/CostumToast";
 import Filtering from "../_helper/filtering";
 
@@ -9,7 +19,9 @@ class Material extends Component {
   state = {
     materials: [],
     tablePagination: { pageSize: 10, currentPage: 1 },
-    searchValue: ""
+    searchValue: "",
+    addMaterial: { id: "", name: "", suplier: "", unit: "" },
+    addMaterialError: { submit: true, error: false, msg: "" }
   };
 
   componentDidMount() {
@@ -64,9 +76,26 @@ class Material extends Component {
       }
     });
   };
+  handleChangeMaterial = (e, { name }) => {
+    this.setState({
+      addMaterial: { ...this.state.addMaterial, [name]: e.target.value }
+    });
+  };
+  handleSubmitMaterial = e => {
+    const { id, name, suplier, unit } = this.state.addMaterial;
+    if (id && name && suplier && unit) {
+      console.log("submited");
+    }
+    e.preventDefault();
+  };
 
   render() {
-    const { materials, tablePagination } = this.state;
+    const {
+      materials,
+      tablePagination,
+      addMaterialError,
+      addMaterial
+    } = this.state;
     const headerRow = ["MATERIAL ID", "MATERIAL NAME", "SUPLIER", "UNIT", ""];
     const renderBodyRow = ({ id, name, suplier, unit }, i) => ({
       key: `row-${i}`,
@@ -77,26 +106,86 @@ class Material extends Component {
         unit,
         {
           key: i,
-          width: 3,
+          width: 2,
           content: (
-            <Button.Group>
-              <Button animated="vertical" size="mini">
-                <Button.Content hidden>Edit</Button.Content>
-                <Button.Content visible>
-                  <Icon name="edit" />
-                </Button.Content>
-              </Button>
-              <Button animated="vertical" onClick={() => this.handleDelete(id)}>
-                <Button.Content hidden>Delete</Button.Content>
-                <Button.Content visible>
-                  <Icon name="delete" />
-                </Button.Content>
-              </Button>
+            <Button.Group basic size="small">
+              <Popup
+                inverted
+                trigger={<Button icon="edit" />}
+                content="Change me!!"
+              />
+              <Popup
+                inverted
+                trigger={
+                  <Button icon="trash" onClick={() => this.handleDelete(id)} />
+                }
+                content="Delete me!!"
+              />
             </Button.Group>
           )
         }
       ]
     });
+
+    const buttonAdd = (
+      <Modal
+        closeIcon
+        size="small"
+        trigger={
+          <Button animated="vertical">
+            <Button.Content hidden>Add</Button.Content>
+            <Button.Content visible>
+              <Icon name="add" />
+            </Button.Content>
+          </Button>
+        }
+      >
+        <Modal.Header>ADD MATERIAL</Modal.Header>
+        <Modal.Content>
+          <Form
+            error={addMaterialError.error}
+            onSubmit={this.handleSubmitMaterial}
+          >
+            <Message error header="Warning" content={addMaterialError.msg} />
+            <Form.Input
+              label="Material ID"
+              name="id"
+              onChange={this.handleChangeMaterial}
+              value={addMaterial.id}
+              placeholder="Material ID"
+            />
+
+            <Form.Input
+              label="Material Name"
+              name="name"
+              value={addMaterial.name}
+              onChange={this.handleChangeMaterial}
+              placeholder="Material Name"
+            />
+            <Form.Group widths="equal">
+              <Form.Input
+                fluid
+                label="Suplier"
+                onChange={this.handleChangeMaterial}
+                name="suplier"
+                value={addMaterial.suplier}
+                placeholder="Suplier"
+              />
+              <Form.Input
+                fluid
+                label="Unit"
+                onChange={this.handleChangeMaterial}
+                name="unit"
+                value={addMaterial.unit}
+                placeholder="Unit"
+              />
+            </Form.Group>
+
+            <Form.Button>SAVE</Form.Button>
+          </Form>
+        </Modal.Content>
+      </Modal>
+    );
 
     return (
       <Segment raised piled>
@@ -108,16 +197,7 @@ class Material extends Component {
           onPageChange={this.handlePageChange}
           pagination={tablePagination}
           onSearch={this.handleOnSearch}
-          button={
-            <Button.Group>
-              <Button animated="vertical">
-                <Button.Content hidden>Add</Button.Content>
-                <Button.Content visible>
-                  <Icon name="add" />
-                </Button.Content>
-              </Button>
-            </Button.Group>
-          }
+          button={<Button.Group>{buttonAdd}</Button.Group>}
         />
       </Segment>
     );
