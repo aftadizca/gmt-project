@@ -1,6 +1,7 @@
 import React, { Component } from "react";
 import API from "../_helper/api";
 import MyTable from "./../_common/Table";
+import Cleave from "cleave.js/react";
 import _ from "lodash";
 import {
   Segment,
@@ -147,12 +148,25 @@ class Material extends Component {
             onSubmit={this.handleSubmitMaterial}
           >
             <Message error header="Warning" content={addMaterialError.msg} />
+            <Cleave
+              placeholder="GMT/02/01/1"
+              options={{
+                delimiter: "/",
+                blocks: [3, 2, 2, 1000],
+                uppercase: true
+              }}
+            />
             <Form.Input
+              as={Cleave}
               label="Material ID"
-              name="id"
               onChange={this.handleChangeMaterial}
               value={addMaterial.id}
               placeholder="Material ID"
+              options={{
+                delimiter: "/",
+                blocks: [3, 2, 2, 1000000],
+                uppercase: true
+              }}
             />
 
             <Form.Input
