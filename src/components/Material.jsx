@@ -1,7 +1,6 @@
 import React, { Component } from "react";
 import API from "../_helper/api";
 import MyTable from "./../_common/Table";
-import Cleave from "cleave.js/react";
 import _ from "lodash";
 import {
   Segment,
@@ -10,19 +9,17 @@ import {
   Popup,
   Modal,
   Form,
-  Label,
   Message
 } from "semantic-ui-react";
 import { DeleteAlert, Toast, Loading } from "../_helper/CostumToast";
-import Filtering from "../_helper/filtering";
 
 class Material extends Component {
   state = {
     materials: [],
-    tablePagination: { pageSize: 10, currentPage: 1 },
-    searchValue: "",
-    addMaterial: { id: "", name: "", suplier: "", unit: "" },
-    addMaterialError: { submit: true, error: false, msg: "" }
+    addMaterial: { id: "", name: "", suplier: "", type: "", unit: "" },
+    addMaterialError: false,
+    addMaterialErrorMsg: "",
+    addMaterialOpen: false
   };
 
   componentDidMount() {
@@ -35,40 +32,29 @@ class Material extends Component {
       .catch(({ response }) => {
         if (typeof response === "undefined") {
           Loading.close();
-          Toast("error", "Server not Available", false).fire();
+          Toast("Server not Available", "error", false).fire();
         } else if (response.status >= 400) {
           Loading.close();
-          Toast("error", "Server error").fire();
+          Toast("Server error", "error").fire();
         }
       });
   }
 
-  handleButtonTableClick = movie => {
+  handleDetail = movie => {
     console.log(movie);
   };
 
-  handlePageChange = (e, a) => {
-    let tablePagination = { ...this.state.tablePagination };
-    tablePagination.currentPage = a.activePage;
-    this.setState({ tablePagination });
-  };
-
-  handleOnSearch = e => {
-    this.setState({ searchValue: e.currentTarget.value });
-  };
-
-  handleDelete = id => {
+  handleDelete = data => {
     DeleteAlert.fire().then(result => {
       if (result.value) {
-        API.delete("material/" + btoa(id))
+        API.delete("material/" + data.id)
           .then(({ status }) => {
             if (status === 200) {
-              const materials = [...this.state.materials];
-              const filtered = materials.filter(x => x.id !== id);
+              const filtered = this.state.materials.filter(x => x !== data);
               this.setState({ materials: filtered });
-              Toast("success", "Successfully delete item!").fire();
+              Toast("Successfully delete item!").fire();
             } else {
-              Toast("error", "Delete failed").fire();
+              Toast("Delete failed", "error").fire();
             }
           })
           .catch(errors => {
@@ -77,34 +63,77 @@ class Material extends Component {
       }
     });
   };
+
   handleChangeMaterial = (e, { name }) => {
     this.setState({
       addMaterial: { ...this.state.addMaterial, [name]: e.target.value }
     });
   };
+
   handleSubmitMaterial = e => {
-    const { id, name, suplier, unit } = this.state.addMaterial;
-    if (id && name && suplier && unit) {
-      console.log("submited");
+    const { name, suplier, unit, type } = this.state.addMaterial;
+    if (name && suplier && unit && type) {
+      API.post("material", this.state.addMaterial)
+        .then(({ status, data }) => {
+          if (status === 201) {
+            const materials = [data, ...this.state.materials];
+            this.setState({ materials });
+            this.handleAddMaterialClose();
+            this.handleAddMaterialClear();
+            Toast("Material added!").fire();
+          }
+        })
+        .catch(error => {
+          if (error.response) {
+            if (error.response.status === 400) {
+              this.setState({
+                addMaterialError: true,
+                addMaterialErrorMsg: error.response.data.error
+              });
+            } else if (error.response.status >= 500) {
+              Toast("Server Error!", "error").fire();
+            }
+          }
+        });
+    } else {
+      this.setState({
+        addMaterialError: true,
+        addMaterialErrorMsg: "Field Can't be Empty!"
+      });
     }
     e.preventDefault();
+  };
+
+  handleAddMaterialOpen = () => {
+    this.setState({ addMaterialOpen: true });
+  };
+
+  handleAddMaterialClose = () => {
+    this.setState({ addMaterialOpen: false });
+  };
+
+  handleAddMaterialClear = () => {
+    this.setState({
+      addMaterial: { id: "", name: "", suplier: "", type: "", unit: "" }
+    });
   };
 
   render() {
     const {
       materials,
-      tablePagination,
       addMaterialError,
-      addMaterial
+      addMaterial,
+      addMaterialOpen,
+      addMaterialErrorMsg
     } = this.state;
     const headerRow = ["MATERIAL ID", "MATERIAL NAME", "SUPLIER", "UNIT", ""];
-    const renderBodyRow = ({ id, name, suplier, unit }, i) => ({
+    const renderBodyRow = (data, i) => ({
       key: `row-${i}`,
       cells: [
-        id,
-        name,
-        suplier,
-        unit,
+        data.id,
+        data.name,
+        data.suplier,
+        data.unit,
         {
           key: i,
           width: 2,
@@ -112,13 +141,18 @@ class Material extends Component {
             <Button.Group basic size="small">
               <Popup
                 inverted
-                trigger={<Button icon="edit" />}
+                trigger={
+                  <Button icon="edit" onClick={() => this.handleDetail(data)} />
+                }
                 content="Change me!!"
               />
               <Popup
                 inverted
                 trigger={
-                  <Button icon="trash" onClick={() => this.handleDelete(id)} />
+                  <Button
+                    icon="trash"
+                    onClick={() => this.handleDelete(data)}
+                  />
                 }
                 content="Delete me!!"
               />
@@ -129,46 +163,27 @@ class Material extends Component {
     });
 
     const buttonAdd = (
+      <Button animated="vertical" onClick={this.handleAddMaterialOpen}>
+        <Button.Content hidden>Add</Button.Content>
+        <Button.Content visible>
+          <Icon name="add" />
+        </Button.Content>
+      </Button>
+    );
+
+    const AddMaterialModal = (
       <Modal
+        closeOnDimmerClick={false}
         closeIcon
+        button={buttonAdd}
         size="small"
-        trigger={
-          <Button animated="vertical">
-            <Button.Content hidden>Add</Button.Content>
-            <Button.Content visible>
-              <Icon name="add" />
-            </Button.Content>
-          </Button>
-        }
+        open={addMaterialOpen}
+        onClose={this.handleAddMaterialClose}
       >
         <Modal.Header>ADD MATERIAL</Modal.Header>
         <Modal.Content>
-          <Form
-            error={addMaterialError.error}
-            onSubmit={this.handleSubmitMaterial}
-          >
-            <Message error header="Warning" content={addMaterialError.msg} />
-            <Cleave
-              placeholder="GMT/02/01/1"
-              options={{
-                delimiter: "/",
-                blocks: [3, 2, 2, 1000],
-                uppercase: true
-              }}
-            />
-            <Form.Input
-              as={Cleave}
-              label="Material ID"
-              onChange={this.handleChangeMaterial}
-              value={addMaterial.id}
-              placeholder="Material ID"
-              options={{
-                delimiter: "/",
-                blocks: [3, 2, 2, 1000000],
-                uppercase: true
-              }}
-            />
-
+          <Form error={addMaterialError}>
+            <Message error header="ERROR" content={addMaterialErrorMsg} />
             <Form.Input
               label="Material Name"
               name="name"
@@ -176,14 +191,21 @@ class Material extends Component {
               onChange={this.handleChangeMaterial}
               placeholder="Material Name"
             />
+            <Form.Input
+              label="Suplier"
+              onChange={this.handleChangeMaterial}
+              name="suplier"
+              value={addMaterial.suplier}
+              placeholder="Suplier"
+            />
             <Form.Group widths="equal">
               <Form.Input
                 fluid
-                label="Suplier"
+                label="Type"
                 onChange={this.handleChangeMaterial}
-                name="suplier"
-                value={addMaterial.suplier}
-                placeholder="Suplier"
+                name="type"
+                value={addMaterial.type}
+                placeholder="Type"
               />
               <Form.Input
                 fluid
@@ -194,26 +216,32 @@ class Material extends Component {
                 placeholder="Unit"
               />
             </Form.Group>
-
-            <Form.Button>SAVE</Form.Button>
           </Form>
         </Modal.Content>
+        <Modal.Actions>
+          <Button color="grey" onClick={this.handleAddMaterialClear}>
+            CLEAR
+          </Button>
+          <Button color="blue" onClick={this.handleSubmitMaterial}>
+            SAVE
+          </Button>
+        </Modal.Actions>
       </Modal>
     );
 
     return (
-      <Segment raised piled>
-        <MyTable
-          title="MATERIAL"
-          headerRow={headerRow}
-          renderBodyRow={renderBodyRow}
-          data={Filtering(materials, this.state.searchValue)}
-          onPageChange={this.handlePageChange}
-          pagination={tablePagination}
-          onSearch={this.handleOnSearch}
-          button={<Button.Group>{buttonAdd}</Button.Group>}
-        />
-      </Segment>
+      <React.Fragment>
+        {AddMaterialModal}
+        <Segment raised piled>
+          <MyTable
+            title="MATERIAL"
+            headerRow={headerRow}
+            renderBodyRow={renderBodyRow}
+            data={materials}
+            button={<Button.Group>{buttonAdd}</Button.Group>}
+          />
+        </Segment>
+      </React.Fragment>
     );
   }
 }

@@ -22,13 +22,10 @@ export const Loading = Swal.mixin({
   showCancelButton: false,
   showConfirmButton: false,
   background: "#00000000",
-  allowOutsideClick: false,
-  costumClass: {
-    content: "center"
-  }
+  allowOutsideClick: false
 });
 
-export const Toast = (type, message, timer = 5000) =>
+export const Toast = (message, type = "success", timer = 5000) =>
   Swal.mixin({
     toast: true,
     position: "top-end",

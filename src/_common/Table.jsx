@@ -5,32 +5,44 @@ import {
   Grid,
   Header,
   Segment,
-  Search,
-  Icon,
-  Menu,
   Input,
-  Popup,
-  Button,
   Table,
-  Pagination
+  Pagination,
+  Select,
+  Button,
+  Icon
 } from "semantic-ui-react";
+import { PageSize } from "../_helper/SelectList";
+import Filtering from "./../_helper/filtering";
 
 class MyTable extends Component {
   state = {
-    searchValue: ""
+    searchValue: "",
+    pageSize: 10,
+    currentPage: 1
+  };
+
+  handleSelectPageSize = (e, data) => {
+    this.setState({ pageSize: data.value });
+  };
+
+  handlePageChange = (e, data) => {
+    this.setState({ currentPage: data.activePage });
+  };
+
+  handleOnSearch = e => {
+    console.log(e.currentTarget.value);
+    this.setState({ searchValue: e.currentTarget.value });
+  };
+
+  handleOnSearchClear = () => {
+    this.setState({ searchValue: "" });
   };
 
   render() {
-    const {
-      headerRow,
-      renderBodyRow,
-      data,
-      title,
-      pagination,
-      onPageChange,
-      onSearch,
-      button
-    } = this.props;
+    const { headerRow, renderBodyRow, data, title, button } = this.props;
+
+    const { pageSize, currentPage, searchValue } = this.state;
 
     //render when no data in table
     const noData = [{ name: "No data available" }];
@@ -46,12 +58,14 @@ class MyTable extends Component {
       textAlign: "center"
     });
 
-    const pageLength = Math.ceil(data.length / pagination.pageSize);
-    const currentPage =
-      pagination.currentPage > pageLength ? pageLength : pagination.currentPage;
-
+    //filtering with search
+    const filteredData = Filtering(data, searchValue);
+    //count length row per page
+    const pageLength = Math.ceil(filteredData.length / pageSize);
+    //check if current page greater than page size
+    const cPage = currentPage > pageLength ? pageLength : currentPage;
     //Pagination
-    const paginatedData = Paginate(data, currentPage, pagination.pageSize);
+    const paginatedData = Paginate(filteredData, cPage, pageSize);
 
     return (
       <React.Fragment>
@@ -64,7 +78,21 @@ class MyTable extends Component {
             </Grid.Column>
             <Grid.Column verticalAlign="middle" textAlign="right">
               {button}{" "}
-              <Input icon="search" placeholder="Search..." onInput={onSearch} />
+              <Input
+                icon={
+                  <Icon
+                    name={this.state.searchValue.length ? "x" : "search"}
+                    inverted
+                    color="blue"
+                    circular
+                    link
+                    onClick={this.handleOnSearchClear}
+                  />
+                }
+                placeholder="Search..."
+                value={this.state.searchValue}
+                onInput={this.handleOnSearch}
+              />
             </Grid.Column>
           </Grid.Row>
 
@@ -84,21 +112,29 @@ class MyTable extends Component {
               />
             </Grid.Column>
           </Grid.Row>
-          <Grid.Row textAlign="center">
-            <Grid.Column>
-              {pageLength === 1 ? (
-                ""
-              ) : (
-                <Pagination
-                  activePage={currentPage}
-                  boundaryRange={1}
-                  onPageChange={onPageChange}
-                  siblingRange={1}
-                  totalPages={pageLength}
-                />
-              )}
-            </Grid.Column>
-          </Grid.Row>
+        </Grid>
+
+        <Grid verticalAlign="middle" padded>
+          <Grid.Column textAlign="right">
+            <Select
+              style={{ marginRight: 10, verticalAlign: "middle" }}
+              onChange={this.handleSelectPageSize}
+              compact
+              options={PageSize}
+              defaultValue={pageSize}
+            />
+            {pageLength === 1 ? (
+              ""
+            ) : (
+              <Pagination
+                activePage={cPage}
+                boundaryRange={1}
+                onPageChange={this.handlePageChange}
+                siblingRange={1}
+                totalPages={pageLength}
+              />
+            )}
+          </Grid.Column>
         </Grid>
       </React.Fragment>
     );
