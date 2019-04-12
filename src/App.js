@@ -10,17 +10,6 @@ import Other from "./components/Other";
 import { Grid } from "semantic-ui-react";
 
 class App extends Component {
-  state = { showTextSidebarItem: false };
-
-  handleMouseEnterSideBar = () => {
-    this.setState({ showTextSidebarItem: true });
-    //console.log("mouse enter", this.state.showTextSidebarItem);
-  };
-  handleMouseLeaveSideBar = () => {
-    this.setState({ showTextSidebarItem: false });
-    //console.log("mouse leave", this.state.showTextSidebarItem);
-  };
-
   render() {
     return (
       <React.Fragment>

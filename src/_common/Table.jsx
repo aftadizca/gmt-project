@@ -123,7 +123,7 @@ class MyTable extends Component {
               options={PageSize}
               defaultValue={pageSize}
             />
-            {pageLength === 1 ? (
+            {pageLength <= 1 ? (
               ""
             ) : (
               <Pagination

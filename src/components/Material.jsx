@@ -1,7 +1,6 @@
 import React, { Component } from "react";
 import API from "../_helper/api";
 import MyTable from "./../_common/Table";
-import _ from "lodash";
 import {
   Segment,
   Button,
