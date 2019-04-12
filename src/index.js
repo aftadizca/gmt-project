@@ -4,6 +4,7 @@ import App from "./App";
 import "semantic-ui-css/semantic.min.css";
 import "@fortawesome/fontawesome-free/css/all.css";
 import "./index.css";
+import "./icon.svg";
 import * as serviceWorker from "./serviceWorker";
 
 ReactDOM.render(<App />, document.getElementById("root"));
