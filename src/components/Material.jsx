@@ -191,7 +191,17 @@ class Material extends Component {
       editMaterialErrorMsg
     } = this.state;
 
-    const headerRow = ["MATERIAL ID", "MATERIAL NAME", "SUPLIER", "UNIT", ""];
+    const headerRow = [
+      {
+        key: 1,
+        content: "MATERIAL ID",
+        name: "id"
+      },
+      { key: 2, content: "MATERIAL NAME", name: "name" },
+      { key: 3, content: "SUPLIER", name: "suplier" },
+      { key: 4, content: "UNIT" },
+      { key: 5, content: "" }
+    ];
     const renderBodyRow = (data, i) => ({
       key: `row-${i}`,
       cells: [
@@ -370,6 +380,8 @@ class Material extends Component {
             headerRow={headerRow}
             renderBodyRow={renderBodyRow}
             data={materials}
+            orderBy={"name"}
+            orderDirection={"asc"}
             button={<Button.Group>{buttonAdd}</Button.Group>}
           />
         </Segment>

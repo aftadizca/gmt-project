@@ -11,13 +11,17 @@ import {
   Icon
 } from "semantic-ui-react";
 import { PageSize } from "../_helper/SelectList";
+import _ from "lodash";
 import Filtering from "./../_helper/filtering";
 
 class MyTable extends Component {
   state = {
     searchValue: "",
     pageSize: 10,
-    currentPage: 1
+    currentPage: 1,
+    orderBy: this.props.orderBy,
+    orderDirection: this.props.orderDirection,
+    headerRow: this.props.headerRow
   };
 
   handleSelectPageSize = (e, data) => {
@@ -35,14 +39,42 @@ class MyTable extends Component {
   handleOnSearchClear = () => {
     this.setState({ searchValue: "" });
   };
-  test = e => {
-    console.log(e.target);
+  handleSort = e => {
+    if (e.target.attributes.name && e.target.nodeName === "TH") {
+      const a = this.state.headerRow;
+      _.forEach(a, x => {
+        if (
+          x.content !== "" &&
+          (e.target.attributes.name &&
+            x.name === e.target.attributes.name.value)
+        ) {
+          const direction = x.className === "asc" ? "desc" : "asc";
+          this.setState({ orderBy: x.name, orderDirection: direction });
+        }
+      });
+    }
   };
 
   render() {
-    const { headerRow, renderBodyRow, data, title, button } = this.props;
+    const { renderBodyRow, data, title, button } = this.props;
 
-    const { pageSize, currentPage, searchValue } = this.state;
+    const {
+      pageSize,
+      currentPage,
+      searchValue,
+      headerRow,
+      orderBy,
+      orderDirection
+    } = this.state;
+
+    const header = headerRow;
+    _.forEach(header, x => {
+      if (x.name === orderBy) {
+        x.className = orderDirection;
+      } else {
+        x.className = "";
+      }
+    });
 
     //render when no data in table
     const noData = [{ name: "No data available" }];
@@ -58,8 +90,9 @@ class MyTable extends Component {
       textAlign: "center"
     });
 
+    var sortedData = _.orderBy(data, orderBy, orderDirection);
     //filtering with search
-    const filteredData = Filtering(data, searchValue);
+    const filteredData = Filtering(sortedData, searchValue);
     //count length row per page
     const pageLength = Math.ceil(filteredData.length / pageSize);
     //check if current page greater than page size
@@ -102,10 +135,10 @@ class MyTable extends Component {
                 color="blue"
                 celled
                 sortable
-                onClick={this.test}
+                onClick={this.handleSort}
                 striped
                 textAlign="center"
-                headerRow={headerRow}
+                headerRow={header}
                 renderBodyRow={
                   paginatedData.length !== 0
                     ? renderBodyRow

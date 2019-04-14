@@ -22,6 +22,32 @@ code {
   text-transform: uppercase;
 }
 
+.ui.sortable.table thead th.desc,
+.ui.sortable.table thead th.asc {
+  background: rgba(0, 0, 0, 0.05);
+  color: rgba(0, 0, 0, 0.95);
+}
+
+.ui.sortable.table thead th.desc,
+.ui.sortable.table thead th.asc,
+.ui.sortable.table thead th.desc:hover,
+.ui.sortable.table thead th.asc:hover {
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+.ui.sortable.table thead th.desc:after {
+  content: "\F0D7";
+  display: inline-block;
+}
+
+.ui.sortable.table thead th.asc:after {
+  content: "\F0D8";
+  display: inline-block;
+}
+
 @keyframes lds-facebook_1 {
   0% {
     top: 36px;
