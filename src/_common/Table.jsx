@@ -1,5 +1,4 @@
 import React, { Component } from "react";
-import _ from "lodash";
 import Paginate from "../_helper/paginate";
 import {
   Grid,
@@ -9,7 +8,6 @@ import {
   Table,
   Pagination,
   Select,
-  Button,
   Icon
 } from "semantic-ui-react";
 import { PageSize } from "../_helper/SelectList";
@@ -31,12 +29,14 @@ class MyTable extends Component {
   };
 
   handleOnSearch = e => {
-    console.log(e.currentTarget.value);
     this.setState({ searchValue: e.currentTarget.value });
   };
 
   handleOnSearchClear = () => {
     this.setState({ searchValue: "" });
+  };
+  test = e => {
+    console.log(e.target);
   };
 
   render() {
@@ -101,6 +101,9 @@ class MyTable extends Component {
               <Table
                 color="blue"
                 celled
+                sortable
+                onClick={this.test}
+                striped
                 textAlign="center"
                 headerRow={headerRow}
                 renderBodyRow={

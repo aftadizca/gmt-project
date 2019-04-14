@@ -11,6 +11,8 @@ import {
   Message
 } from "semantic-ui-react";
 import { DeleteAlert, Toast, Loading } from "../_helper/CostumToast";
+import { UnitList } from "../_helper/SelectList";
+import { TypeList } from "./../_helper/SelectList";
 
 class Material extends Component {
   state = {
@@ -18,7 +20,11 @@ class Material extends Component {
     addMaterial: { id: "", name: "", suplier: "", type: "", unit: "" },
     addMaterialError: false,
     addMaterialErrorMsg: "",
-    addMaterialOpen: false
+    addMaterialOpen: false,
+    editMaterial: { id: "", name: "", suplier: "", type: "", unit: "" },
+    editMaterialError: false,
+    editMaterialErrorMsg: "",
+    editMaterialOpen: false
   };
 
   componentDidMount() {
@@ -63,13 +69,14 @@ class Material extends Component {
     });
   };
 
-  handleChangeMaterial = (e, { name }) => {
+  //#region ADD MATERIAL
+  handleChangeAddMaterial = (e, { name, value }) => {
     this.setState({
-      addMaterial: { ...this.state.addMaterial, [name]: e.target.value }
+      addMaterial: { ...this.state.addMaterial, [name]: value.toUpperCase() }
     });
   };
 
-  handleSubmitMaterial = e => {
+  handleSaveAddMaterial = e => {
     const { name, suplier, unit, type } = this.state.addMaterial;
     if (name && suplier && unit && type) {
       API.post("material", this.state.addMaterial)
@@ -116,6 +123,60 @@ class Material extends Component {
       addMaterial: { id: "", name: "", suplier: "", type: "", unit: "" }
     });
   };
+  //#endregion
+
+  //#region EDIT MATERIAL
+  handleChangeEditMaterial = (e, { name, value }) => {
+    this.setState({
+      editMaterial: { ...this.state.editMaterial, [name]: value.toUpperCase() }
+    });
+  };
+
+  handleSaveEditMaterial = e => {
+    const { name, suplier, unit, type } = this.state.editMaterial;
+    if (name && suplier && unit && type) {
+      API.put("material/" + this.state.editMaterial.id, this.state.editMaterial)
+        .then(({ status, data }) => {
+          //console.log(status, data);
+          if (status === 200) {
+            const m = this.state.materials.filter(x => x.id !== data.id);
+            const materials = [data, ...m];
+            this.setState({ materials });
+            this.handleEditMaterialClose();
+            Toast("Material edited!").fire();
+          }
+        })
+        .catch(error => {
+          console.log(error);
+          if (error.response) {
+            if (error.response.status === 400) {
+              this.setState({
+                editMaterialError: true,
+                editMaterialErrorMsg: error.response.data.error
+              });
+            } else if (error.response.status >= 500) {
+              Toast("Server Error!", "error").fire();
+            }
+          }
+        });
+    } else {
+      this.setState({
+        editMaterialError: true,
+        editMaterialErrorMsg: "Field Can't be Empty!"
+      });
+    }
+    e.preventDefault();
+  };
+
+  handleEditMaterialOpen = data => {
+    this.setState({ editMaterial: data });
+    this.setState({ editMaterialOpen: true });
+  };
+
+  handleEditMaterialClose = () => {
+    this.setState({ editMaterialOpen: false });
+  };
+  //#endregion
 
   render() {
     const {
@@ -123,8 +184,13 @@ class Material extends Component {
       addMaterialError,
       addMaterial,
       addMaterialOpen,
-      addMaterialErrorMsg
+      addMaterialErrorMsg,
+      editMaterialError,
+      editMaterial,
+      editMaterialOpen,
+      editMaterialErrorMsg
     } = this.state;
+
     const headerRow = ["MATERIAL ID", "MATERIAL NAME", "SUPLIER", "UNIT", ""];
     const renderBodyRow = (data, i) => ({
       key: `row-${i}`,
@@ -141,7 +207,10 @@ class Material extends Component {
               <Popup
                 inverted
                 trigger={
-                  <Button icon="edit" onClick={() => this.handleDetail(data)} />
+                  <Button
+                    icon="edit"
+                    onClick={() => this.handleEditMaterialOpen(data)}
+                  />
                 }
                 content="Change me!!"
               />
@@ -172,6 +241,7 @@ class Material extends Component {
 
     const AddMaterialModal = (
       <Modal
+        dimmer={"blurring"}
         closeOnDimmerClick={false}
         closeIcon
         button={buttonAdd}
@@ -187,42 +257,104 @@ class Material extends Component {
               label="Material Name"
               name="name"
               value={addMaterial.name}
-              onChange={this.handleChangeMaterial}
+              onChange={this.handleChangeAddMaterial}
               placeholder="Material Name"
             />
             <Form.Input
               label="Suplier"
-              onChange={this.handleChangeMaterial}
+              onChange={this.handleChangeAddMaterial}
               name="suplier"
               value={addMaterial.suplier}
               placeholder="Suplier"
             />
             <Form.Group widths="equal">
-              <Form.Input
+              <Form.Select
+                onChange={this.handleChangeAddMaterial}
                 fluid
-                label="Type"
-                onChange={this.handleChangeMaterial}
                 name="type"
-                value={addMaterial.type}
-                placeholder="Type"
+                label="Type"
+                options={TypeList}
+                defaultValue={TypeList[0].value}
               />
-              <Form.Input
+              <Form.Select
+                onChange={this.handleChangeAddMaterial}
                 fluid
-                label="Unit"
-                onChange={this.handleChangeMaterial}
                 name="unit"
-                value={addMaterial.unit}
-                placeholder="Unit"
+                label="Unit"
+                options={UnitList}
+                defaultValue={UnitList[0].value}
               />
             </Form.Group>
           </Form>
         </Modal.Content>
         <Modal.Actions>
           <Button color="grey" onClick={this.handleAddMaterialClear}>
-            CLEAR
+            <Icon name="x" /> CLEAR
           </Button>
-          <Button color="blue" onClick={this.handleSubmitMaterial}>
-            SAVE
+          <Button color="blue" onClick={this.handleSaveAddMaterial}>
+            <Icon name="save" /> SAVE
+          </Button>
+        </Modal.Actions>
+      </Modal>
+    );
+
+    const EditMaterialModal = (
+      <Modal
+        dimmer={"blurring"}
+        closeOnDimmerClick={false}
+        closeIcon
+        size="small"
+        open={editMaterialOpen}
+        onClose={this.handleEditMaterialClose}
+      >
+        <Modal.Header>EDIT MATERIAL</Modal.Header>
+        <Modal.Content>
+          <Form error={editMaterialError}>
+            <Message error header="ERROR" content={editMaterialErrorMsg} />
+            <Form.Input
+              label="Material Name"
+              name="name"
+              readOnly
+              value={editMaterial.id}
+              placeholder="Material ID"
+            />
+            <Form.Input
+              label="Material Name"
+              name="name"
+              value={editMaterial.name}
+              onChange={this.handleChangeEditMaterial}
+              placeholder="Material Name"
+            />
+            <Form.Input
+              label="Suplier"
+              onChange={this.handleChangeEditMaterial}
+              name="suplier"
+              value={editMaterial.suplier}
+              placeholder="Suplier"
+            />
+            <Form.Group widths="equal">
+              <Form.Select
+                onChange={this.handleChangeEditMaterial}
+                fluid
+                name="type"
+                label="Type"
+                options={TypeList}
+                value={editMaterial.type}
+              />
+              <Form.Select
+                onChange={this.handleChangeEditMaterial}
+                fluid
+                name="unit"
+                label="Unit"
+                options={UnitList}
+                value={editMaterial.unit}
+              />
+            </Form.Group>
+          </Form>
+        </Modal.Content>
+        <Modal.Actions>
+          <Button color="blue" onClick={this.handleSaveEditMaterial}>
+            <Icon name="save" /> SAVE
           </Button>
         </Modal.Actions>
       </Modal>
@@ -231,6 +363,7 @@ class Material extends Component {
     return (
       <React.Fragment>
         {AddMaterialModal}
+        {EditMaterialModal}
         <Segment raised piled>
           <MyTable
             title="MATERIAL"

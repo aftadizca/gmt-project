@@ -1,10 +1,11 @@
 import React, { Component } from "react";
-import { Grid, Statistic } from "semantic-ui-react";
+import { Grid } from "semantic-ui-react";
 import { Line } from "react-chartjs-2";
 
 class Home extends Component {
   state = {};
   render() {
+    document.tile = "HOME";
     const data = {
       labels: [
         "January",

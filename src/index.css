@@ -18,6 +18,10 @@ code {
   padding-left: 4.8125rem;
 }
 
+.uppercase {
+  text-transform: uppercase;
+}
+
 @keyframes lds-facebook_1 {
   0% {
     top: 36px;

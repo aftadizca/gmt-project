@@ -10,6 +10,7 @@ export default function Filtering(data, filterText) {
         if (d[x].toLowerCase().includes(filterText.toLowerCase())) {
           temp = d;
         }
+        return null;
       });
       return _.isEqual(d, temp);
     });
