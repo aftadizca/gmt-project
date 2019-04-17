@@ -13,6 +13,8 @@ import {
 import { DeleteAlert, Toast, Loading } from "../_helper/CostumToast";
 import { UnitList } from "../_helper/SelectList";
 import { TypeList } from "./../_helper/SelectList";
+import { TITLE } from "../_helper/constant";
+import { AppContext } from "./../AppProvider";
 
 class Material extends Component {
   state = {
@@ -26,6 +28,8 @@ class Material extends Component {
     editMaterialErrorMsg: "",
     editMaterialOpen: false
   };
+
+  static contextType = AppContext;
 
   componentDidMount() {
     Loading.fire();
@@ -186,6 +190,7 @@ class Material extends Component {
   //#endregion
 
   render() {
+    document.title = "MATERIAL - " + TITLE;
     const {
       materials,
       addMaterialError,

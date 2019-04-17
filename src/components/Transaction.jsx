@@ -1,27 +1,80 @@
 import React, { Component } from "react";
-import { Tab } from "semantic-ui-react";
+import { Tab, Icon } from "semantic-ui-react";
 import MyTable from "./../_common/Table";
+import { TITLE } from "../_helper/constant";
 
 class Transaction extends Component {
-  state = {};
+  state = {
+    materialStocks: [],
+    incomings: [],
+    outcomings: []
+  };
 
   render() {
+    document.title = "TRANSACTION - " + TITLE;
+
+    const materialStockHeader = [
+      { key: 1, content: "STATUS ID", name: "id" },
+      { key: 2, content: "STATUS", name: "name" }
+    ];
+    const statusQCRow = ({ id, name }, i) => ({
+      key: `row-${i}`,
+      cells: [
+        { key: `td-${i}`, content: id, width: 2 },
+        { key: name, content: name }
+      ]
+    });
+
     const panes = [
       {
-        menuItem: "MATERIAL STOCK",
-        render: () => <Tab.Pane attached={false}>Tab 3 Content</Tab.Pane>
+        menuItem: {
+          key: "MATERIAL STOCK",
+          content: "MATERIAL STOCK",
+          icon: "warehouse large"
+        },
+        render: () => (
+          <Tab.Pane attached={false} raised piled>
+            Tab 1 Content
+          </Tab.Pane>
+        )
       },
       {
-        menuItem: "INCOMING",
-        render: () => <Tab.Pane attached={false}>Tab 2 Content</Tab.Pane>
+        menuItem: {
+          key: "INCOMING",
+          content: "INCOMING",
+          icon: "arrow circle down large"
+        },
+        render: () => (
+          <Tab.Pane attached={false} raised piled>
+            Tab 2 Content
+          </Tab.Pane>
+        )
       },
       {
-        menuItem: "OUTCOMING",
-        render: () => <Tab.Pane attached={false}>Tab 3 Content</Tab.Pane>
+        menuItem: {
+          key: "OUTCOMING",
+          content: "OUTCOMING",
+          icon: "arrow circle up large"
+        },
+        render: () => (
+          <Tab.Pane attached={false} raised piled>
+            Tab 3 Content
+          </Tab.Pane>
+        )
       }
     ];
 
-    return <Tab menu={{ pointing: true }} panes={panes} />;
+    return (
+      <Tab
+        menu={{
+          borderless: true,
+          color: "blue",
+          pointing: true,
+          inverted: true
+        }}
+        panes={panes}
+      />
+    );
   }
 }
 

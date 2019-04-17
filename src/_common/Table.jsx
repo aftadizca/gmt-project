@@ -166,9 +166,9 @@ class MyTable extends Component {
             ) : (
               <Pagination
                 activePage={cPage}
-                boundaryRange={1}
+                boundaryRange={2}
                 onPageChange={this.handlePageChange}
-                siblingRange={1}
+                siblingRange={3}
                 totalPages={pageLength}
               />
             )}

@@ -8,41 +8,44 @@ import Material from "./components/Material";
 import Transaction from "./components/Transaction";
 import Other from "./components/Other";
 import { Grid } from "semantic-ui-react";
+import AppProvider from "./AppProvider";
 
 class App extends Component {
   render() {
     return (
-      <React.Fragment>
-        <BrowserRouter>
-          <div style={{ marginTop: 20 }} />
-          <Grid>
-            <Grid.Column width={2}>
-              <SideBar>
-                <SideBarItem path="/home" icon="home" text="Home" />
-                <SideBarItem path="/material" icon="boxes" text="Material" />
-                <SideBarItem
-                  path="/transaction"
-                  icon="exchange"
-                  text="Transaction"
-                />
-                <SideBarItem path="/other" icon="settings" text="Other" />
-              </SideBar>
-            </Grid.Column>
-            <Grid.Column width={13}>
-              <Route>
-                <Switch>
-                  <Route path="/home" component={Home} />
-                  <Route path="/material" component={Material} />
-                  <Route path="/transaction" component={Transaction} />
-                  <Route path="/other" component={Other} />
-                  <Redirect from="/" to="/home" />
-                </Switch>
-              </Route>
-            </Grid.Column>
-            <Grid.Column width={1} />
-          </Grid>
-        </BrowserRouter>
-      </React.Fragment>
+      <AppProvider>
+        <React.Fragment>
+          <BrowserRouter>
+            <div style={{ marginTop: 20 }} />
+            <Grid>
+              <Grid.Column width={2}>
+                <SideBar>
+                  <SideBarItem path="/home" icon="home" text="Home" />
+                  <SideBarItem path="/material" icon="boxes" text="Material" />
+                  <SideBarItem
+                    path="/transaction"
+                    icon="exchange"
+                    text="Transaction"
+                  />
+                  <SideBarItem path="/other" icon="settings" text="Other" />
+                </SideBar>
+              </Grid.Column>
+              <Grid.Column width={13}>
+                <Route>
+                  <Switch>
+                    <Route path="/home" component={Home} />
+                    <Route path="/material" component={Material} />
+                    <Route path="/transaction" component={Transaction} />
+                    <Route path="/other" component={Other} />
+                    <Redirect from="/" to="/home" />
+                  </Switch>
+                </Route>
+              </Grid.Column>
+              <Grid.Column width={1} />
+            </Grid>
+          </BrowserRouter>
+        </React.Fragment>
+      </AppProvider>
     );
   }
 }

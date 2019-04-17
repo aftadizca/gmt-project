@@ -1,10 +1,12 @@
 import React, { Component } from "react";
 import { Grid } from "semantic-ui-react";
 import { Line } from "react-chartjs-2";
+import { TITLE } from "../_helper/constant";
 
 class Home extends Component {
   state = {};
   render() {
+    document.title = TITLE;
     const data = {
       labels: [
         "January",

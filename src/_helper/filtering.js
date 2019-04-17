@@ -7,7 +7,12 @@ export default function Filtering(data, filterText) {
       var temp = {};
 
       a.map(x => {
-        if (d[x].toLowerCase().includes(filterText.toLowerCase())) {
+        if (
+          d[x]
+            .toString()
+            .toLowerCase()
+            .includes(filterText.toString().toLowerCase())
+        ) {
           temp = d;
         }
         return null;

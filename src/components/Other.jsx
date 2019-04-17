@@ -3,7 +3,7 @@ import { Tab } from "semantic-ui-react";
 import MyTable from "./../_common/Table";
 import api from "../_helper/api";
 import { Loading, Toast } from "../_helper/CostumToast";
-import { axios } from "axios";
+import { TITLE } from "../_helper/constant";
 
 class Other extends Component {
   state = {
@@ -37,7 +37,9 @@ class Other extends Component {
   };
 
   render() {
+    document.title = "OTHER - " + TITLE;
     const { statusQC, locations } = this.state;
+
     const statusQCHeader = [
       { key: 1, content: "STATUS ID", name: "id" },
       { key: 2, content: "STATUS", name: "name" }
@@ -58,15 +60,15 @@ class Other extends Component {
     const locationRow = ({ location, materialName, traceID }, i) => ({
       key: `row-${i}`,
       cells: [
-        { key: location, content: location, width: 2 },
+        { key: location, content: location, width: 4 },
         {
           key: "traceID" + i,
-          content: traceID || "NONE",
+          content: traceID,
           className: traceID || "error"
         },
         {
-          key: "materialName" + 1,
-          content: materialName || "NONE",
+          key: "materialName" + i,
+          content: materialName,
           className: materialName || "error"
         }
       ]
@@ -74,9 +76,13 @@ class Other extends Component {
 
     const panes = [
       {
-        menuItem: "STATUS QC",
+        menuItem: {
+          key: "STATUS QC",
+          content: "STATUS QC",
+          icon: "clipboard check large"
+        },
         render: () => (
-          <Tab.Pane attached={false}>
+          <Tab.Pane attached={false} raised piled>
             <MyTable
               key={1}
               title="STATUS QC"
@@ -90,9 +96,13 @@ class Other extends Component {
         )
       },
       {
-        menuItem: "LOCATION",
+        menuItem: {
+          key: "LOCATION",
+          content: "LOCATION",
+          icon: "map marker alternate large"
+        },
         render: () => (
-          <Tab.Pane attached={false}>
+          <Tab.Pane attached={false} raised piled>
             <MyTable
               key={2}
               title="LOCATION"
@@ -108,11 +118,25 @@ class Other extends Component {
       },
       {
         menuItem: "Tab 3",
-        render: () => <Tab.Pane attached={false}>Tab 3 Content</Tab.Pane>
+        render: () => (
+          <Tab.Pane attached={false} raised piled>
+            Tab 3 Content
+          </Tab.Pane>
+        )
       }
     ];
 
-    return <Tab menu={{ pointing: true }} panes={panes} />;
+    return (
+      <Tab
+        menu={{
+          borderless: true,
+          color: "blue",
+          pointing: true,
+          inverted: true
+        }}
+        panes={panes}
+      />
+    );
   }
 }
 

@@ -177,3 +177,12 @@ code {
 .swal2-container {
   z-index: 10000;
 }
+
+.ui.pointing.menu .item:after {
+  width: 1rem;
+  height: 1rem;
+}
+
+.ui.blue.inverted.pointing.menu .active.item:after {
+  background: #1e77bb !important;
+}
