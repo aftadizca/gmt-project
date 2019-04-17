@@ -30,17 +30,20 @@ class Material extends Component {
   componentDidMount() {
     Loading.fire();
     API.get("material")
-      .then(({ data }) => {
+      .then(({ data, headers }) => {
+        console.log(headers.myheader);
         this.setState({ materials: data });
         Loading.close();
       })
       .catch(({ response }) => {
-        if (typeof response === "undefined") {
+        if (response) {
+          if (response.status >= 400) {
+            Loading.close();
+            Toast("Server error", "error").fire();
+          }
+        } else {
           Loading.close();
           Toast("Server not Available", "error", false).fire();
-        } else if (response.status >= 400) {
-          Loading.close();
-          Toast("Server error", "error").fire();
         }
       });
   }
@@ -69,7 +72,7 @@ class Material extends Component {
     });
   };
 
-  //#region ADD MATERIAL
+  //#region ADD MATERIAL ACTION
   handleChangeAddMaterial = (e, { name, value }) => {
     this.setState({
       addMaterial: { ...this.state.addMaterial, [name]: value.toUpperCase() }
@@ -77,6 +80,7 @@ class Material extends Component {
   };
 
   handleSaveAddMaterial = e => {
+    Loading.fire();
     const { name, suplier, unit, type } = this.state.addMaterial;
     if (name && suplier && unit && type) {
       API.post("material", this.state.addMaterial)
@@ -86,17 +90,20 @@ class Material extends Component {
             this.setState({ materials });
             this.handleAddMaterialClose();
             this.handleAddMaterialClear();
+            Loading.close();
             Toast("Material added!").fire();
           }
         })
-        .catch(error => {
-          if (error.response) {
-            if (error.response.status === 400) {
+        .catch(({ response }) => {
+          if (response) {
+            if (response.status >= 400) {
+              Loading.close();
               this.setState({
                 addMaterialError: true,
-                addMaterialErrorMsg: error.response.data.error
+                addMaterialErrorMsg: response.data.error
               });
-            } else if (error.response.status >= 500) {
+            } else if (response.status >= 500) {
+              Loading.close();
               Toast("Server Error!", "error").fire();
             }
           }
@@ -120,12 +127,13 @@ class Material extends Component {
 
   handleAddMaterialClear = () => {
     this.setState({
-      addMaterial: { id: "", name: "", suplier: "", type: "", unit: "" }
+      addMaterial: { id: "", name: "", suplier: "", type: "", unit: "" },
+      addMaterialError: false
     });
   };
   //#endregion
 
-  //#region EDIT MATERIAL
+  //#region EDIT MATERIAL ACTION
   handleChangeEditMaterial = (e, { name, value }) => {
     this.setState({
       editMaterial: { ...this.state.editMaterial, [name]: value.toUpperCase() }
@@ -136,8 +144,8 @@ class Material extends Component {
     const { name, suplier, unit, type } = this.state.editMaterial;
     if (name && suplier && unit && type) {
       API.put("material/" + this.state.editMaterial.id, this.state.editMaterial)
-        .then(({ status, data }) => {
-          //console.log(status, data);
+        .then(({ status, data, headers }) => {
+          console.log(headers);
           if (status === 200) {
             const m = this.state.materials.filter(x => x.id !== data.id);
             const materials = [data, ...m];
@@ -147,7 +155,6 @@ class Material extends Component {
           }
         })
         .catch(error => {
-          console.log(error);
           if (error.response) {
             if (error.response.status === 400) {
               this.setState({
@@ -251,7 +258,6 @@ class Material extends Component {
 
     const AddMaterialModal = (
       <Modal
-        dimmer={"blurring"}
         closeOnDimmerClick={false}
         closeIcon
         button={buttonAdd}
@@ -281,18 +287,20 @@ class Material extends Component {
               <Form.Select
                 onChange={this.handleChangeAddMaterial}
                 fluid
+                placeholder={"Select type material"}
                 name="type"
                 label="Type"
+                value={addMaterial.type}
                 options={TypeList}
-                defaultValue={TypeList[0].value}
               />
               <Form.Select
                 onChange={this.handleChangeAddMaterial}
                 fluid
+                placeholder={"Select unit material"}
                 name="unit"
                 label="Unit"
+                value={addMaterial.unit}
                 options={UnitList}
-                defaultValue={UnitList[0].value}
               />
             </Form.Group>
           </Form>
@@ -310,7 +318,6 @@ class Material extends Component {
 
     const EditMaterialModal = (
       <Modal
-        dimmer={"blurring"}
         closeOnDimmerClick={false}
         closeIcon
         size="small"
@@ -349,6 +356,7 @@ class Material extends Component {
                 name="type"
                 label="Type"
                 options={TypeList}
+                value={editMaterial.type}
               />
               <Form.Select
                 onChange={this.handleChangeEditMaterial}
@@ -381,6 +389,7 @@ class Material extends Component {
             data={materials}
             orderBy={"name"}
             orderDirection={"asc"}
+            actionBar={true}
             button={<Button.Group>{buttonAdd}</Button.Group>}
           />
         </Segment>

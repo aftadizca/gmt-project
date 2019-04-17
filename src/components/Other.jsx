@@ -1,58 +1,73 @@
 import React, { Component } from "react";
-import { Tab, Button, Icon, Popup } from "semantic-ui-react";
+import { Tab } from "semantic-ui-react";
 import MyTable from "./../_common/Table";
-import Filtering from "./../_helper/filtering";
+import api from "../_helper/api";
+import { Loading, Toast } from "../_helper/CostumToast";
+import { axios } from "axios";
 
 class Other extends Component {
   state = {
-    statusQC: [
-      { id: 1, total: 1250, name: "Unapprove" },
-      { id: 2, total: 564, name: "Approve" },
-      { id: 3, total: 564, name: "Quarantine" },
-      { id: 4, total: 564, name: "Block" }
-    ],
-    tablePagination: { pageSize: 10, currentPage: 1 },
-    searchValue: ""
+    statusQC: [],
+    locations: []
   };
+
+  componentDidMount() {
+    Loading.fire();
+    Promise.all([api.get("statusqc"), api.get("location")])
+      .then(result => {
+        this.setState({ statusQC: result[0].data });
+        this.setState({ locations: result[1].data });
+        Loading.close();
+      })
+      .catch(({ response }) => {
+        if (response) {
+          if (response.status >= 400) {
+            Loading.close();
+            Toast("Server error", "error").fire();
+          }
+        } else {
+          Loading.close();
+          Toast("Server not Available", "error", false).fire();
+        }
+      });
+  }
 
   handleDeleteStatusQC = id => {
     console.log(id);
   };
 
-  handleOnSearch = () => {};
-
-  handlePageChange = () => {};
-
   render() {
-    const { statusQC, searchValue, tablePagination } = this.state;
-    const statusQCHeader = ["STATUS ID", "STATUS", ""];
+    const { statusQC, locations } = this.state;
+    const statusQCHeader = [
+      { key: 1, content: "STATUS ID", name: "id" },
+      { key: 2, content: "STATUS", name: "name" }
+    ];
     const statusQCRow = ({ id, name }, i) => ({
       key: `row-${i}`,
       cells: [
-        { key: id, content: id, width: 2 },
-        { key: name, content: name },
+        { key: `td-${i}`, content: id, width: 2 },
+        { key: name, content: name }
+      ]
+    });
+
+    const locationHeader = [
+      { key: 1, content: "LOCATION", name: "location" },
+      { key: 2, content: "TRACE", name: "traceID" },
+      { key: 3, content: "MATERIAL NAME", name: "materialName" }
+    ];
+    const locationRow = ({ location, materialName, traceID }, i) => ({
+      key: `row-${i}`,
+      cells: [
+        { key: location, content: location, width: 2 },
         {
-          key: i,
-          width: 2,
-          content: (
-            <Button.Group basic size="small">
-              <Popup
-                inverted
-                trigger={<Button icon="edit" />}
-                content="Change me!!"
-              />
-              <Popup
-                inverted
-                trigger={
-                  <Button
-                    icon="trash"
-                    onClick={() => this.handleDeleteStatusQC(id)}
-                  />
-                }
-                content="Delete me!!"
-              />
-            </Button.Group>
-          )
+          key: "traceID" + i,
+          content: traceID || "NONE",
+          className: traceID || "error"
+        },
+        {
+          key: "materialName" + 1,
+          content: materialName || "NONE",
+          className: materialName || "error"
         }
       ]
     });
@@ -63,30 +78,33 @@ class Other extends Component {
         render: () => (
           <Tab.Pane attached={false}>
             <MyTable
+              key={1}
               title="STATUS QC"
               headerRow={statusQCHeader}
               renderBodyRow={statusQCRow}
-              data={Filtering(statusQC, searchValue)}
-              onPageChange={this.handlePageChange}
-              pagination={tablePagination}
-              onSearch={this.handleOnSearch}
-              button={
-                <Button.Group>
-                  <Button animated="vertical">
-                    <Button.Content hidden>Add</Button.Content>
-                    <Button.Content visible>
-                      <Icon name="add" />
-                    </Button.Content>
-                  </Button>
-                </Button.Group>
-              }
+              data={statusQC}
+              orderBy="id"
+              orderDirection="asc"
             />
           </Tab.Pane>
         )
       },
       {
         menuItem: "LOCATION",
-        render: () => <Tab.Pane attached={false}>Tab 2 Content</Tab.Pane>
+        render: () => (
+          <Tab.Pane attached={false}>
+            <MyTable
+              key={2}
+              title="LOCATION"
+              headerRow={locationHeader}
+              renderBodyRow={locationRow}
+              data={locations}
+              orderBy="location"
+              actionBar={true}
+              orderDirection="asc"
+            />
+          </Tab.Pane>
+        )
       },
       {
         menuItem: "Tab 3",

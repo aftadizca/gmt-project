@@ -5,7 +5,6 @@ import { Line } from "react-chartjs-2";
 class Home extends Component {
   state = {};
   render() {
-    document.tile = "HOME";
     const data = {
       labels: [
         "January",

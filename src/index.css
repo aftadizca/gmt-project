@@ -39,13 +39,19 @@ code {
 }
 
 .ui.sortable.table thead th.desc:after {
-  content: "\F0D7";
+  content: "\f15e";
   display: inline-block;
+  float: right;
+  font-size: 1.2rem;
+  color: #2185d0;
 }
 
 .ui.sortable.table thead th.asc:after {
-  content: "\F0D8";
+  content: "\f15d";
+  float: right;
   display: inline-block;
+  font-size: 1.2rem;
+  color: #2185d0;
 }
 
 @keyframes lds-facebook_1 {
@@ -166,4 +172,8 @@ code {
   height: 200px !important;
   -webkit-transform: translate(-100px, -100px) scale(1) translate(100px, 100px);
   transform: translate(-100px, -100px) scale(1) translate(100px, 100px);
+}
+
+.swal2-container {
+  z-index: 10000;
 }

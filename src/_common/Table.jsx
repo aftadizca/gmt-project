@@ -56,7 +56,7 @@ class MyTable extends Component {
   };
 
   render() {
-    const { renderBodyRow, data, title, button } = this.props;
+    const { renderBodyRow, data, title, button, actionBar } = this.props;
 
     const {
       pageSize,
@@ -110,22 +110,24 @@ class MyTable extends Component {
               </Segment>
             </Grid.Column>
             <Grid.Column verticalAlign="middle" textAlign="right">
-              {button}{" "}
-              <Input
-                icon={
-                  <Icon
-                    name={this.state.searchValue.length ? "x" : "search"}
-                    inverted
-                    color="blue"
-                    circular
-                    link
-                    onClick={this.handleOnSearchClear}
-                  />
-                }
-                placeholder="Search..."
-                value={this.state.searchValue}
-                onInput={this.handleOnSearch}
-              />
+              {actionBar && button}{" "}
+              {actionBar && (
+                <Input
+                  icon={
+                    <Icon
+                      name={this.state.searchValue.length ? "x" : "search"}
+                      inverted
+                      color="blue"
+                      circular
+                      link
+                      onClick={this.handleOnSearchClear}
+                    />
+                  }
+                  placeholder="Search..."
+                  value={this.state.searchValue}
+                  onInput={this.handleOnSearch}
+                />
+              )}
             </Grid.Column>
           </Grid.Row>
 
