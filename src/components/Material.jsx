@@ -349,7 +349,6 @@ class Material extends Component {
                 name="type"
                 label="Type"
                 options={TypeList}
-                value={editMaterial.type}
               />
               <Form.Select
                 onChange={this.handleChangeEditMaterial}
