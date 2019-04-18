@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import { Loading, Toast } from "./_helper/CostumToast";
+import { Loading, Toast, DeleteAlert } from "./_helper/CostumToast";
 import api from "./_helper/api";
 
 export const AppContext = React.createContext();
@@ -7,13 +7,16 @@ export const AppContext = React.createContext();
 class AppProvider extends Component {
   state = {
     materials: [],
-    getAPI: (url, state) => {
+    statusQCs: [],
+    locations: [],
+    getAPI: url => {
+      const state = url + "s";
       Loading.fire();
       api
         .get(url)
         .then(({ data, headers }) => {
           console.log(headers.myheader);
-          this.setState({ state: data });
+          this.setState({ [state]: data });
           Loading.close();
         })
         .catch(({ response }) => {
@@ -27,6 +30,74 @@ class AppProvider extends Component {
             Toast("Server not Available", "error", false).fire();
           }
         });
+    },
+    postAPI: (url, postdata, success, error) => {
+      const state = url + "s";
+      api
+        .post(url, postdata)
+        .then(({ status, data }) => {
+          if (status === 201) {
+            const x = [data, ...this.state[state]];
+            this.setState({ [state]: x });
+            success();
+            Loading.close();
+            Toast("Item succesfully added!").fire();
+          }
+        })
+        .catch(({ response }) => {
+          if (response) {
+            if (response.status >= 400) {
+              Loading.close();
+              error(response);
+            } else if (response.status >= 500) {
+              Loading.close();
+              Toast("Server Error!", "error").fire();
+            }
+          }
+        });
+    },
+    putAPI: (url, id, postdata, success, error) => {
+      const state = url + "s";
+      api
+        .put(`${url}/${id}`, postdata)
+        .then(({ status, data }) => {
+          if (status === 200) {
+            const m = this.state[state].filter(x => x.id !== data.id);
+            this.setState({ [state]: [data, ...m] });
+            success();
+            Toast("Item successfully edited!").fire();
+          }
+        })
+        .catch(errors => {
+          if (errors.response) {
+            if (errors.response.status === 400) {
+              error(errors.response);
+            } else if (errors.response.status >= 500) {
+              Toast("Server Error!", "error").fire();
+            }
+          }
+        });
+    },
+    handleDelete: (url, data) => {
+      const state = url + "s";
+      DeleteAlert.fire().then(result => {
+        if (result.value) {
+          api
+            .delete(`${url}/${data.id}`)
+            .then(({ status }) => {
+              if (status === 200) {
+                const filtered = this.state[state].filter(x => x !== data);
+                this.setState({ [state]: filtered });
+                Toast("Successfully delete item!").fire();
+              } else {
+                Toast("Delete failed", "error").fire();
+              }
+            })
+            .catch(errors => {
+              console.log(errors);
+            });
+        }
+      });
     }
   };
 

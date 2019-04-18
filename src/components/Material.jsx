@@ -10,15 +10,16 @@ import {
   Form,
   Message
 } from "semantic-ui-react";
-import { DeleteAlert, Toast, Loading } from "../_helper/CostumToast";
+
+import { Toast, Loading } from "../_helper/CostumToast";
 import { UnitList } from "../_helper/SelectList";
 import { TypeList } from "./../_helper/SelectList";
 import { TITLE } from "../_helper/constant";
 import { AppContext } from "./../AppProvider";
+import TableButton from "./../_common/TableButton";
 
 class Material extends Component {
   state = {
-    materials: [],
     addMaterial: { id: "", name: "", suplier: "", type: "", unit: "" },
     addMaterialError: false,
     addMaterialErrorMsg: "",
@@ -32,24 +33,7 @@ class Material extends Component {
   static contextType = AppContext;
 
   componentDidMount() {
-    Loading.fire();
-    API.get("material")
-      .then(({ data, headers }) => {
-        console.log(headers.myheader);
-        this.setState({ materials: data });
-        Loading.close();
-      })
-      .catch(({ response }) => {
-        if (response) {
-          if (response.status >= 400) {
-            Loading.close();
-            Toast("Server error", "error").fire();
-          }
-        } else {
-          Loading.close();
-          Toast("Server not Available", "error", false).fire();
-        }
-      });
+    this.context.getAPI("material");
   }
 
   handleDetail = movie => {
@@ -57,23 +41,7 @@ class Material extends Component {
   };
 
   handleDelete = data => {
-    DeleteAlert.fire().then(result => {
-      if (result.value) {
-        API.delete("material/" + data.id)
-          .then(({ status }) => {
-            if (status === 200) {
-              const filtered = this.state.materials.filter(x => x !== data);
-              this.setState({ materials: filtered });
-              Toast("Successfully delete item!").fire();
-            } else {
-              Toast("Delete failed", "error").fire();
-            }
-          })
-          .catch(errors => {
-            console.log(errors);
-          });
-      }
-    });
+    this.context.handleDelete("material", data);
   };
 
   //#region ADD MATERIAL ACTION
@@ -83,42 +51,30 @@ class Material extends Component {
     });
   };
 
-  handleSaveAddMaterial = e => {
+  handleSaveAddMaterial = () => {
     Loading.fire();
     const { name, suplier, unit, type } = this.state.addMaterial;
     if (name && suplier && unit && type) {
-      API.post("material", this.state.addMaterial)
-        .then(({ status, data }) => {
-          if (status === 201) {
-            const materials = [data, ...this.state.materials];
-            this.setState({ materials });
-            this.handleAddMaterialClose();
-            this.handleAddMaterialClear();
-            Loading.close();
-            Toast("Material added!").fire();
-          }
-        })
-        .catch(({ response }) => {
-          if (response) {
-            if (response.status >= 400) {
-              Loading.close();
-              this.setState({
-                addMaterialError: true,
-                addMaterialErrorMsg: response.data.error
-              });
-            } else if (response.status >= 500) {
-              Loading.close();
-              Toast("Server Error!", "error").fire();
-            }
-          }
-        });
+      this.context.postAPI(
+        "material",
+        this.state.addMaterial,
+        () => {
+          this.handleAddMaterialClose();
+          this.handleAddMaterialClear();
+        },
+        response => {
+          this.setState({
+            addMaterialError: true,
+            addMaterialErrorMsg: response.data.error
+          });
+        }
+      );
     } else {
       this.setState({
         addMaterialError: true,
         addMaterialErrorMsg: "Field Can't be Empty!"
       });
     }
-    e.preventDefault();
   };
 
   handleAddMaterialOpen = () => {
@@ -147,36 +103,23 @@ class Material extends Component {
   handleSaveEditMaterial = e => {
     const { name, suplier, unit, type } = this.state.editMaterial;
     if (name && suplier && unit && type) {
-      API.put("material/" + this.state.editMaterial.id, this.state.editMaterial)
-        .then(({ status, data, headers }) => {
-          console.log(headers);
-          if (status === 200) {
-            const m = this.state.materials.filter(x => x.id !== data.id);
-            const materials = [data, ...m];
-            this.setState({ materials });
-            this.handleEditMaterialClose();
-            Toast("Material edited!").fire();
-          }
-        })
-        .catch(error => {
-          if (error.response) {
-            if (error.response.status === 400) {
-              this.setState({
-                editMaterialError: true,
-                editMaterialErrorMsg: error.response.data.error
-              });
-            } else if (error.response.status >= 500) {
-              Toast("Server Error!", "error").fire();
-            }
-          }
-        });
+      this.context.putAPI(
+        "material",
+        this.state.editMaterial.id,
+        this.state.editMaterial,
+        () => this.handleEditMaterialClose(),
+        response =>
+          this.setState({
+            editMaterialError: true,
+            editMaterialErrorMsg: response.data.error
+          })
+      );
     } else {
       this.setState({
         editMaterialError: true,
         editMaterialErrorMsg: "Field Can't be Empty!"
       });
     }
-    e.preventDefault();
   };
 
   handleEditMaterialOpen = data => {
@@ -186,13 +129,13 @@ class Material extends Component {
 
   handleEditMaterialClose = () => {
     this.setState({ editMaterialOpen: false });
+    console.log("sasas");
   };
   //#endregion
 
   render() {
     document.title = "MATERIAL - " + TITLE;
     const {
-      materials,
       addMaterialError,
       addMaterial,
       addMaterialOpen,
@@ -202,6 +145,8 @@ class Material extends Component {
       editMaterialOpen,
       editMaterialErrorMsg
     } = this.state;
+
+    const { materials } = this.context;
 
     const headerRow = [
       {
@@ -252,20 +197,10 @@ class Material extends Component {
       ]
     });
 
-    const buttonAdd = (
-      <Button animated="vertical" onClick={this.handleAddMaterialOpen}>
-        <Button.Content hidden>Add</Button.Content>
-        <Button.Content visible>
-          <Icon name="add" />
-        </Button.Content>
-      </Button>
-    );
-
     const AddMaterialModal = (
       <Modal
         closeOnDimmerClick={false}
         closeIcon
-        button={buttonAdd}
         size="small"
         open={addMaterialOpen}
         onClose={this.handleAddMaterialClose}
@@ -395,7 +330,15 @@ class Material extends Component {
             orderBy={"name"}
             orderDirection={"asc"}
             actionBar={true}
-            button={<Button.Group>{buttonAdd}</Button.Group>}
+            button={
+              <Button.Group>
+                <TableButton
+                  title="ADD"
+                  icon="add"
+                  onClick={this.handleAddMaterialOpen}
+                />
+              </Button.Group>
+            }
           />
         </Segment>
       </React.Fragment>

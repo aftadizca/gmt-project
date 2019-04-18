@@ -105,7 +105,7 @@ class MyTable extends Component {
         <Grid padded textAlign="center">
           <Grid.Row columns={2}>
             <Grid.Column>
-              <Segment inverted color="blue" stacked>
+              <Segment color="blue" inverted>
                 <Header as="h1">{title}</Header>
               </Segment>
             </Grid.Column>
@@ -123,7 +123,7 @@ class MyTable extends Component {
                       onClick={this.handleOnSearchClear}
                     />
                   }
-                  placeholder="Search..."
+                  placeholder="SEARCH"
                   value={this.state.searchValue}
                   onInput={this.handleOnSearch}
                 />
@@ -153,7 +153,7 @@ class MyTable extends Component {
         </Grid>
 
         <Grid verticalAlign="middle" padded>
-          <Grid.Column textAlign="right">
+          <Grid.Column textAlign="center">
             <Select
               style={{ marginRight: 10, verticalAlign: "middle" }}
               onChange={this.handleSelectPageSize}

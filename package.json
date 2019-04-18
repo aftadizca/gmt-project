@@ -10,6 +10,7 @@
     "bootstrap": "^4.3.1",
     "chart.js": "^2.8.0",
     "cleave.js": "^1.4.10",
+    "dotnetify": "^3.3.1",
     "font-awesome": "^4.7.0",
     "lodash": "^4.17.11",
     "react": "^16.8.6",

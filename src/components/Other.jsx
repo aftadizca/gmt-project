@@ -1,35 +1,17 @@
 import React, { Component } from "react";
-import { Tab } from "semantic-ui-react";
+import { Tab, Icon } from "semantic-ui-react";
 import MyTable from "./../_common/Table";
-import api from "../_helper/api";
-import { Loading, Toast } from "../_helper/CostumToast";
 import { TITLE } from "../_helper/constant";
+import { AppContext } from "../AppProvider";
 
 class Other extends Component {
-  state = {
-    statusQC: [],
-    locations: []
-  };
+  state = {};
+
+  static contextType = AppContext;
 
   componentDidMount() {
-    Loading.fire();
-    Promise.all([api.get("statusqc"), api.get("location")])
-      .then(result => {
-        this.setState({ statusQC: result[0].data });
-        this.setState({ locations: result[1].data });
-        Loading.close();
-      })
-      .catch(({ response }) => {
-        if (response) {
-          if (response.status >= 400) {
-            Loading.close();
-            Toast("Server error", "error").fire();
-          }
-        } else {
-          Loading.close();
-          Toast("Server not Available", "error", false).fire();
-        }
-      });
+    this.context.getAPI("location");
+    this.context.getAPI("statusQC");
   }
 
   handleDeleteStatusQC = id => {
@@ -38,7 +20,7 @@ class Other extends Component {
 
   render() {
     document.title = "OTHER - " + TITLE;
-    const { statusQC, locations } = this.state;
+    const { statusQCs, locations } = this.context;
 
     const statusQCHeader = [
       { key: 1, content: "STATUS ID", name: "id" },
@@ -63,12 +45,12 @@ class Other extends Component {
         { key: location, content: location, width: 4 },
         {
           key: "traceID" + i,
-          content: traceID,
+          content: traceID || <Icon name="question" />,
           className: traceID || "error"
         },
         {
           key: "materialName" + i,
-          content: materialName,
+          content: materialName || <Icon name="question" />,
           className: materialName || "error"
         }
       ]
@@ -79,7 +61,7 @@ class Other extends Component {
         menuItem: {
           key: "STATUS QC",
           content: "STATUS QC",
-          icon: "clipboard check large"
+          icon: <Icon size="large" name="clipboard check" />
         },
         render: () => (
           <Tab.Pane attached={false} raised piled>
@@ -88,7 +70,7 @@ class Other extends Component {
               title="STATUS QC"
               headerRow={statusQCHeader}
               renderBodyRow={statusQCRow}
-              data={statusQC}
+              data={statusQCs}
               orderBy="id"
               orderDirection="asc"
             />
@@ -99,7 +81,7 @@ class Other extends Component {
         menuItem: {
           key: "LOCATION",
           content: "LOCATION",
-          icon: "map marker alternate large"
+          icon: <Icon size="large" name="map marker alternate" />
         },
         render: () => (
           <Tab.Pane attached={false} raised piled>
