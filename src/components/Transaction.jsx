@@ -30,7 +30,7 @@ class Transaction extends Component {
         menuItem: {
           key: "MATERIAL STOCK",
           content: "MATERIAL STOCK",
-          icon: "warehouse large"
+          icon: <Icon name="warehouse" size="large" />
         },
         render: () => (
           <Tab.Pane attached={false} raised piled>
@@ -42,7 +42,7 @@ class Transaction extends Component {
         menuItem: {
           key: "INCOMING",
           content: "INCOMING",
-          icon: "arrow circle down large"
+          icon: <Icon name="arrow circle down" size="large" />
         },
         render: () => (
           <Tab.Pane attached={false} raised piled>
@@ -54,7 +54,7 @@ class Transaction extends Component {
         menuItem: {
           key: "OUTCOMING",
           content: "OUTCOMING",
-          icon: "arrow circle up large"
+          icon: <Icon name="arrow circle up" size="large" />
         },
         render: () => (
           <Tab.Pane attached={false} raised piled>

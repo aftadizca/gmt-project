@@ -61,9 +61,10 @@ class AppProvider extends Component {
       api
         .put(`${url}/${id}`, postdata)
         .then(({ status, data }) => {
-          if (status === 200) {
-            const m = this.state[state].filter(x => x.id !== data.id);
-            this.setState({ [state]: [data, ...m] });
+          console.log(status);
+          if (status === 204) {
+            const m = this.state[state].filter(x => x.id !== postdata.id);
+            this.setState({ [state]: [postdata, ...m] });
             success();
             Toast("Item successfully edited!").fire();
           }
