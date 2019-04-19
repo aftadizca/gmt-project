@@ -1,17 +1,19 @@
 import React, { Component } from "react";
-import { Tab, Icon } from "semantic-ui-react";
+import { Tab, Icon, Menu } from "semantic-ui-react";
 import MyTable from "./../_common/Table";
 import { TITLE } from "../_helper/constant";
 import { AppContext } from "../AppProvider";
+import LabelTab from "../_common/LabelTab";
+import { NavLink } from "react-router-dom";
 
 class Other extends Component {
-  state = {};
-
   static contextType = AppContext;
+  state = {
+    locationMap: []
+  };
 
   componentDidMount() {
-    this.context.getAPI("location");
-    this.context.getAPI("statusQC");
+    console.log("Other DidMounted");
   }
 
   handleDeleteStatusQC = id => {
@@ -19,8 +21,8 @@ class Other extends Component {
   };
 
   render() {
-    document.title = "OTHER - " + TITLE;
-    const { statusQCs, locations } = this.context;
+    document.title = this.props.match.params.tab.toUpperCase() + " - " + TITLE;
+    const { statusQCs, locationmaps } = this.context;
 
     const statusQCHeader = [
       { key: 1, content: "STATUS ID", name: "id" },
@@ -56,13 +58,23 @@ class Other extends Component {
       ]
     });
 
+    const TabIndex = {
+      statusqc: 0,
+      locationmap: 1
+    };
+
     const panes = [
       {
-        menuItem: {
-          key: "STATUS QC",
-          content: "STATUS QC",
-          icon: <Icon size="large" name="clipboard check" />
-        },
+        menuItem: (
+          <Menu.Item
+            key="statusqc"
+            className="tabmenu"
+            as={NavLink}
+            to="/other/statusqc"
+          >
+            <Icon name="clipboard check" /> STATUS QC
+          </Menu.Item>
+        ),
         render: () => (
           <Tab.Pane attached={false} raised piled>
             <MyTable
@@ -78,11 +90,16 @@ class Other extends Component {
         )
       },
       {
-        menuItem: {
-          key: "LOCATION",
-          content: "LOCATION",
-          icon: <Icon size="large" name="map marker alternate" />
-        },
+        menuItem: (
+          <Menu.Item
+            key="location"
+            className="tabmenu"
+            as={NavLink}
+            to="/other/locationmap"
+          >
+            <Icon name="map marker alternate" /> LOCATION MAP
+          </Menu.Item>
+        ),
         render: () => (
           <Tab.Pane attached={false} raised piled>
             <MyTable
@@ -90,19 +107,11 @@ class Other extends Component {
               title="LOCATION"
               headerRow={locationHeader}
               renderBodyRow={locationRow}
-              data={locations}
+              data={locationmaps}
               orderBy="location"
               actionBar={true}
               orderDirection="asc"
             />
-          </Tab.Pane>
-        )
-      },
-      {
-        menuItem: "Tab 3",
-        render: () => (
-          <Tab.Pane attached={false} raised piled>
-            Tab 3 Content
           </Tab.Pane>
         )
       }
@@ -116,6 +125,7 @@ class Other extends Component {
           pointing: true,
           inverted: true
         }}
+        activeIndex={TabIndex[this.props.match.params.tab]}
         panes={panes}
       />
     );

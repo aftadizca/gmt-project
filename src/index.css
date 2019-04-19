@@ -183,3 +183,71 @@ code {
 .ui.blue.inverted.pointing.menu .active.item:after {
   background: #1e77bb !important;
 }
+
+.tabmenu {
+  font-size: 1.4rem;
+  padding: 5px;
+}
+
+.tabmenu.active {
+  font-weight: 900 !important;
+}
+
+@keyframes blinking {
+  0% {
+    background: #e0e0e0;
+  }
+  49% {
+    background: #0303039d;
+  }
+  50% {
+    background: #0303039d;
+  }
+  99% {
+    background: #e0e0e0;
+  }
+  100% {
+    background: #e0e0e0;
+  }
+}
+@-moz-keyframes blinking {
+  0% {
+    background: #e0e0e0;
+  }
+  49% {
+    background: #0303039d;
+  }
+  50% {
+    background: #0303039d;
+  }
+  99% {
+    background: #e0e0e0;
+  }
+  100% {
+    background: #e0e0e0;
+  }
+}
+@-webkit-keyframes blinking {
+  0% {
+    background: #e0e0e0;
+  }
+  49% {
+    background: #0303039d;
+  }
+  50% {
+    background: #0303039d;
+  }
+  99% {
+    background: #e0e0e0;
+  }
+  100% {
+    background: #e0e0e0;
+  }
+}
+
+.ui.table td.active,
+.ui.table tr.active {
+  animation: blinking 3s !important;
+  -moz-animation: blinking 3s !important;
+  -webkit-animation: blinking 3s !important;
+}

@@ -35,8 +35,11 @@ class App extends Component {
                   <Switch>
                     <Route path="/home" component={Home} />
                     <Route path="/material" component={Material} />
-                    <Route path="/transaction" component={Transaction} />
-                    <Route path="/other" component={Other} />
+                    <Route path="/transaction/:tab" component={Transaction} />
+                    <Route path="/other/:tab" component={Other} />
+                    {/* <Route path="/other" component={Other} /> */}
+                    <Redirect from="/other" to="/other/statusqc" />
+                    <Redirect from="/transaction" to="/transaction/stok" />
                     <Redirect from="/" to="/home" />
                   </Switch>
                 </Route>

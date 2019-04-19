@@ -1,5 +1,4 @@
 import React, { Component } from "react";
-import API from "../_helper/api";
 import MyTable from "./../_common/Table";
 import {
   Segment,
@@ -11,7 +10,7 @@ import {
   Message
 } from "semantic-ui-react";
 
-import { Toast, Loading } from "../_helper/CostumToast";
+import { Loading } from "../_helper/CostumToast";
 import { UnitList } from "../_helper/SelectList";
 import { TypeList } from "./../_helper/SelectList";
 import { TITLE } from "../_helper/constant";
@@ -19,6 +18,7 @@ import { AppContext } from "./../AppProvider";
 import TableButton from "./../_common/TableButton";
 
 class Material extends Component {
+  static contextType = AppContext;
   state = {
     addMaterial: { id: "", name: "", suplier: "", type: "", unit: "" },
     addMaterialError: false,
@@ -27,14 +27,19 @@ class Material extends Component {
     editMaterial: { id: "", name: "", suplier: "", type: "", unit: "" },
     editMaterialError: false,
     editMaterialErrorMsg: "",
-    editMaterialOpen: false
+    editMaterialOpen: false,
+    rowActive: ""
   };
 
-  static contextType = AppContext;
-
   componentDidMount() {
-    this.context.getAPI("material");
+    console.log("Material DidMounted");
   }
+
+  timeOut = () => {
+    setTimeout(() => {
+      this.setState({ rowActive: "" });
+    }, 5000);
+  };
 
   handleDetail = movie => {
     console.log(movie);
@@ -58,7 +63,9 @@ class Material extends Component {
       this.context.postAPI(
         "material",
         this.state.addMaterial,
-        () => {
+        data => {
+          this.setState({ rowActive: data.id });
+          this.timeOut();
           this.handleAddMaterialClose();
           this.handleAddMaterialClear();
         },
@@ -107,7 +114,11 @@ class Material extends Component {
         "material",
         this.state.editMaterial.id,
         this.state.editMaterial,
-        () => this.handleEditMaterialClose(),
+        () => {
+          this.handleEditMaterialClose();
+          this.setState({ rowActive: this.state.editMaterial.id });
+          this.timeOut();
+        },
         response =>
           this.setState({
             editMaterialError: true,
@@ -134,6 +145,7 @@ class Material extends Component {
   //#endregion
 
   render() {
+    console.log("Material render");
     document.title = "MATERIAL - " + TITLE;
     const {
       addMaterialError,
@@ -161,6 +173,7 @@ class Material extends Component {
     ];
     const renderBodyRow = (data, i) => ({
       key: `row-${i}`,
+      active: this.state.rowActive === data.id,
       cells: [
         data.id,
         data.name,
@@ -327,8 +340,8 @@ class Material extends Component {
             headerRow={headerRow}
             renderBodyRow={renderBodyRow}
             data={materials}
-            orderBy={"name"}
-            orderDirection={"asc"}
+            orderBy={"id"}
+            orderDirection={"desc"}
             actionBar={true}
             button={
               <Button.Group>

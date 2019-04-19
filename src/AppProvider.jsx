@@ -8,19 +8,20 @@ class AppProvider extends Component {
   state = {
     materials: [],
     statusQCs: [],
-    locations: [],
+    locationsmaps: [],
+    stoks: [],
     getAPI: url => {
       const state = url + "s";
       Loading.fire();
       api
         .get(url)
         .then(({ data, headers }) => {
-          console.log(headers.myheader);
           this.setState({ [state]: data });
           Loading.close();
         })
         .catch(({ response }) => {
           if (response) {
+            console.error("GET ERROR", response);
             if (response.status >= 400) {
               Loading.close();
               Toast("Server error", "error").fire();
@@ -39,13 +40,14 @@ class AppProvider extends Component {
           if (status === 201) {
             const x = [data, ...this.state[state]];
             this.setState({ [state]: x });
-            success();
+            success(data);
             Loading.close();
             Toast("Item succesfully added!").fire();
           }
         })
         .catch(({ response }) => {
           if (response) {
+            console.error("POST ERROR", response);
             if (response.status >= 400) {
               Loading.close();
               error(response);
@@ -60,8 +62,7 @@ class AppProvider extends Component {
       const state = url + "s";
       api
         .put(`${url}/${id}`, postdata)
-        .then(({ status, data }) => {
-          console.log(status);
+        .then(({ status }) => {
           if (status === 204) {
             const m = this.state[state].filter(x => x.id !== postdata.id);
             this.setState({ [state]: [postdata, ...m] });
@@ -71,6 +72,7 @@ class AppProvider extends Component {
         })
         .catch(errors => {
           if (errors.response) {
+            console.error("PUT ERROR", errors.response);
             if (errors.response.status === 400) {
               error(errors.response);
             } else if (errors.response.status >= 500) {
@@ -95,14 +97,24 @@ class AppProvider extends Component {
               }
             })
             .catch(errors => {
-              console.log(errors);
+              console.log("DELETE ERROR", errors);
             });
         }
       });
     }
   };
 
+  componentDidMount() {
+    console.info("App Provider DidMounted");
+    this.state.getAPI("material");
+    this.state.getAPI("statusQC");
+    this.state.getAPI("locationmap");
+    this.state.getAPI("stok");
+  }
+
   render() {
+    console.log("AppProvider Render");
+
     return (
       <AppContext.Provider value={this.state}>
         {this.props.children}
