@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import { Tab, Icon, Label, Menu } from "semantic-ui-react";
+import { Tab, Icon, Label, Menu, Checkbox } from "semantic-ui-react";
 import MyTable from "./../_common/Table";
 import { TITLE } from "../_helper/constant";
 import { AppContext } from "./../AppProvider";
@@ -28,6 +28,7 @@ class Transaction extends Component {
     const stokAll = stoks.filter(x => x.statusQCID > 1 && x.qty > 0);
 
     const materialStockHeader = [
+      { key: 1, content: "", name: "" },
       { key: 1, content: "TRACE ID", name: "id" },
       { key: 2, content: "MATERIAL NAME", name: "materialID" },
       { key: 3, content: "LOCATION", name: "locationID" },
@@ -51,7 +52,12 @@ class Transaction extends Component {
       i
     ) => ({
       key: `row-${i}`,
+      active: true,
       cells: [
+        {
+          key: `id-${i}`,
+          content: <Checkbox />
+        },
         id,
         {
           key: `material-${i}`,

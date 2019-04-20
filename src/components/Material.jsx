@@ -346,9 +346,14 @@ class Material extends Component {
             button={
               <Button.Group>
                 <TableButton
-                  title="ADD"
+                  title="Add"
                   icon="add"
                   onClick={this.handleAddMaterialOpen}
+                />
+                <TableButton
+                  title="Refresh"
+                  icon="refresh"
+                  onClick={() => this.context.getAPI("material")}
                 />
               </Button.Group>
             }

@@ -8,7 +8,8 @@ import {
   Table,
   Pagination,
   Select,
-  Icon
+  Icon,
+  Label
 } from "semantic-ui-react";
 import { PageSize } from "../_helper/SelectList";
 import _ from "lodash";
@@ -106,11 +107,11 @@ class MyTable extends Component {
           <Grid.Row columns={2}>
             <Grid.Column>
               <Segment color="blue" inverted>
-                <Header as="h1">{title}</Header>
+                <Header as="h1">{title} </Header>
               </Segment>
             </Grid.Column>
             <Grid.Column verticalAlign="middle" textAlign="right">
-              {actionBar && button}{" "}
+              {button}{" "}
               {actionBar && (
                 <Input
                   icon={

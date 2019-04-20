@@ -8,15 +8,17 @@ class AppProvider extends Component {
   state = {
     materials: [],
     statusQCs: [],
-    locationsmaps: [],
+    locationmaps: [],
+    locations: [],
     stoks: [],
     getAPI: url => {
       const state = url + "s";
       Loading.fire();
       api
         .get(url)
-        .then(({ data, headers }) => {
+        .then(({ data }) => {
           this.setState({ [state]: data });
+          console.log("get call success :", state);
           Loading.close();
         })
         .catch(({ response }) => {

@@ -190,7 +190,7 @@ code {
 }
 
 .tabmenu.active {
-  font-weight: 900 !important;
+  font-weight: 600 !important;
 }
 
 @keyframes blinking {
@@ -245,6 +245,7 @@ code {
   }
 }
 
+/* efek blink di row table */
 .ui.table td.active,
 .ui.table tr.active {
   animation: blinking 3s !important;

@@ -1,10 +1,10 @@
 import React, { Component } from "react";
-import { Tab, Icon, Menu } from "semantic-ui-react";
+import { Tab, Icon, Menu, Button } from "semantic-ui-react";
 import MyTable from "./../_common/Table";
 import { TITLE } from "../_helper/constant";
 import { AppContext } from "../AppProvider";
-import LabelTab from "../_common/LabelTab";
 import { NavLink } from "react-router-dom";
+import TableButton from "../_common/TableButton";
 
 class Other extends Component {
   static contextType = AppContext;
@@ -85,6 +85,15 @@ class Other extends Component {
               data={statusQCs}
               orderBy="id"
               orderDirection="asc"
+              button={
+                <Button.Group>
+                  <TableButton
+                    title="Refresh"
+                    icon="refresh"
+                    onClick={() => this.context.getAPI("statusqc")}
+                  />
+                </Button.Group>
+              }
             />
           </Tab.Pane>
         )
@@ -111,6 +120,15 @@ class Other extends Component {
               orderBy="location"
               actionBar={true}
               orderDirection="asc"
+              button={
+                <Button.Group>
+                  <TableButton
+                    title="Refresh"
+                    icon="refresh"
+                    onClick={() => this.context.getAPI("locationmap")}
+                  />
+                </Button.Group>
+              }
             />
           </Tab.Pane>
         )
