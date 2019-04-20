@@ -195,60 +195,64 @@ code {
 
 @keyframes blinking {
   0% {
-    background: #e0e0e0;
+    background: #2184d0b2;
   }
   49% {
-    background: #0303039d;
+    background: #2185d065;
   }
   50% {
-    background: #0303039d;
+    background: #2184d065;
   }
   99% {
-    background: #e0e0e0;
+    background: #2185d0b2;
   }
   100% {
-    background: #e0e0e0;
+    background: #2185d0b2;
   }
 }
 @-moz-keyframes blinking {
   0% {
-    background: #e0e0e0;
+    background: #2185d0b2;
   }
   49% {
-    background: #0303039d;
+    background: #2185d065;
   }
   50% {
-    background: #0303039d;
+    background: #2184d065;
   }
   99% {
-    background: #e0e0e0;
+    background: #2185d0b2;
   }
   100% {
-    background: #e0e0e0;
+    background: #2185d0b2;
   }
 }
 @-webkit-keyframes blinking {
   0% {
-    background: #e0e0e0;
+    background: #2185d0b2;
   }
   49% {
-    background: #0303039d;
+    background: #2185d065;
   }
   50% {
-    background: #0303039d;
+    background: #2184d065;
   }
   99% {
-    background: #e0e0e0;
+    background: #2185d0b2;
   }
   100% {
-    background: #e0e0e0;
+    background: #2185d0b2;
   }
 }
 
 /* efek blink di row table */
 .ui.table td.active,
 .ui.table tr.active {
-  animation: blinking 3s !important;
-  -moz-animation: blinking 3s !important;
-  -webkit-animation: blinking 3s !important;
+  background: #2185d0b2 !important;
+  animation: blinking 1s !important;
+  -moz-animation: blinking 1s !important;
+  -webkit-animation: blinking 1s !important;
+}
+.ui.striped.selectable.selectable.selectable.table tbody tr.active:hover {
+  background: #2184d065 !important;
 }

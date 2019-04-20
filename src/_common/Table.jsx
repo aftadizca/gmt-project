@@ -138,6 +138,7 @@ class MyTable extends Component {
                 color="blue"
                 celled
                 sortable
+                selectable
                 onClick={this.handleSort}
                 striped
                 textAlign="center"

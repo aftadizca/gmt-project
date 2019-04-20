@@ -11,24 +11,27 @@ class Transaction extends Component {
   static contextType = AppContext;
 
   state = {
-    materialStocks: [],
-    incomings: [],
-    outcomings: []
+    selectedStock: []
   };
 
   componentDidMount() {
     console.log("Transaction DidMounted");
   }
 
+  handleSelectRow = data => {
+    data.active = data.active ? !data.active : true;
+    this.context.handleUpdate("stoks", data);
+  };
+
   render() {
     console.log("Transaction render");
     document.title = this.props.match.params.tab.toUpperCase() + " - " + TITLE;
     const { materials, locationmaps, statusQCs, stoks } = this.context;
+
     const incoming = stoks.filter(x => x.statusQCID === 1);
     const stokAll = stoks.filter(x => x.statusQCID > 1 && x.qty > 0);
 
     const materialStockHeader = [
-      { key: 1, content: "", name: "" },
       { key: 1, content: "TRACE ID", name: "id" },
       { key: 2, content: "MATERIAL NAME", name: "materialID" },
       { key: 3, content: "LOCATION", name: "locationID" },
@@ -38,48 +41,33 @@ class Transaction extends Component {
       { key: 8, content: "QTY", name: "qty" },
       { key: 4, content: "STATUS QC", name: "statusQCID" }
     ];
-    const materialStockRow = (
-      {
-        id,
-        materialID,
-        locationID,
-        lot,
-        comingDate,
-        expiredDate,
-        qty,
-        statusQCID
-      },
-      i
-    ) => ({
+    const materialStockRow = (data, i) => ({
       key: `row-${i}`,
-      active: true,
+      active: data.active,
+      onClick: () => this.handleSelectRow(data),
       cells: [
-        {
-          key: `id-${i}`,
-          content: <Checkbox />
-        },
-        id,
+        data.id,
         {
           key: `material-${i}`,
-          content: getById(materials, materialID, "name")
+          content: getById(materials, data.materialID, "name")
         },
         {
           key: `location-${i}`,
-          content: getById(locationmaps, locationID, "location")
+          content: getById(locationmaps, data.locationID, "location")
         },
-        lot,
+        data.lot,
         {
-          key: `id-${i}`,
-          content: new Date(Date.parse(comingDate)).toLocaleDateString()
+          key: `comingDate-${i}`,
+          content: new Date(Date.parse(data.comingDate)).toLocaleDateString()
         },
         {
           key: `exp-${i}`,
-          content: new Date(Date.parse(expiredDate)).toLocaleDateString()
+          content: new Date(Date.parse(data.expiredDate)).toLocaleDateString()
         },
-        qty,
+        data.qty,
         {
           key: `statusQC-${i}`,
-          content: getById(statusQCs, statusQCID, "name")
+          content: getById(statusQCs, data.statusQCID, "name")
         }
       ]
     });
@@ -106,6 +94,7 @@ class Transaction extends Component {
         render: () => (
           <Tab.Pane attached={false} raised piled>
             <MyTable
+              key="stock"
               title="STOCK"
               headerRow={materialStockHeader}
               renderBodyRow={materialStockRow}
@@ -113,7 +102,6 @@ class Transaction extends Component {
               orderBy="materialID"
               orderDirection="asc"
               actionBar={true}
-              //button={}
             />
           </Tab.Pane>
         )
@@ -133,6 +121,7 @@ class Transaction extends Component {
         render: () => (
           <Tab.Pane attached={false} raised piled>
             <MyTable
+              key="incoming"
               title="INCOMING MATERIAL"
               headerRow={materialStockHeader}
               renderBodyRow={materialStockRow}
@@ -140,7 +129,6 @@ class Transaction extends Component {
               orderBy="materialID"
               orderDirection="asc"
               actionBar={true}
-              //button={}
             />
           </Tab.Pane>
         )

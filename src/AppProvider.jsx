@@ -1,6 +1,7 @@
 import React, { Component } from "react";
 import { Loading, Toast, DeleteAlert } from "./_helper/CostumToast";
 import api from "./_helper/api";
+import _ from "lodash";
 
 export const AppContext = React.createContext();
 
@@ -103,6 +104,10 @@ class AppProvider extends Component {
             });
         }
       });
+    },
+    handleUpdate: (target, data) => {
+      const m = this.state[target].filter(x => x.id !== data.id);
+      this.setState({ [target]: _.orderBy([data, ...m], "id", "asc") });
     }
   };
 
