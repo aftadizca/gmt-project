@@ -91,6 +91,16 @@ class MyTable extends Component {
       textAlign: "center"
     });
 
+    const renderFooter = [
+      {
+        key: "footer",
+        as: "th",
+        colSpan: headerRow.length,
+        content: button,
+        textAlign: "left"
+      }
+    ];
+
     var sortedData = _.orderBy(data, orderBy, orderDirection);
     //filtering with search
     const filteredData = Filtering(sortedData, searchValue);
@@ -111,7 +121,6 @@ class MyTable extends Component {
               </Segment>
             </Grid.Column>
             <Grid.Column verticalAlign="middle" textAlign="right">
-              {button}{" "}
               {actionBar && (
                 <Input
                   icon={
@@ -149,6 +158,7 @@ class MyTable extends Component {
                     : renderBodyRowEmpty
                 }
                 tableData={paginatedData.length !== 0 ? paginatedData : noData}
+                footerRow={renderFooter}
               />
             </Grid.Column>
           </Grid.Row>
