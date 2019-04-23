@@ -353,7 +353,7 @@ class Material extends Component {
                 <TableButton
                   title="Refresh"
                   icon="refresh"
-                  onClick={() => this.context.getAPI("material")}
+                  onClick={() => this.context.getAPI(["material"])}
                 />
               </Button.Group>
             }

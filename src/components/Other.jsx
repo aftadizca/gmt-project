@@ -90,7 +90,7 @@ class Other extends Component {
                   <TableButton
                     title="Refresh"
                     icon="refresh"
-                    onClick={() => this.context.getAPI("statusqc")}
+                    onClick={() => this.context.getAPI(["statusqc"])}
                   />
                 </Button.Group>
               }
@@ -125,7 +125,7 @@ class Other extends Component {
                   <TableButton
                     title="Refresh"
                     icon="refresh"
-                    onClick={() => this.context.getAPI("locationmap")}
+                    onClick={() => this.context.getAPI(["locationmap"])}
                   />
                 </Button.Group>
               }

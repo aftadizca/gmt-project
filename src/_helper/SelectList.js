@@ -20,3 +20,11 @@ export const TypeList = [
   { key: 4, value: "LAKBAN", text: "LAKBAN" },
   { key: 5, value: "SEDOTAN", text: "SEDOTAN" }
 ];
+
+export function DinamicList(data, value, text) {
+  const n = [];
+  data.forEach((x, i) => {
+    n[i] = { key: i, value: x[value], text: x[text] };
+  });
+  return n;
+}

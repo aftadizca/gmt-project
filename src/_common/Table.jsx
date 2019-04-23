@@ -8,8 +8,7 @@ import {
   Table,
   Pagination,
   Select,
-  Icon,
-  Label
+  Icon
 } from "semantic-ui-react";
 import { PageSize } from "../_helper/SelectList";
 import _ from "lodash";
@@ -25,6 +24,9 @@ class MyTable extends Component {
     headerRow: this.props.headerRow
   };
 
+  componentWillUnmount() {
+    console.log("Material Unmount");
+  }
   handleSelectPageSize = (e, data) => {
     this.setState({ pageSize: data.value });
   };
@@ -56,6 +58,10 @@ class MyTable extends Component {
     }
   };
 
+  handleClickRow = data => {
+    console.log(data);
+  };
+
   render() {
     const { renderBodyRow, data, title, button, actionBar } = this.props;
 
@@ -75,6 +81,12 @@ class MyTable extends Component {
       } else {
         x.className = "";
       }
+    });
+
+    const br = (data, i) => ({
+      ...this.props.renderBodyRow(data, i),
+      active: false,
+      trr: this.active
     });
 
     //render when no data in table
@@ -153,12 +165,10 @@ class MyTable extends Component {
                 textAlign="center"
                 headerRow={header}
                 renderBodyRow={
-                  paginatedData.length !== 0
-                    ? renderBodyRow
-                    : renderBodyRowEmpty
+                  paginatedData.length !== 0 ? br : renderBodyRowEmpty
                 }
                 tableData={paginatedData.length !== 0 ? paginatedData : noData}
-                footerRow={renderFooter}
+                footerRow={button && renderFooter}
               />
             </Grid.Column>
           </Grid.Row>

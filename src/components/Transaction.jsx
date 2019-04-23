@@ -1,32 +1,53 @@
 import React, { Component } from "react";
-import { Tab, Icon, Label, Menu, Checkbox } from "semantic-ui-react";
+import {
+  Tab,
+  Icon,
+  Label,
+  Menu,
+  Modal,
+  Form,
+  Message,
+  Button
+} from "semantic-ui-react";
 import MyTable from "./../_common/Table";
 import { TITLE } from "../_helper/constant";
 import { AppContext } from "./../AppProvider";
 import { getById } from "../_helper/tool";
 import LabelTab from "./../_common/LabelTab";
 import { NavLink } from "react-router-dom";
+import StatusButton from "../_common/StatusButton";
+import { Enum } from "linq";
+import { DinamicList } from "../_helper/SelectList";
 
 class Transaction extends Component {
   static contextType = AppContext;
 
   state = {
-    selectedStock: []
+    selectedStok: [],
+    modalStatusQC: false,
+    selectedStok: {}
   };
 
   componentDidMount() {
     console.log("Transaction DidMounted");
   }
 
-  handleSelectRow = data => {
-    data.active = data.active ? !data.active : true;
-    this.context.handleUpdate("stoks", data);
+  handleUpdateStatusQC = (qc, data) => {
+    const x = { ...data };
+    x.statusQCID = qc;
+    this.setState({ selectedStok: x });
+    this.setState({ modalStatusQC: true });
+  };
+
+  modalStatusQCClose = () => {
+    this.setState({ modalStatusQC: false });
   };
 
   render() {
     console.log("Transaction render");
     document.title = this.props.match.params.tab.toUpperCase() + " - " + TITLE;
     const { materials, locationmaps, statusQCs, stoks } = this.context;
+    const { modalStatusQC, selectedStok } = this.state;
 
     const incoming = stoks.filter(x => x.statusQCID === 1);
     const stokAll = stoks.filter(x => x.statusQCID > 1 && x.qty > 0);
@@ -43,8 +64,6 @@ class Transaction extends Component {
     ];
     const materialStockRow = (data, i) => ({
       key: `row-${i}`,
-      active: data.active,
-      onClick: () => this.handleSelectRow(data),
       cells: [
         data.id,
         {
@@ -67,7 +86,14 @@ class Transaction extends Component {
         data.qty,
         {
           key: `statusQC-${i}`,
-          content: getById(statusQCs, data.statusQCID, "name")
+          content: (
+            <StatusButton
+              button={this.context.statusQCs}
+              disabled={modalStatusQC}
+              label={getById(statusQCs, data.statusQCID, "name")}
+              onClick={qc => this.handleUpdateStatusQC(qc, data)}
+            />
+          )
         }
       ]
     });
@@ -156,16 +182,67 @@ class Transaction extends Component {
     ];
 
     return (
-      <Tab
-        menu={{
-          borderless: true,
-          color: "blue",
-          pointing: true,
-          inverted: true
-        }}
-        activeIndex={TabIndex[this.props.match.params.tab]}
-        panes={panes}
-      />
+      <React.Fragment>
+        <Modal
+          closeOnDimmerClick={false}
+          closeIcon
+          size="small"
+          open={modalStatusQC}
+          onClose={this.modalStatusQCClose}
+        >
+          <Modal.Header>UPDATE STATUS QC</Modal.Header>
+          <Modal.Content>
+            <Form>
+              <Form.Input
+                label="Material Name"
+                name="name"
+                readOnly
+                value={selectedStok.id}
+                placeholder="Material ID"
+              />
+              <Form.Input
+                label="Material Name"
+                name="name"
+                readOnly
+                value={getById(materials, selectedStok.materialID, "name")}
+                placeholder="Material ID"
+              />
+              <Form.Input
+                label="Material Name"
+                name="name"
+                readOnly
+                value={getById(statusQCs, selectedStok.statusQCID, "name")}
+                placeholder="Material ID"
+              />
+              <Form.Select
+                name="type"
+                label="Type"
+                options={DinamicList(
+                  locationmaps.filter(x => x.traceID === ""),
+                  "id",
+                  "location"
+                )}
+                value={selectedStok.locationID}
+              />
+            </Form>
+          </Modal.Content>
+          <Modal.Actions>
+            <Button color="blue" onClick={this.handleSaveEditMaterial}>
+              <Icon name="save" /> SAVE
+            </Button>
+          </Modal.Actions>
+        </Modal>
+        <Tab
+          menu={{
+            borderless: true,
+            color: "blue",
+            pointing: true,
+            inverted: true
+          }}
+          activeIndex={TabIndex[this.props.match.params.tab]}
+          panes={panes}
+        />
+      </React.Fragment>
     );
   }
 }

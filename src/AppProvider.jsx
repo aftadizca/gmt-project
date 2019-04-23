@@ -13,13 +13,20 @@ class AppProvider extends Component {
     locations: [],
     stoks: [],
     getAPI: url => {
-      const state = url + "s";
+      // const state = url + "s";
       Loading.fire();
-      api
-        .get(url)
-        .then(({ data }) => {
-          this.setState({ [state]: data });
-          console.log("get call success :", state);
+      const prom = [];
+      url.forEach((x, i) => {
+        prom[i] = api.get(x);
+      });
+      Promise.all(prom)
+        .then(data => {
+          const d = {};
+          data.forEach((x, i) => {
+            d[url[i] + "s"] = x.data;
+          });
+          this.setState(d);
+          console.log("get call success :", url);
           Loading.close();
         })
         .catch(({ response }) => {
@@ -113,10 +120,7 @@ class AppProvider extends Component {
 
   componentDidMount() {
     console.info("App Provider DidMounted");
-    this.state.getAPI("material");
-    this.state.getAPI("statusQC");
-    this.state.getAPI("locationmap");
-    this.state.getAPI("stok");
+    this.state.getAPI(["material", "statusQC", "locationmap", "stok"]);
   }
 
   render() {
