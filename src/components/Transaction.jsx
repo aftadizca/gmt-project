@@ -1,31 +1,22 @@
 import React, { Component } from "react";
-import {
-  Tab,
-  Icon,
-  Label,
-  Menu,
-  Modal,
-  Form,
-  Message,
-  Button
-} from "semantic-ui-react";
-import MyTable from "./../_common/Table";
-import { TITLE } from "../_helper/constant";
+import { Tab, Icon, Label, Menu, Modal, Form, Button } from "semantic-ui-react";
+import MyTable from "./../_common/MyTable";
+import { TITLE, LOCALE_DATE, OPTIONS_DATE } from "../_helper/constant";
 import { AppContext } from "./../AppProvider";
 import { getById } from "../_helper/tool";
 import LabelTab from "./../_common/LabelTab";
 import { NavLink } from "react-router-dom";
-import StatusButton from "../_common/StatusButton";
-import { Enum } from "linq";
+import QCButton from "../_common/QCButton";
 import { DinamicList } from "../_helper/SelectList";
+import TableButton from "./../_common/TableButton";
+import { Toast } from "./../_helper/CostumToast";
 
 class Transaction extends Component {
   static contextType = AppContext;
 
   state = {
-    selectedStok: [],
-    modalStatusQC: false,
-    selectedStok: {}
+    selectedStok: {},
+    modalStatusQC: false
   };
 
   componentDidMount() {
@@ -34,13 +25,55 @@ class Transaction extends Component {
 
   handleUpdateStatusQC = (qc, data) => {
     const x = { ...data };
+    console.log(qc, data);
     x.statusQCID = qc;
     this.setState({ selectedStok: x });
-    this.setState({ modalStatusQC: true });
+    if (!x.locationID) {
+      this.setState({ modalStatusQC: true });
+    } else {
+      setTimeout(() => {
+        this.handleSubmit(false, "");
+      }, 500);
+    }
   };
 
-  modalStatusQCClose = () => {
+  handleModalStatusQCClose = () => {
     this.setState({ modalStatusQC: false });
+  };
+
+  handleOnChange = (e, data) => {
+    this.setState({
+      selectedStok: { ...this.state.selectedStok, [data.name]: data.value }
+    });
+  };
+
+  handleSubmit = (e, data) => {
+    const { selectedStok } = this.state;
+    if (data.name === "statusqc") {
+      this.context.putAPI(
+        "stok",
+        selectedStok.id,
+        selectedStok,
+
+        () => {
+          this.handleModalStatusQCClose();
+          this.setState({ selectedStok: {} });
+        },
+        response => Toast(response.data, "error").fire()
+      );
+    } else {
+      this.context.putAPI(
+        "stok",
+        selectedStok.id,
+        selectedStok,
+        false,
+        response => Toast(response.data, "error").fire()
+      );
+    }
+  };
+
+  handleSelectedChange = data => {
+    console.log("SELECTED: ", data);
   };
 
   render() {
@@ -77,17 +110,23 @@ class Transaction extends Component {
         data.lot,
         {
           key: `comingDate-${i}`,
-          content: new Date(Date.parse(data.comingDate)).toLocaleDateString()
+          content: new Date(Date.parse(data.comingDate)).toLocaleDateString(
+            LOCALE_DATE,
+            OPTIONS_DATE
+          )
         },
         {
           key: `exp-${i}`,
-          content: new Date(Date.parse(data.expiredDate)).toLocaleDateString()
+          content: new Date(Date.parse(data.expiredDate)).toLocaleDateString(
+            LOCALE_DATE,
+            OPTIONS_DATE
+          )
         },
         data.qty,
         {
           key: `statusQC-${i}`,
           content: (
-            <StatusButton
+            <QCButton
               button={this.context.statusQCs}
               disabled={modalStatusQC}
               label={getById(statusQCs, data.statusQCID, "name")}
@@ -97,6 +136,88 @@ class Transaction extends Component {
         }
       ]
     });
+
+    const incomingButton = (
+      <Button.Group>
+        <TableButton
+          title="Refresh"
+          icon="refresh"
+          onClick={() => this.context.getAPI(["stok"])}
+        />
+        <TableButton
+          title="Add"
+          icon="add"
+          //onClick={this.handleAddMaterialOpen}
+        />
+      </Button.Group>
+    );
+    const stockButton = (
+      <Button.Group>
+        <TableButton
+          title="Refresh"
+          icon="refresh"
+          onClick={() => this.context.getAPI(["stok"])}
+        />
+      </Button.Group>
+    );
+
+    const updateStatusModal = (
+      <Modal
+        closeOnDimmerClick={false}
+        closeIcon
+        size="small"
+        open={modalStatusQC}
+        onClose={this.handleModalStatusQCClose}
+      >
+        <Modal.Header>UPDATE STATUS QC</Modal.Header>
+        <Modal.Content>
+          <Form>
+            <Form.Input
+              label="TRACE ID"
+              name="id"
+              readOnly
+              value={selectedStok.id}
+            />
+            <Form.Input
+              label="MATERIAL NAME"
+              name="name"
+              readOnly
+              value={getById(materials, selectedStok.materialID, "name")}
+            />
+            <Form.Group widths="equal">
+              <Form.Input
+                label="STATUS QC"
+                name="statusQCID"
+                readOnly
+                color="blue"
+                inverted
+                fluid
+                value={getById(statusQCs, selectedStok.statusQCID, "name")}
+              />
+              <Form.Dropdown
+                name="locationID"
+                label="LOCATION"
+                search
+                fluid
+                selection
+                onChange={this.handleOnChange}
+                options={DinamicList(
+                  locationmaps.filter(x => x.traceID === ""),
+                  "id",
+                  "location"
+                )}
+                value={selectedStok.locationID}
+              />
+            </Form.Group>
+          </Form>
+        </Modal.Content>
+        <Modal.Actions>
+          <Button color="blue" onClick={this.handleSubmit} name="statusqc">
+            <Icon name="save" /> SAVE
+          </Button>
+        </Modal.Actions>
+      </Modal>
+    );
 
     const TabIndex = {
       stok: 0,
@@ -122,12 +243,14 @@ class Transaction extends Component {
             <MyTable
               key="stock"
               title="STOCK"
-              headerRow={materialStockHeader}
-              renderBodyRow={materialStockRow}
+              header={materialStockHeader}
+              body={materialStockRow}
               data={stokAll}
-              orderBy="materialID"
-              orderDirection="asc"
-              actionBar={true}
+              onSelectedChange={this.handleSelectedChange}
+              orderBy={0}
+              searchBar
+              selection
+              button={stockButton}
             />
           </Tab.Pane>
         )
@@ -149,12 +272,13 @@ class Transaction extends Component {
             <MyTable
               key="incoming"
               title="INCOMING MATERIAL"
-              headerRow={materialStockHeader}
-              renderBodyRow={materialStockRow}
+              header={materialStockHeader}
+              body={materialStockRow}
               data={incoming}
-              orderBy="materialID"
-              orderDirection="asc"
-              actionBar={true}
+              orderBy={0}
+              searchBar
+              selection
+              button={incomingButton}
             />
           </Tab.Pane>
         )
@@ -183,55 +307,7 @@ class Transaction extends Component {
 
     return (
       <React.Fragment>
-        <Modal
-          closeOnDimmerClick={false}
-          closeIcon
-          size="small"
-          open={modalStatusQC}
-          onClose={this.modalStatusQCClose}
-        >
-          <Modal.Header>UPDATE STATUS QC</Modal.Header>
-          <Modal.Content>
-            <Form>
-              <Form.Input
-                label="Material Name"
-                name="name"
-                readOnly
-                value={selectedStok.id}
-                placeholder="Material ID"
-              />
-              <Form.Input
-                label="Material Name"
-                name="name"
-                readOnly
-                value={getById(materials, selectedStok.materialID, "name")}
-                placeholder="Material ID"
-              />
-              <Form.Input
-                label="Material Name"
-                name="name"
-                readOnly
-                value={getById(statusQCs, selectedStok.statusQCID, "name")}
-                placeholder="Material ID"
-              />
-              <Form.Select
-                name="type"
-                label="Type"
-                options={DinamicList(
-                  locationmaps.filter(x => x.traceID === ""),
-                  "id",
-                  "location"
-                )}
-                value={selectedStok.locationID}
-              />
-            </Form>
-          </Modal.Content>
-          <Modal.Actions>
-            <Button color="blue" onClick={this.handleSaveEditMaterial}>
-              <Icon name="save" /> SAVE
-            </Button>
-          </Modal.Actions>
-        </Modal>
+        {updateStatusModal}
         <Tab
           menu={{
             borderless: true,

@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 import { Tab, Icon, Menu, Button } from "semantic-ui-react";
-import MyTable from "./../_common/Table";
+import MyTable from "./../_common/MyTable";
 import { TITLE } from "../_helper/constant";
 import { AppContext } from "../AppProvider";
 import { NavLink } from "react-router-dom";
@@ -58,6 +58,7 @@ class Other extends Component {
       ]
     });
 
+    //indexing tab
     const TabIndex = {
       statusqc: 0,
       locationmap: 1
@@ -80,11 +81,10 @@ class Other extends Component {
             <MyTable
               key={1}
               title="STATUS QC"
-              headerRow={statusQCHeader}
-              renderBodyRow={statusQCRow}
+              header={statusQCHeader}
+              body={statusQCRow}
               data={statusQCs}
-              orderBy="id"
-              orderDirection="asc"
+              orderBy={0}
               button={
                 <Button.Group>
                   <TableButton
@@ -114,12 +114,11 @@ class Other extends Component {
             <MyTable
               key={2}
               title="LOCATION"
-              headerRow={locationHeader}
-              renderBodyRow={locationRow}
+              header={locationHeader}
+              body={locationRow}
               data={locationmaps}
-              orderBy="location"
-              actionBar={true}
-              orderDirection="asc"
+              orderBy={0}
+              searchBar
               button={
                 <Button.Group>
                   <TableButton

@@ -2,7 +2,7 @@ import React from "react";
 import { Popup, Button } from "semantic-ui-react";
 import { STATUS_COLOR } from "../_helper/constant";
 
-const StatusButton = props => {
+const QCButton = props => {
   const btn = props.button.filter(
     x => x.name.toLowerCase() !== props.label.toLowerCase() && x.id > 1
   );
@@ -18,7 +18,7 @@ const StatusButton = props => {
         <Button.Group>
           {btn.map(x => (
             <Button
-              key={x.name}
+              key={x.id}
               color={STATUS_COLOR[x.name.toLowerCase()]}
               content={x.name}
               onClick={() => props.onClick(x.id)}
@@ -34,4 +34,4 @@ const StatusButton = props => {
   );
 };
 
-export default StatusButton;
+export default QCButton;

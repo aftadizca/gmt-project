@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import MyTable from "./../_common/Table";
+import MyTable from "./../_common/MyTable";
 import {
   Segment,
   Button,
@@ -337,12 +337,12 @@ class Material extends Component {
         <Segment raised piled>
           <MyTable
             title="MATERIAL"
-            headerRow={headerRow}
-            renderBodyRow={renderBodyRow}
+            header={headerRow}
+            body={renderBodyRow}
             data={materials}
-            orderBy={"id"}
-            orderDirection={"desc"}
-            actionBar={true}
+            orderBy={0}
+            orderDirection="desc"
+            searchBar
             button={
               <Button.Group>
                 <TableButton

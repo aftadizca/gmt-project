@@ -246,7 +246,7 @@ code {
 }
 
 /* efek blink di row table */
-.ui.table td.active,
+/* .ui.table td.active,
 .ui.table tr.active {
   background: #2185d0b2 !important;
   animation: blinking 1s !important;
@@ -255,4 +255,4 @@ code {
 }
 .ui.striped.selectable.selectable.selectable.table tbody tr.active:hover {
   background: #2184d065 !important;
-}
+} */

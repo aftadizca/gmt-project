@@ -83,7 +83,7 @@ class AppProvider extends Component {
         .catch(errors => {
           if (errors.response) {
             console.error("PUT ERROR", errors.response);
-            if (errors.response.status === 400) {
+            if (errors.response.status >= 400) {
               error(errors.response);
             } else if (errors.response.status >= 500) {
               Toast("Server Error!", "error").fire();

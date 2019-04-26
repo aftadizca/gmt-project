@@ -1,5 +1,6 @@
 import React, { Component } from "react";
 import Paginate from "../_helper/paginate";
+import PropTypes from "prop-types";
 import {
   Grid,
   Header,
@@ -8,11 +9,15 @@ import {
   Table,
   Pagination,
   Select,
-  Icon
+  Icon,
+  Checkbox,
+  Button,
+  Label
 } from "semantic-ui-react";
 import { PageSize } from "../_helper/SelectList";
 import _ from "lodash";
-import Filtering from "./../_helper/filtering";
+import Filtering from "../_helper/filtering";
+import TableButton from "./TableButton";
 
 class MyTable extends Component {
   state = {
@@ -21,7 +26,25 @@ class MyTable extends Component {
     currentPage: 1,
     orderBy: this.props.orderBy,
     orderDirection: this.props.orderDirection,
-    headerRow: this.props.headerRow
+    selectedData: []
+  };
+
+  static propTypes = {
+    searchBar: PropTypes.bool,
+    orderBy: PropTypes.number,
+    orderDirection: PropTypes.oneOf(["asc", "desc"]),
+    selection: PropTypes.bool,
+    onSelectedChange: PropTypes.func,
+    title: PropTypes.string.isRequired,
+    data: PropTypes.array.isRequired,
+    button: PropTypes.element
+  };
+
+  static defaultProps = {
+    searchBar: false,
+    orderDirection: "asc",
+    selection: false,
+    orderBy: 0
   };
 
   componentWillUnmount() {
@@ -42,52 +65,119 @@ class MyTable extends Component {
   handleOnSearchClear = () => {
     this.setState({ searchValue: "" });
   };
+
   handleSort = e => {
     if (e.target.attributes.name && e.target.nodeName === "TH") {
-      const a = this.state.headerRow;
-      _.forEach(a, x => {
+      const a = this.props.header;
+      _.forEach(a, (x, i) => {
         if (
           x.content !== "" &&
           (e.target.attributes.name &&
             x.name === e.target.attributes.name.value)
         ) {
           const direction = x.className === "asc" ? "desc" : "asc";
-          this.setState({ orderBy: x.name, orderDirection: direction });
+          console.log(i);
+          this.setState({ orderBy: i, orderDirection: direction });
         }
       });
     }
   };
 
-  handleClickRow = data => {
-    console.log(data);
+  handleSelectionOnChange = (data, checked) => {
+    let selectedData = [];
+    if (checked) {
+      selectedData = [...this.state.selectedData, data];
+      this.setState({ selectedData });
+    } else {
+      selectedData = this.state.selectedData.filter(x => !_.isEqual(x, data));
+      this.setState({ selectedData });
+    }
+    this.props.onSelectedChange && this.props.onSelectedChange(selectedData);
+  };
+
+  handleClearSelection = () => {
+    this.setState({ selectedData: [] });
   };
 
   render() {
-    const { renderBodyRow, data, title, button, actionBar } = this.props;
+    const {
+      data,
+      title,
+      button,
+      searchBar,
+      selection,
+      body,
+      header
+    } = this.props;
 
     const {
       pageSize,
       currentPage,
       searchValue,
-      headerRow,
       orderBy,
       orderDirection
     } = this.state;
 
-    const header = headerRow;
-    _.forEach(header, x => {
-      if (x.name === orderBy) {
+    //show order icon in header
+    const headerWithOrder = header;
+    _.forEach(headerWithOrder, (x, i) => {
+      if (orderBy === i) {
         x.className = orderDirection;
       } else {
         x.className = "";
       }
     });
 
+    //header and body with checkbox
+    const hr = [{ key: "cb-0", content: "" }, ...headerWithOrder];
     const br = (data, i) => ({
-      ...this.props.renderBodyRow(data, i),
-      active: false,
-      trr: this.active
+      ...this.props.body(data, i),
+      cells: [
+        {
+          key: `cb-${i}`,
+          width: 1,
+          content: (
+            <Checkbox
+              toggle
+              checked={_.find(this.state.selectedData, data) ? true : false}
+              onChange={(e, props) =>
+                this.handleSelectionOnChange(data, props.checked)
+              }
+            />
+          )
+        },
+        ...this.props.body(data, i).cells
+      ],
+      active: _.find(this.state.selectedData, data) ? true : false
     });
+    const renderFooter = [
+      {
+        key: "footer",
+        as: "th",
+        colSpan: headerWithOrder.length,
+        content: (
+          <React.Fragment>
+            {this.state.selectedData.length !== 0 && (
+              <Button.Group onClick={this.handleClearSelection}>
+                <Button as="div" labelPosition="left">
+                  <Label basic>{this.state.selectedData.length}</Label>
+                  <TableButton title="Deselect" icon="ban" />
+                </Button>
+              </Button.Group>
+            )}{" "}
+            {button}
+          </React.Fragment>
+        ),
+        textAlign: "left"
+      }
+    ];
+    const footerWithCb = [
+      {
+        key: "footer-1",
+        content: ""
+      },
+      ...renderFooter
+    ];
 
     //render when no data in table
     const noData = [{ name: "No data available" }];
@@ -96,24 +186,14 @@ class MyTable extends Component {
       cells: [
         {
           key: i,
-          colSpan: headerRow.length,
+          colSpan: selection ? header.length + 1 : header.length,
           content: name
         }
       ],
       textAlign: "center"
     });
 
-    const renderFooter = [
-      {
-        key: "footer",
-        as: "th",
-        colSpan: headerRow.length,
-        content: button,
-        textAlign: "left"
-      }
-    ];
-
-    var sortedData = _.orderBy(data, orderBy, orderDirection);
+    const sortedData = _.orderBy(data, header[orderBy].name, orderDirection);
     //filtering with search
     const filteredData = Filtering(sortedData, searchValue);
     //count length row per page
@@ -133,7 +213,7 @@ class MyTable extends Component {
               </Segment>
             </Grid.Column>
             <Grid.Column verticalAlign="middle" textAlign="right">
-              {actionBar && (
+              {searchBar && (
                 <Input
                   icon={
                     <Icon
@@ -156,19 +236,22 @@ class MyTable extends Component {
           <Grid.Row>
             <Grid.Column>
               <Table
-                color="blue"
                 celled
                 sortable
                 selectable
+                definition={selection}
                 onClick={this.handleSort}
-                striped
                 textAlign="center"
-                headerRow={header}
+                headerRow={selection ? hr : headerWithOrder}
                 renderBodyRow={
-                  paginatedData.length !== 0 ? br : renderBodyRowEmpty
+                  paginatedData.length !== 0
+                    ? selection
+                      ? br
+                      : body
+                    : renderBodyRowEmpty
                 }
                 tableData={paginatedData.length !== 0 ? paginatedData : noData}
-                footerRow={button && renderFooter}
+                footerRow={button && (selection ? footerWithCb : renderFooter)}
               />
             </Grid.Column>
           </Grid.Row>

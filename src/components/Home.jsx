@@ -41,7 +41,7 @@ class Home extends Component {
             "rgba(0, 92, 240, 1)",
             "rgba(0, 92, 240, 1)"
           ],
-          borderWidth: 3
+          borderWidth: 1
         },
         {
           label: "MATERIAL OUTCOMING",
@@ -61,7 +61,7 @@ class Home extends Component {
             "rgba(255, 0, 0, 1)",
             "rgba(255, 0, 0, 1)"
           ],
-          borderWidth: 3
+          borderWidth: 1
         }
       ]
     };
