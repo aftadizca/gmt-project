@@ -21,7 +21,6 @@ class Material extends Component {
   }
 
   handleDelete = () => {
-    console.log("delete");
     this.context.deleteAPI("material", this.state.selectedRow, () =>
       this.setState({ selectedRow: [] })
     );
