@@ -43,6 +43,7 @@ class AppProvider extends Component {
         });
     },
     postAPI: (url, postdata, success, error) => {
+      Loading.fire();
       const state = url + "s";
       api
         .post(url, postdata)
@@ -50,8 +51,8 @@ class AppProvider extends Component {
           if (status === 201) {
             const x = [data, ...this.state[state]];
             this.setState({ [state]: x });
-            success(data);
             Loading.close();
+            success(data);
             Toast("Item succesfully added!").fire();
           }
         })
@@ -69,6 +70,7 @@ class AppProvider extends Component {
         });
     },
     putAPI: (url, id, postdata, success, error) => {
+      Loading.fire();
       const state = url + "s";
       api
         .put(`${url}/${id}`, postdata)
@@ -76,6 +78,7 @@ class AppProvider extends Component {
           if (status === 204) {
             const m = this.state[state].filter(x => x.id !== postdata.id);
             this.setState({ [state]: [postdata, ...m] });
+            Loading.close();
             success();
             Toast("Item successfully edited!").fire();
           }
@@ -84,14 +87,16 @@ class AppProvider extends Component {
           if (errors.response) {
             console.error("PUT ERROR", errors.response);
             if (errors.response.status >= 400) {
+              Loading.close();
               error(errors.response);
             } else if (errors.response.status >= 500) {
+              Loading.close();
               Toast("Server Error!", "error").fire();
             }
           }
         });
     },
-    handleDelete: (url, data) => {
+    deleteAPI: (url, data) => {
       const state = url + "s";
       DeleteAlert.fire().then(result => {
         if (result.value) {

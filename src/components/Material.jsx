@@ -1,162 +1,112 @@
 import React, { Component } from "react";
 import MyTable from "./../_common/MyTable";
-import {
-  Segment,
-  Button,
-  Icon,
-  Popup,
-  Modal,
-  Form,
-  Message
-} from "semantic-ui-react";
+import { Segment, Button, Icon, Modal, Form, Message } from "semantic-ui-react";
 
-import { Loading } from "../_helper/CostumToast";
 import { UnitList } from "../_helper/SelectList";
 import { TypeList } from "./../_helper/SelectList";
 import { TITLE } from "../_helper/constant";
 import { AppContext } from "./../AppProvider";
-import TableButton from "./../_common/TableButton";
 
 class Material extends Component {
   static contextType = AppContext;
   state = {
-    addMaterial: { id: "", name: "", suplier: "", type: "", unit: "" },
-    addMaterialError: false,
-    addMaterialErrorMsg: "",
-    addMaterialOpen: false,
-    editMaterial: { id: "", name: "", suplier: "", type: "", unit: "" },
-    editMaterialError: false,
-    editMaterialErrorMsg: "",
-    editMaterialOpen: false,
-    rowActive: ""
+    activeModal: "",
+    selectedRow: [],
+    material: { id: "", name: "", suplier: "", type: "", unit: "" },
+    modalError: { error: false, msg: "" }
   };
 
   componentDidMount() {
-    console.log("Material DidMounted");
+    // console.log("Material DidMounted");
   }
 
-  timeOut = () => {
-    setTimeout(() => {
-      this.setState({ rowActive: "" });
-    }, 5000);
-  };
-
-  handleDetail = movie => {
-    console.log(movie);
-  };
-
   handleDelete = data => {
-    this.context.handleDelete("material", data);
+    this.context.deleteAPI("material", data);
   };
 
-  //#region ADD MATERIAL ACTION
-  handleChangeAddMaterial = (e, { name, value }) => {
+  //handle open and close Modal
+  handleModal = (e, data) => {
+    if (this.state.activeModal === data.title) {
+      this.setState({ activeModal: "" });
+      this.setState({ material: {} });
+      this.setState({ modalError: { error: false, msg: "" } });
+    } else {
+      if (data.title === "Edit") {
+        this.setState({ material: this.state.selectedRow[0] });
+      }
+      this.setState({ activeModal: data.title });
+    }
+  };
+
+  //handle when input change in form
+  handleInputOnChange = (e, { name, value }) => {
     this.setState({
-      addMaterial: { ...this.state.addMaterial, [name]: value.toUpperCase() }
+      material: { ...this.state.material, [name]: value.toUpperCase() }
     });
   };
 
-  handleSaveAddMaterial = () => {
-    Loading.fire();
-    const { name, suplier, unit, type } = this.state.addMaterial;
+  //handle submit form
+  handleSubmit = (e, data) => {
+    const { name, suplier, unit, type } = this.state.material;
     if (name && suplier && unit && type) {
-      this.context.postAPI(
-        "material",
-        this.state.addMaterial,
-        data => {
-          this.setState({ rowActive: data.id });
-          this.timeOut();
-          this.handleAddMaterialClose();
-          this.handleAddMaterialClear();
-        },
-        response => {
-          this.setState({
-            addMaterialError: true,
-            addMaterialErrorMsg: response.data.error
-          });
-        }
-      );
+      if (data.action === "Edit") {
+        this.context.putAPI(
+          "material",
+          this.state.material.id,
+          this.state.material,
+          () => {
+            this.setState({
+              activeModal: "",
+              selectedRow: []
+            });
+            this.handleMaterialClear();
+          },
+          response =>
+            this.setState({
+              modalError: { error: true, msg: response.data.error }
+            })
+        );
+      } else if (data.action === "Add") {
+        this.context.postAPI(
+          "material",
+          this.state.material,
+          () => {
+            this.setState({
+              activeModal: "",
+              selectedRow: []
+            });
+            this.handleMaterialClear();
+          },
+          response => {
+            this.setState({
+              modalError: { error: true, msg: response.data.error }
+            });
+          }
+        );
+      }
     } else {
       this.setState({
-        addMaterialError: true,
-        addMaterialErrorMsg: "Field Can't be Empty!"
+        modalError: { error: true, msg: "Field can't be empty!" }
       });
     }
   };
 
-  handleAddMaterialOpen = () => {
-    this.setState({ addMaterialOpen: true });
+  //handle table selection
+  handleSelection = data => {
+    this.setState({ selectedRow: data });
   };
 
-  handleAddMaterialClose = () => {
-    this.setState({ addMaterialOpen: false });
-  };
-
-  handleAddMaterialClear = () => {
+  //clear state material and modalError
+  handleMaterialClear = () => {
     this.setState({
-      addMaterial: { id: "", name: "", suplier: "", type: "", unit: "" },
-      addMaterialError: false
+      material: { id: "", name: "", suplier: "", type: "", unit: "" },
+      modalError: { error: false, msg: "" }
     });
   };
-  //#endregion
-
-  //#region EDIT MATERIAL ACTION
-  handleChangeEditMaterial = (e, { name, value }) => {
-    this.setState({
-      editMaterial: { ...this.state.editMaterial, [name]: value.toUpperCase() }
-    });
-  };
-
-  handleSaveEditMaterial = e => {
-    const { name, suplier, unit, type } = this.state.editMaterial;
-    if (name && suplier && unit && type) {
-      this.context.putAPI(
-        "material",
-        this.state.editMaterial.id,
-        this.state.editMaterial,
-        () => {
-          this.handleEditMaterialClose();
-          this.setState({ rowActive: this.state.editMaterial.id });
-          this.timeOut();
-        },
-        response =>
-          this.setState({
-            editMaterialError: true,
-            editMaterialErrorMsg: response.data.error
-          })
-      );
-    } else {
-      this.setState({
-        editMaterialError: true,
-        editMaterialErrorMsg: "Field Can't be Empty!"
-      });
-    }
-  };
-
-  handleEditMaterialOpen = data => {
-    this.setState({ editMaterial: data });
-    this.setState({ editMaterialOpen: true });
-  };
-
-  handleEditMaterialClose = () => {
-    this.setState({ editMaterialOpen: false });
-    console.log("sasas");
-  };
-  //#endregion
 
   render() {
-    console.log("Material render");
     document.title = "MATERIAL - " + TITLE;
-    const {
-      addMaterialError,
-      addMaterial,
-      addMaterialOpen,
-      addMaterialErrorMsg,
-      editMaterialError,
-      editMaterial,
-      editMaterialOpen,
-      editMaterialErrorMsg
-    } = this.state;
+    const { modalError, activeModal, selectedRow, material } = this.state;
 
     const { materials } = this.context;
 
@@ -168,46 +118,11 @@ class Material extends Component {
       },
       { key: 2, content: "MATERIAL NAME", name: "name" },
       { key: 3, content: "SUPLIER", name: "suplier" },
-      { key: 4, content: "UNIT" },
-      { key: 5, content: "" }
+      { key: 4, content: "UNIT" }
     ];
     const renderBodyRow = (data, i) => ({
       key: `row-${i}`,
-      active: this.state.rowActive === data.id,
-      cells: [
-        data.id,
-        data.name,
-        data.suplier,
-        data.unit,
-        {
-          key: i,
-          width: 2,
-          content: (
-            <Button.Group basic size="small">
-              <Popup
-                inverted
-                trigger={
-                  <Button
-                    icon="edit"
-                    onClick={() => this.handleEditMaterialOpen(data)}
-                  />
-                }
-                content="Change me!!"
-              />
-              <Popup
-                inverted
-                trigger={
-                  <Button
-                    icon="trash"
-                    onClick={() => this.handleDelete(data)}
-                  />
-                }
-                content="Delete me!!"
-              />
-            </Button.Group>
-          )
-        }
-      ]
+      cells: [data.id, data.name, data.suplier, data.unit]
     });
 
     const AddMaterialModal = (
@@ -215,54 +130,55 @@ class Material extends Component {
         closeOnDimmerClick={false}
         closeIcon
         size="small"
-        open={addMaterialOpen}
-        onClose={this.handleAddMaterialClose}
+        title="Add"
+        open={activeModal === "Add"}
+        onClose={this.handleModal}
       >
         <Modal.Header>ADD MATERIAL</Modal.Header>
         <Modal.Content>
-          <Form error={addMaterialError}>
-            <Message error header="ERROR" content={addMaterialErrorMsg} />
+          <Form error={modalError.error}>
+            <Message error header="ERROR" content={modalError.msg} />
             <Form.Input
               label="Material Name"
               name="name"
-              value={addMaterial.name}
-              onChange={this.handleChangeAddMaterial}
+              value={material.name}
+              onChange={this.handleInputOnChange}
               placeholder="Material Name"
             />
             <Form.Input
               label="Suplier"
-              onChange={this.handleChangeAddMaterial}
+              onChange={this.handleInputOnChange}
               name="suplier"
-              value={addMaterial.suplier}
+              value={material.suplier}
               placeholder="Suplier"
             />
             <Form.Group widths="equal">
               <Form.Select
-                onChange={this.handleChangeAddMaterial}
+                onChange={this.handleInputOnChange}
                 fluid
                 placeholder={"Select type material"}
                 name="type"
                 label="Type"
-                value={addMaterial.type}
+                value={material.type}
                 options={TypeList}
               />
               <Form.Select
-                onChange={this.handleChangeAddMaterial}
+                onChange={this.handleInputOnChange}
                 fluid
                 placeholder={"Select unit material"}
                 name="unit"
                 label="Unit"
-                value={addMaterial.unit}
+                value={material.unit}
                 options={UnitList}
               />
             </Form.Group>
           </Form>
         </Modal.Content>
         <Modal.Actions>
-          <Button color="grey" onClick={this.handleAddMaterialClear}>
+          <Button color="grey" onClick={this.handleMaterialClear}>
             <Icon name="x" /> CLEAR
           </Button>
-          <Button color="blue" onClick={this.handleSaveAddMaterial}>
+          <Button color="blue" action="Add" onClick={this.handleSubmit}>
             <Icon name="save" /> SAVE
           </Button>
         </Modal.Actions>
@@ -273,57 +189,58 @@ class Material extends Component {
       <Modal
         closeOnDimmerClick={false}
         closeIcon
+        title="Edit"
         size="small"
-        open={editMaterialOpen}
-        onClose={this.handleEditMaterialClose}
+        open={activeModal === "Edit"}
+        onClose={this.handleModal}
       >
         <Modal.Header>EDIT MATERIAL</Modal.Header>
         <Modal.Content>
-          <Form error={editMaterialError}>
-            <Message error header="ERROR" content={editMaterialErrorMsg} />
+          <Form error={modalError.error}>
+            <Message error header="ERROR" content={modalError.msg} />
             <Form.Input
               label="Material Name"
               name="name"
               readOnly
-              value={editMaterial.id}
+              value={material.id}
               placeholder="Material ID"
             />
             <Form.Input
               label="Material Name"
               name="name"
-              value={editMaterial.name}
-              onChange={this.handleChangeEditMaterial}
+              value={material.name}
+              onChange={this.handleInputOnChange}
               placeholder="Material Name"
             />
             <Form.Input
               label="Suplier"
-              onChange={this.handleChangeEditMaterial}
+              onChange={this.handleInputOnChange}
               name="suplier"
-              value={editMaterial.suplier}
+              value={material.suplier}
               placeholder="Suplier"
             />
             <Form.Group widths="equal">
               <Form.Select
-                onChange={this.handleChangeEditMaterial}
+                onChange={this.handleInputOnChange}
                 fluid
                 name="type"
                 label="Type"
                 options={TypeList}
-                value={editMaterial.type}
+                value={material.type}
               />
               <Form.Select
-                onChange={this.handleChangeEditMaterial}
+                onChange={this.handleInputOnChange}
                 fluid
                 name="unit"
                 label="Unit"
                 options={UnitList}
-                value={editMaterial.unit}
+                value={material.unit}
               />
             </Form.Group>
           </Form>
         </Modal.Content>
         <Modal.Actions>
-          <Button color="blue" onClick={this.handleSaveEditMaterial}>
+          <Button color="blue" action="Edit" onClick={this.handleSubmit}>
             <Icon name="save" /> SAVE
           </Button>
         </Modal.Actions>
@@ -341,19 +258,33 @@ class Material extends Component {
             body={renderBodyRow}
             data={materials}
             orderBy={0}
+            selection
+            selectedRow={selectedRow}
+            onSelectedChange={this.handleSelection}
             orderDirection="desc"
             searchBar
             button={
               <Button.Group>
-                <TableButton
-                  title="Add"
-                  icon="add"
-                  onClick={this.handleAddMaterialOpen}
-                />
-                <TableButton
+                <MyTable.Button
                   title="Refresh"
                   icon="refresh"
                   onClick={() => this.context.getAPI(["material"])}
+                />
+                <MyTable.Button
+                  title="Add"
+                  icon="add"
+                  onClick={this.handleModal}
+                />
+                <MyTable.Button
+                  title="Edit"
+                  icon="edit"
+                  disabled={selectedRow.length !== 1}
+                  onClick={this.handleModal}
+                />
+                <MyTable.Button
+                  title="Delete"
+                  icon="delete"
+                  //onClick={this.handleAddMaterialOpen}
                 />
               </Button.Group>
             }

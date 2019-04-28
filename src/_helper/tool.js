@@ -9,3 +9,11 @@ export function getById(object, id, key) {
       .toJoinedString() || "-"
   );
 }
+
+export function filterWithArray(target, filter) {
+  return _.flatten(
+    _.map(filter, item => {
+      return _.filter(target, item);
+    })
+  );
+}

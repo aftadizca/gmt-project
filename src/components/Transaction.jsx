@@ -3,7 +3,7 @@ import { Tab, Icon, Label, Menu, Modal, Form, Button } from "semantic-ui-react";
 import MyTable from "./../_common/MyTable";
 import { TITLE, LOCALE_DATE, OPTIONS_DATE } from "../_helper/constant";
 import { AppContext } from "./../AppProvider";
-import { getById, findByKey } from "../_helper/tool";
+import { getById } from "../_helper/tool";
 import LabelTab from "./../_common/LabelTab";
 import { NavLink } from "react-router-dom";
 import QCButton from "../_common/QCButton";
@@ -15,6 +15,7 @@ class Transaction extends Component {
 
   state = {
     selectedStok: {},
+    selectedRow: [],
     modalStatusQC: false
   };
 
@@ -53,7 +54,6 @@ class Transaction extends Component {
         "stok",
         selectedStok.id,
         selectedStok,
-
         () => {
           this.handleModalStatusQCClose();
           this.setState({ selectedStok: {} });
@@ -72,13 +72,13 @@ class Transaction extends Component {
   };
 
   handleSelectedChange = data => {
-    this.setState({ selectedStok: data });
+    this.setState({ selectedRow: data });
   };
 
   render() {
     document.title = this.props.match.params.tab.toUpperCase() + " - " + TITLE;
     const { materials, locationmaps, statusQCs, stoks } = this.context;
-    const { modalStatusQC, selectedStok } = this.state;
+    const { modalStatusQC, selectedStok, selectedRow } = this.state;
 
     const incoming = stoks.filter(x => x.statusQCID === 1);
     const stokAll = stoks.filter(x => x.statusQCID > 1 && x.qty > 0);
@@ -150,7 +150,7 @@ class Transaction extends Component {
         <MyTable.Button
           title="Edit"
           icon="edit"
-          disabled={!(selectedStok.length === 1)}
+          disabled={!(selectedRow.length === 1)}
           //onClick={this.handleAddMaterialOpen}
         />
       </Button.Group>
@@ -165,7 +165,7 @@ class Transaction extends Component {
         <MyTable.Button
           title="Edit"
           icon="edit"
-          disabled={!(selectedStok.length === 1)}
+          disabled={!(selectedRow.length === 1)}
           //onClick={this.handleAddMaterialOpen}
         />
       </Button.Group>

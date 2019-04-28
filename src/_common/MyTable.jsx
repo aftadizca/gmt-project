@@ -25,8 +25,7 @@ class MyTable extends Component {
     pageSize: 10,
     currentPage: 1,
     orderBy: this.props.orderBy,
-    orderDirection: this.props.orderDirection,
-    selectedData: []
+    orderDirection: this.props.orderDirection
   };
 
   static propTypes = {
@@ -44,7 +43,8 @@ class MyTable extends Component {
     searchBar: false,
     orderDirection: "asc",
     selection: false,
-    orderBy: 0
+    orderBy: 0,
+    selectedRow: []
   };
 
   componentWillUnmount() {
@@ -85,19 +85,17 @@ class MyTable extends Component {
   };
 
   handleSelectionOnChange = (data, checked) => {
-    let selectedData = [];
+    let selectedRow = [];
     if (checked) {
-      selectedData = [...this.state.selectedData, data];
-      this.setState({ selectedData });
+      selectedRow = [...this.props.selectedRow, data];
     } else {
-      selectedData = this.state.selectedData.filter(x => !_.isEqual(x, data));
-      this.setState({ selectedData });
+      selectedRow = this.props.selectedRow.filter(x => !_.isEqual(x, data));
     }
-    this.props.onSelectedChange && this.props.onSelectedChange(selectedData);
+    this.props.onSelectedChange && this.props.onSelectedChange(selectedRow);
   };
 
   handleClearSelection = () => {
-    this.setState({ selectedData: [] });
+    this.props.onSelectedChange && this.props.onSelectedChange([]);
   };
 
   render() {
@@ -140,7 +138,7 @@ class MyTable extends Component {
           content: (
             <Checkbox
               toggle
-              checked={_.find(this.state.selectedData, data) ? true : false}
+              checked={_.find(this.props.selectedRow, data) ? true : false}
               onChange={(e, props) =>
                 this.handleSelectionOnChange(data, props.checked)
               }
@@ -149,7 +147,7 @@ class MyTable extends Component {
         },
         ...this.props.body(data, i).cells
       ],
-      active: _.find(this.state.selectedData, data) ? true : false
+      active: _.find(this.props.selectedRow, data) ? true : false
     });
     const renderFooter = [
       {
@@ -158,10 +156,10 @@ class MyTable extends Component {
         colSpan: headerWithOrder.length,
         content: (
           <React.Fragment>
-            {this.state.selectedData.length !== 0 && (
+            {this.props.selectedRow.length !== 0 && (
               <Button.Group onClick={this.handleClearSelection}>
                 <Button as="div" labelPosition="left">
-                  <Label basic>{this.state.selectedData.length}</Label>
+                  <Label basic>{this.props.selectedRow.length}</Label>
                   <TableButton title="Deselect" icon="ban" />
                 </Button>
               </Button.Group>
@@ -289,6 +287,7 @@ MyTable.Button = props => {
   return (
     <Button
       animated
+      title={props.title}
       size="mini"
       color={props.color}
       onClick={props.onClick}
