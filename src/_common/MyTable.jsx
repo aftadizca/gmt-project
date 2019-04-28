@@ -48,13 +48,14 @@ class MyTable extends Component {
   };
 
   componentWillUnmount() {
-    console.log("Material Unmount");
+    this.props.onSelectedChange && this.props.onSelectedChange([]);
   }
   handleSelectPageSize = (e, data) => {
     this.setState({ pageSize: data.value });
   };
 
   handlePageChange = (e, data) => {
+    //clear selection before unmounting
     this.setState({ currentPage: data.activePage });
   };
 
@@ -283,5 +284,22 @@ class MyTable extends Component {
     );
   }
 }
+
+MyTable.Button = props => {
+  return (
+    <Button
+      animated
+      size="mini"
+      color={props.color}
+      onClick={props.onClick}
+      disabled={props.disabled}
+    >
+      <Button.Content hidden>{props.title}</Button.Content>
+      <Button.Content visible>
+        <Icon name={props.icon} />
+      </Button.Content>
+    </Button>
+  );
+};
 
 export default MyTable;

@@ -3,12 +3,11 @@ import { Tab, Icon, Label, Menu, Modal, Form, Button } from "semantic-ui-react";
 import MyTable from "./../_common/MyTable";
 import { TITLE, LOCALE_DATE, OPTIONS_DATE } from "../_helper/constant";
 import { AppContext } from "./../AppProvider";
-import { getById } from "../_helper/tool";
+import { getById, findByKey } from "../_helper/tool";
 import LabelTab from "./../_common/LabelTab";
 import { NavLink } from "react-router-dom";
 import QCButton from "../_common/QCButton";
 import { DinamicList } from "../_helper/SelectList";
-import TableButton from "./../_common/TableButton";
 import { Toast } from "./../_helper/CostumToast";
 
 class Transaction extends Component {
@@ -73,11 +72,10 @@ class Transaction extends Component {
   };
 
   handleSelectedChange = data => {
-    console.log("SELECTED: ", data);
+    this.setState({ selectedStok: data });
   };
 
   render() {
-    console.log("Transaction render");
     document.title = this.props.match.params.tab.toUpperCase() + " - " + TITLE;
     const { materials, locationmaps, statusQCs, stoks } = this.context;
     const { modalStatusQC, selectedStok } = this.state;
@@ -139,24 +137,36 @@ class Transaction extends Component {
 
     const incomingButton = (
       <Button.Group>
-        <TableButton
+        <MyTable.Button
           title="Refresh"
           icon="refresh"
           onClick={() => this.context.getAPI(["stok"])}
         />
-        <TableButton
+        <MyTable.Button
           title="Add"
           icon="add"
+          //onClick={this.handleAddMaterialOpen}
+        />
+        <MyTable.Button
+          title="Edit"
+          icon="edit"
+          disabled={!(selectedStok.length === 1)}
           //onClick={this.handleAddMaterialOpen}
         />
       </Button.Group>
     );
     const stockButton = (
       <Button.Group>
-        <TableButton
+        <MyTable.Button
           title="Refresh"
           icon="refresh"
           onClick={() => this.context.getAPI(["stok"])}
+        />
+        <MyTable.Button
+          title="Edit"
+          icon="edit"
+          disabled={!(selectedStok.length === 1)}
+          //onClick={this.handleAddMaterialOpen}
         />
       </Button.Group>
     );
@@ -275,6 +285,7 @@ class Transaction extends Component {
               header={materialStockHeader}
               body={materialStockRow}
               data={incoming}
+              onSelectedChange={this.handleSelectedChange}
               orderBy={0}
               searchBar
               selection
