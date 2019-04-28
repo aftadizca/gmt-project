@@ -2,6 +2,7 @@ import React, { Component } from "react";
 import { Loading, Toast, DeleteAlert } from "./_helper/CostumToast";
 import api from "./_helper/api";
 import _ from "lodash";
+import { filterWithArray } from "./_helper/tool";
 
 export const AppContext = React.createContext();
 
@@ -96,23 +97,26 @@ class AppProvider extends Component {
           }
         });
     },
-    deleteAPI: (url, data) => {
+    deleteAPI: (url, data, success, error) => {
+      Loading.fire();
       const state = url + "s";
       DeleteAlert.fire().then(result => {
         if (result.value) {
           api
-            .delete(`${url}/${data.id}`)
+            .delete(`${url}`, { data: data })
             .then(({ status }) => {
               if (status === 200) {
-                const filtered = this.state[state].filter(x => x !== data);
+                const filtered = filterWithArray(this.state[state], data);
                 this.setState({ [state]: filtered });
+                Loading.close();
+                success();
                 Toast("Successfully delete item!").fire();
-              } else {
-                Toast("Delete failed", "error").fire();
               }
             })
             .catch(errors => {
-              console.log("DELETE ERROR", errors);
+              Loading.close();
+              error(errors);
+              Toast("Delete failed", "error").fire();
             });
         }
       });

@@ -20,8 +20,11 @@ class Material extends Component {
     // console.log("Material DidMounted");
   }
 
-  handleDelete = data => {
-    this.context.deleteAPI("material", data);
+  handleDelete = () => {
+    console.log("delete");
+    this.context.deleteAPI("material", this.state.selectedRow, () =>
+      this.setState({ selectedRow: [] })
+    );
   };
 
   //handle open and close Modal
@@ -284,7 +287,7 @@ class Material extends Component {
                 <MyTable.Button
                   title="Delete"
                   icon="delete"
-                  //onClick={this.handleAddMaterialOpen}
+                  onClick={this.handleDelete}
                 />
               </Button.Group>
             }

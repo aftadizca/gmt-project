@@ -11,9 +11,9 @@ export function getById(object, id, key) {
 }
 
 export function filterWithArray(target, filter) {
-  return _.flatten(
-    _.map(filter, item => {
-      return _.filter(target, item);
-    })
-  );
+  let tar = [...target];
+  _.map(filter, item => {
+    return _.remove(tar, item);
+  });
+  return tar;
 }
