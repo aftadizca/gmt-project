@@ -1,7 +1,12 @@
 import React, { Component } from "react";
 import { Tab, Icon, Label, Menu, Modal, Form, Button } from "semantic-ui-react";
 import MyTable from "./../_common/MyTable";
-import { TITLE, LOCALE_DATE, OPTIONS_DATE } from "../_helper/constant";
+import {
+  TITLE,
+  LOCALE_DATE,
+  OPTIONS_DATE,
+  STATUS_COLOR
+} from "../_helper/constant";
 import { AppContext } from "./../AppProvider";
 import { getByProperty } from "../_helper/tool";
 import LabelTab from "./../_common/LabelTab";
@@ -125,51 +130,60 @@ class Transaction extends Component {
         {
           key: `statusQC-${i}`,
           content: (
-            <QCButton
-              button={this.context.statusQCs}
-              disabled={modalStatusQC}
-              label={getByProperty(statusQCs, "id", data.statusQCID, "name")}
-              onClick={qc => this.handleUpdateStatusQC(qc, data)}
-            />
+            <Label tag color={STATUS_COLOR[data.statusQCID]}>
+              {getByProperty(statusQCs, "id", data.statusQCID, "name")}
+            </Label>
           )
         }
       ]
     });
 
     const incomingButton = (
-      <Button.Group>
-        <MyTable.Button
-          title="Refresh"
-          icon="refresh"
-          onClick={() => this.context.getAPI(["stok"])}
+      <React.Fragment>
+        <Button.Group>
+          <MyTable.Button
+            label="Refresh"
+            icon="refresh"
+            onClick={() => this.context.getAPI(["stok"])}
+          />
+          <MyTable.Button
+            label="Add"
+            icon="add"
+            //onClick={this.handleAddMaterialOpen}
+          />
+          <MyTable.Button
+            label="Edit"
+            icon="edit"
+            disabled={!(selectedRow.length === 1)}
+            //onClick={this.handleAddMaterialOpen}
+          />
+        </Button.Group>{" "}
+        <QCButton
+          button={this.context.statusQCs}
+          disabled={!(selectedRow.length > 0)}
         />
-        <MyTable.Button
-          title="Add"
-          icon="add"
-          //onClick={this.handleAddMaterialOpen}
-        />
-        <MyTable.Button
-          title="Edit"
-          icon="edit"
-          disabled={!(selectedRow.length === 1)}
-          //onClick={this.handleAddMaterialOpen}
-        />
-      </Button.Group>
+      </React.Fragment>
     );
     const stockButton = (
-      <Button.Group>
-        <MyTable.Button
-          title="Refresh"
-          icon="refresh"
-          onClick={() => this.context.getAPI(["stok"])}
+      <React.Fragment>
+        <Button.Group>
+          <MyTable.Button
+            label="Refresh"
+            icon="refresh"
+            onClick={() => this.context.getAPI(["stok"])}
+          />
+          <MyTable.Button
+            label="Edit"
+            icon="edit"
+            disabled={!(selectedRow.length === 1)}
+            //onClick={this.handleAddMaterialOpen}
+          />
+        </Button.Group>{" "}
+        <QCButton
+          button={this.context.statusQCs}
+          disabled={!(selectedRow.length > 0)}
         />
-        <MyTable.Button
-          title="Edit"
-          icon="edit"
-          disabled={!(selectedRow.length === 1)}
-          //onClick={this.handleAddMaterialOpen}
-        />
-      </Button.Group>
+      </React.Fragment>
     );
 
     const updateStatusModal = (

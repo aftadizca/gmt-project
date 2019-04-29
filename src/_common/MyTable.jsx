@@ -12,12 +12,12 @@ import {
   Icon,
   Checkbox,
   Button,
-  Label
+  Label,
+  Popup
 } from "semantic-ui-react";
 import { PageSize } from "../_helper/SelectList";
 import _ from "lodash";
 import Filtering from "../_helper/filtering";
-import TableButton from "./TableButton";
 
 class MyTable extends Component {
   state = {
@@ -158,7 +158,7 @@ class MyTable extends Component {
                   <Label basic color="red">
                     {this.props.selectedRow.length}
                   </Label>
-                  <TableButton title="Unselect" icon="erase" color="red" />
+                  <MyTable.Button label="Unselect" icon="erase" color="red" />
                 </Button>
               </Button.Group>
             )}{" "}
@@ -256,13 +256,20 @@ class MyTable extends Component {
 
         <Grid verticalAlign="middle" padded>
           <Grid.Column textAlign="center">
-            <Select
-              style={{ marginRight: 10, verticalAlign: "middle" }}
-              onChange={this.handleSelectPageSize}
-              compact
-              options={PageSize}
-              defaultValue={pageSize}
+            <Popup
+              content="Select row size per table"
+              position="top center"
+              trigger={
+                <Select
+                  style={{ marginRight: 10, verticalAlign: "middle" }}
+                  onChange={this.handleSelectPageSize}
+                  compact
+                  options={PageSize}
+                  defaultValue={pageSize}
+                />
+              }
             />
+
             {pageLength <= 1 ? (
               ""
             ) : (
@@ -285,14 +292,14 @@ MyTable.Button = props => {
   return (
     <Button
       animated
-      title={props.title}
       size="mini"
+      action={props.action}
       color={props.color || "blue"}
       onClick={props.onClick}
       disabled={props.disabled}
     >
-      <Button.Content hidden>{props.title}</Button.Content>
-      <Button.Content visible>
+      <Button.Content visible>{props.label}</Button.Content>
+      <Button.Content hidden>
         <Icon name={props.icon} />
       </Button.Content>
     </Button>

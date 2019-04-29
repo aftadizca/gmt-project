@@ -1,7 +1,6 @@
 import React, { Component } from "react";
 import MyTable from "./../_common/MyTable";
 import { Segment, Button, Icon, Modal, Form, Message } from "semantic-ui-react";
-
 import { UnitList } from "../_helper/SelectList";
 import { TypeList } from "./../_helper/SelectList";
 import { TITLE } from "../_helper/constant";
@@ -28,15 +27,15 @@ class Material extends Component {
 
   //handle open and close Modal
   handleModal = (e, data) => {
-    if (this.state.activeModal === data.title) {
+    if (this.state.activeModal === data.action) {
       this.setState({ activeModal: "" });
       this.setState({ material: {} });
       this.setState({ modalError: { error: false, msg: "" } });
     } else {
-      if (data.title === "Edit") {
+      if (data.action === "EDIT_MATERIAL") {
         this.setState({ material: this.state.selectedRow[0] });
       }
-      this.setState({ activeModal: data.title });
+      this.setState({ activeModal: data.action });
     }
   };
 
@@ -129,21 +128,28 @@ class Material extends Component {
     const buttonFooter = (
       <Button.Group>
         <MyTable.Button
-          title="Refresh"
+          label="Refresh"
           icon="refresh"
           onClick={() => this.context.getAPI(["material"])}
         />
-        <MyTable.Button title="Add" icon="add" onClick={this.handleModal} />
         <MyTable.Button
-          title="Edit"
+          label="Add"
+          action="ADD_MATERIAL"
+          icon="add"
+          onClick={this.handleModal}
+        />
+        <MyTable.Button
+          label="Edit"
           icon="edit"
+          action="EDIT_MATERIAL"
           disabled={selectedRow.length !== 1}
           onClick={this.handleModal}
         />
         <MyTable.Button
-          title="Delete"
+          label="Delete"
           icon="delete"
           color="red"
+          action="DELETE_MATERIAL"
           onClick={this.handleDelete}
         />
       </Button.Group>
@@ -155,7 +161,7 @@ class Material extends Component {
         closeIcon
         size="small"
         title="Add"
-        open={activeModal === "Add"}
+        open={activeModal === "ADD_MATERIAL"}
         onClose={this.handleModal}
       >
         <Modal.Header>ADD MATERIAL</Modal.Header>
@@ -215,7 +221,7 @@ class Material extends Component {
         closeIcon
         title="Edit"
         size="small"
-        open={activeModal === "Edit"}
+        open={activeModal === "EDIT_MATERIAL"}
         onClose={this.handleModal}
       >
         <Modal.Header>EDIT MATERIAL</Modal.Header>

@@ -4,7 +4,6 @@ import MyTable from "./../_common/MyTable";
 import { TITLE } from "../_helper/constant";
 import { AppContext } from "../AppProvider";
 import { NavLink } from "react-router-dom";
-import TableButton from "../_common/TableButton";
 
 class Other extends Component {
   static contextType = AppContext;
@@ -87,8 +86,8 @@ class Other extends Component {
               orderBy={0}
               button={
                 <Button.Group>
-                  <TableButton
-                    title="Refresh"
+                  <MyTable.Button
+                    label="Refresh"
                     icon="refresh"
                     onClick={() => this.context.getAPI(["statusqc"])}
                   />
@@ -121,8 +120,8 @@ class Other extends Component {
               searchBar
               button={
                 <Button.Group>
-                  <TableButton
-                    title="Refresh"
+                  <MyTable.Button
+                    label="Refresh"
                     icon="refresh"
                     onClick={() => this.context.getAPI(["locationmap"])}
                   />
