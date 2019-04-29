@@ -14,7 +14,6 @@ class AppProvider extends Component {
     locations: [],
     stoks: [],
     getAPI: url => {
-      // const state = url + "s";
       Loading.fire();
       const prom = [];
       url.forEach((x, i) => {
@@ -27,7 +26,7 @@ class AppProvider extends Component {
             d[url[i] + "s"] = x.data;
           });
           this.setState(d);
-          console.log("get call success :", url);
+          //console.log("get call success :", url);
           Loading.close();
         })
         .catch(({ response }) => {
@@ -128,13 +127,10 @@ class AppProvider extends Component {
   };
 
   componentDidMount() {
-    console.info("App Provider DidMounted");
     this.state.getAPI(["material", "statusQC", "locationmap", "stok"]);
   }
 
   render() {
-    console.log("AppProvider Render");
-
     return (
       <AppContext.Provider value={this.state}>
         {this.props.children}

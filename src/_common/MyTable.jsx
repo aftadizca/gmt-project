@@ -47,9 +47,6 @@ class MyTable extends Component {
     selectedRow: []
   };
 
-  componentWillUnmount() {
-    this.props.onSelectedChange && this.props.onSelectedChange([]);
-  }
   handleSelectPageSize = (e, data) => {
     this.setState({ pageSize: data.value });
   };
@@ -77,7 +74,6 @@ class MyTable extends Component {
             x.name === e.target.attributes.name.value)
         ) {
           const direction = x.className === "asc" ? "desc" : "asc";
-          console.log(i);
           this.setState({ orderBy: i, orderDirection: direction });
         }
       });

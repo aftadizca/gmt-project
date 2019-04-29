@@ -3,7 +3,7 @@ import { Tab, Icon, Label, Menu, Modal, Form, Button } from "semantic-ui-react";
 import MyTable from "./../_common/MyTable";
 import { TITLE, LOCALE_DATE, OPTIONS_DATE } from "../_helper/constant";
 import { AppContext } from "./../AppProvider";
-import { getById } from "../_helper/tool";
+import { getByProperty } from "../_helper/tool";
 import LabelTab from "./../_common/LabelTab";
 import { NavLink } from "react-router-dom";
 import QCButton from "../_common/QCButton";
@@ -25,7 +25,6 @@ class Transaction extends Component {
 
   handleUpdateStatusQC = (qc, data) => {
     const x = { ...data };
-    console.log(qc, data);
     x.statusQCID = qc;
     this.setState({ selectedStok: x });
     if (!x.locationID) {
@@ -99,11 +98,13 @@ class Transaction extends Component {
         data.id,
         {
           key: `material-${i}`,
-          content: getById(materials, data.materialID, "name")
+          content: getByProperty(materials, "id", data.materialID, "name")
         },
         {
           key: `location-${i}`,
-          content: getById(locationmaps, data.locationID, "location")
+          content: getByProperty(
+            (locationmaps, "id", data.locationID, "location")
+          )
         },
         data.lot,
         {
@@ -127,7 +128,7 @@ class Transaction extends Component {
             <QCButton
               button={this.context.statusQCs}
               disabled={modalStatusQC}
-              label={getById(statusQCs, data.statusQCID, "name")}
+              label={getByProperty(statusQCs, "id", data.statusQCID, "name")}
               onClick={qc => this.handleUpdateStatusQC(qc, data)}
             />
           )
@@ -192,7 +193,12 @@ class Transaction extends Component {
               label="MATERIAL NAME"
               name="name"
               readOnly
-              value={getById(materials, selectedStok.materialID, "name")}
+              value={getByProperty(
+                materials,
+                "id",
+                selectedStok.materialID,
+                "name"
+              )}
             />
             <Form.Group widths="equal">
               <Form.Input
@@ -202,7 +208,12 @@ class Transaction extends Component {
                 color="blue"
                 inverted
                 fluid
-                value={getById(statusQCs, selectedStok.statusQCID, "name")}
+                value={getByProperty(
+                  statusQCs,
+                  "id",
+                  selectedStok.statusQCID,
+                  "name"
+                )}
               />
               <Form.Dropdown
                 name="locationID"
@@ -256,6 +267,7 @@ class Transaction extends Component {
               header={materialStockHeader}
               body={materialStockRow}
               data={stokAll}
+              selectedRow={selectedRow}
               onSelectedChange={this.handleSelectedChange}
               orderBy={0}
               searchBar
@@ -285,6 +297,7 @@ class Transaction extends Component {
               header={materialStockHeader}
               body={materialStockRow}
               data={incoming}
+              selectedRow={selectedRow}
               onSelectedChange={this.handleSelectedChange}
               orderBy={0}
               searchBar
