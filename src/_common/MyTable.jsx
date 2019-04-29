@@ -155,8 +155,10 @@ class MyTable extends Component {
             {this.props.selectedRow.length !== 0 && (
               <Button.Group onClick={this.handleClearSelection}>
                 <Button as="div" labelPosition="left">
-                  <Label basic>{this.props.selectedRow.length}</Label>
-                  <TableButton title="Deselect" icon="ban" />
+                  <Label basic color="red">
+                    {this.props.selectedRow.length}
+                  </Label>
+                  <TableButton title="Unselect" icon="erase" color="red" />
                 </Button>
               </Button.Group>
             )}{" "}
@@ -285,7 +287,7 @@ MyTable.Button = props => {
       animated
       title={props.title}
       size="mini"
-      color={props.color}
+      color={props.color || "blue"}
       onClick={props.onClick}
       disabled={props.disabled}
     >

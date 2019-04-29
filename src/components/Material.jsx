@@ -126,6 +126,28 @@ class Material extends Component {
       key: `row-${i}`,
       cells: [data.id, data.name, data.suplier, data.unit]
     });
+    const buttonFooter = (
+      <Button.Group>
+        <MyTable.Button
+          title="Refresh"
+          icon="refresh"
+          onClick={() => this.context.getAPI(["material"])}
+        />
+        <MyTable.Button title="Add" icon="add" onClick={this.handleModal} />
+        <MyTable.Button
+          title="Edit"
+          icon="edit"
+          disabled={selectedRow.length !== 1}
+          onClick={this.handleModal}
+        />
+        <MyTable.Button
+          title="Delete"
+          icon="delete"
+          color="red"
+          onClick={this.handleDelete}
+        />
+      </Button.Group>
+    );
 
     const AddMaterialModal = (
       <Modal
@@ -265,31 +287,7 @@ class Material extends Component {
             onSelectedChange={this.handleSelection}
             orderDirection="desc"
             searchBar
-            button={
-              <Button.Group>
-                <MyTable.Button
-                  title="Refresh"
-                  icon="refresh"
-                  onClick={() => this.context.getAPI(["material"])}
-                />
-                <MyTable.Button
-                  title="Add"
-                  icon="add"
-                  onClick={this.handleModal}
-                />
-                <MyTable.Button
-                  title="Edit"
-                  icon="edit"
-                  disabled={selectedRow.length !== 1}
-                  onClick={this.handleModal}
-                />
-                <MyTable.Button
-                  title="Delete"
-                  icon="delete"
-                  onClick={this.handleDelete}
-                />
-              </Button.Group>
-            }
+            button={buttonFooter}
           />
         </Segment>
       </React.Fragment>

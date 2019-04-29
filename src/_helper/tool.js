@@ -37,11 +37,11 @@ export function getByProperty(object, key, value, returnedKey) {
 }
 
 export function filterWithArray(target, filter) {
-  console.time("filterWithArray");
+  //console.time("filterWithArray");
   let tar = [...target];
   _.map(filter, item => {
     return _.remove(tar, item);
   });
-  console.timeEnd("filterWithArray");
+  //console.timeEnd("filterWithArray");
   return tar;
 }
