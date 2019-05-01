@@ -40,10 +40,10 @@ class Other extends Component {
       { key: 2, content: "TRACE", name: "traceID" },
       { key: 3, content: "MATERIAL NAME", name: "materialName" }
     ];
-    const locationRow = ({ location, materialName, traceID }, i) => ({
+    const locationRow = ({ name, materialName, traceID }, i) => ({
       key: `row-${i}`,
       cells: [
-        { key: location, content: location, width: 4 },
+        { key: name, content: name, width: 4 },
         {
           key: "traceID" + i,
           content: traceID || <Icon name="question" />,

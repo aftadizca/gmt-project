@@ -13,34 +13,20 @@ class AppProvider extends Component {
     locationmaps: [],
     locations: [],
     stoks: [],
-    getAPI: url => {
+    getAPI: (url, success) => {
       Loading.fire();
       const prom = [];
       url.forEach((x, i) => {
         prom[i] = api.get(x);
       });
-      Promise.all(prom)
-        .then(data => {
-          const d = {};
-          data.forEach((x, i) => {
-            d[url[i] + "s"] = x.data;
-          });
-          this.setState(d);
-          //console.log("get call success :", url);
-          Loading.close();
-        })
-        .catch(({ response }) => {
-          if (response) {
-            console.error("GET ERROR", response);
-            if (response.status >= 400) {
-              Loading.close();
-              Toast("Server error", "error").fire();
-            }
-          } else {
-            Loading.close();
-            Toast("Server not Available", "error", false).fire();
-          }
+      Promise.all(prom).then(data => {
+        const d = {};
+        data.forEach((x, i) => {
+          d[url[i] + "s"] = x.data;
         });
+        this.setState(d, () => success && success());
+        Loading.close();
+      });
     },
     postAPI: (url, postdata, success, error) => {
       Loading.fire();
@@ -71,13 +57,24 @@ class AppProvider extends Component {
     },
     putAPI: (url, id, postdata, success, error) => {
       Loading.fire();
+      console.log("putAPI", { url, id, postdata, success, error });
       const state = url + "s";
       api
-        .put(`${url}/${id}`, postdata)
+        .put(`${url}${id ? "/" + id : ""}`, postdata)
         .then(({ status }) => {
           if (status === 204) {
-            const m = this.state[state].filter(x => x.id !== postdata.id);
-            this.setState({ [state]: [postdata, ...m] });
+            if (id) {
+              const m = this.state[state].filter(x => x.id !== postdata.id);
+              this.setState({
+                [state]: _.orderBy([postdata, ...m], "id", "asc")
+              });
+            } else {
+              const m = filterWithArray(this.state[state], postdata, "id");
+              this.setState({
+                [state]: _.orderBy([...postdata, ...m], "id", "asc")
+              });
+            }
+
             Loading.close();
             success();
             Toast("Item successfully edited!").fire();
@@ -106,9 +103,11 @@ class AppProvider extends Component {
             .then(({ status }) => {
               if (status === 200) {
                 const filtered = filterWithArray(this.state[state], data);
-                this.setState({ [state]: filtered });
+                this.setState(
+                  { [state]: filtered },
+                  () => success && success()
+                );
                 Loading.close();
-                success();
                 Toast("Successfully delete item!").fire();
               }
             })
@@ -120,14 +119,29 @@ class AppProvider extends Component {
         }
       });
     },
-    handleUpdate: (target, data) => {
-      const m = this.state[target].filter(x => x.id !== data.id);
-      this.setState({ [target]: _.orderBy([data, ...m], "id", "asc") });
+    locationMap: () => {
+      const stok = this.state.stoks.filter(x => x.locationID !== 0);
+      const locationmaps = this.state.locations.map(x => {
+        const traceID = _.find(stok, ["locationID", x.id]);
+        if (traceID) {
+          const materialName = _.find(this.state.materials, [
+            "id",
+            traceID.materialID
+          ]);
+          return { ...x, traceID: traceID.id, materialName: materialName.name };
+        } else {
+          return { ...x, traceID: "", materialName: "" };
+        }
+      });
+
+      this.setState({ locationmaps: _.orderBy(locationmaps, "name", "asc") });
     }
   };
 
   componentDidMount() {
-    this.state.getAPI(["material", "statusQC", "locationmap", "stok"]);
+    this.state.getAPI(["material", "statusQC", "location", "stok"], () =>
+      this.state.locationMap()
+    );
   }
 
   render() {

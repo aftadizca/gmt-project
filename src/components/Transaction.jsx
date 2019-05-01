@@ -14,67 +14,104 @@ import { NavLink } from "react-router-dom";
 import QCButton from "../_common/QCButton";
 import { DinamicList } from "../_helper/SelectList";
 import { Toast } from "./../_helper/CostumToast";
+import _ from "lodash";
 
 class Transaction extends Component {
   static contextType = AppContext;
 
   state = {
-    selectedStok: {},
     selectedRow: [],
-    modalStatusQC: false
+    selectedRowEdit: [],
+    modalStatusQC: false,
+    currentPageModal: 1,
+    activeModal: ""
   };
 
   componentDidMount() {
     console.log("Transaction DidMounted");
   }
 
-  handleUpdateStatusQC = (qc, data) => {
-    const x = { ...data };
-    x.statusQCID = qc;
-    this.setState({ selectedStok: x });
-    if (!x.locationID) {
-      this.setState({ modalStatusQC: true });
-    } else {
-      setTimeout(() => {
-        this.handleSubmit(false, "");
-      }, 500);
+  handleOnChange = (e, data) => {
+    console.log("handleOnChange", { e, data });
+    const selectedRowEdit = [...this.state.selectedRowEdit];
+    selectedRowEdit[data.selectedrowindex] = {
+      ...selectedRowEdit[data.selectedrowindex],
+      [data.name]: data.value
+    };
+    this.setState({ selectedRowEdit });
+  };
+
+  //handle open and close modal
+  handleModal = (e, data) => {
+    console.log("handleModal", { e, data });
+    if (data.eventPool === "Modal" && data.open) {
+      this.resetModal();
+      return;
+    }
+
+    switch (data.action) {
+      case "STATUS_QC":
+        const selectedRowEdit = _.cloneDeep(this.state.selectedRow);
+        selectedRowEdit.map(x => (x.statusQCID = data.statusid));
+        if (_.find(selectedRowEdit, ["locationID", 0])) {
+          this.setState({ selectedRowEdit }, () =>
+            this.setState({ activeModal: "UPDATE_STATUS_QC" })
+          );
+        } else {
+          this.setState({ selectedRowEdit }, () =>
+            this.handleSubmit(e, { action: "UPDATE_STATUS_QC" })
+          );
+        }
+        break;
+
+      default:
+        break;
     }
   };
 
-  handleModalStatusQCClose = () => {
-    this.setState({ modalStatusQC: false });
+  // modal next and prev page
+  handlePageModal = (e, data) => {
+    if (data.action === "P") {
+      this.setState({ currentPageModal: this.state.currentPageModal - 1 });
+    } else {
+      this.setState({ currentPageModal: this.state.currentPageModal + 1 });
+    }
   };
 
-  handleOnChange = (e, data) => {
+  //reset modal state
+  resetModal = () => {
     this.setState({
-      selectedStok: { ...this.state.selectedStok, [data.name]: data.value }
+      activeModal: "",
+      currentPageModal: 1,
+      selectedRowEdit: []
     });
   };
 
+  //handle submit Form
   handleSubmit = (e, data) => {
-    const { selectedStok } = this.state;
-    if (data.name === "statusqc") {
-      this.context.putAPI(
-        "stok",
-        selectedStok.id,
-        selectedStok,
-        () => {
-          this.handleModalStatusQCClose();
-          this.setState({ selectedStok: {} });
-        },
-        response => Toast(response.data, "error").fire()
-      );
-    } else {
-      this.context.putAPI(
-        "stok",
-        selectedStok.id,
-        selectedStok,
-        false,
-        response => Toast(response.data, "error").fire()
-      );
+    console.log("handleSubmit", { e, data });
+    const { selectedRowEdit } = this.state;
+    switch (data.action) {
+      case "UPDATE_STATUS_QC":
+        this.context.putAPI(
+          "stok",
+          undefined,
+          selectedRowEdit,
+          () => {
+            this.resetModal();
+            this.setState({ selectedRow: [] });
+            this.context.locationMap();
+          },
+          response => Toast(response.data, "error").fire()
+        );
+        break;
+
+      default:
+        break;
     }
   };
 
+  //handle selection in Table
   handleSelectedChange = data => {
     this.setState({ selectedRow: data });
   };
@@ -82,7 +119,12 @@ class Transaction extends Component {
   render() {
     document.title = this.props.match.params.tab.toUpperCase() + " - " + TITLE;
     const { materials, locationmaps, statusQCs, stoks } = this.context;
-    const { modalStatusQC, selectedStok, selectedRow } = this.state;
+    const {
+      activeModal,
+      selectedRow,
+      selectedRowEdit,
+      currentPageModal
+    } = this.state;
 
     const incoming = stoks.filter(x => x.statusQCID === 1);
     const stokAll = stoks.filter(x => x.statusQCID > 1 && x.qty > 0);
@@ -107,9 +149,7 @@ class Transaction extends Component {
         },
         {
           key: `location-${i}`,
-          content: getByProperty(
-            (locationmaps, "id", data.locationID, "location")
-          )
+          content: getByProperty(locationmaps, "id", data.locationID, "name")
         },
         data.lot,
         {
@@ -161,6 +201,7 @@ class Transaction extends Component {
         <QCButton
           button={this.context.statusQCs}
           disabled={!(selectedRow.length > 0)}
+          onClick={this.handleModal}
         />
       </React.Fragment>
     );
@@ -182,6 +223,7 @@ class Transaction extends Component {
         <QCButton
           button={this.context.statusQCs}
           disabled={!(selectedRow.length > 0)}
+          onClick={this.handleModal}
         />
       </React.Fragment>
     );
@@ -191,28 +233,39 @@ class Transaction extends Component {
         closeOnDimmerClick={false}
         closeIcon
         size="small"
-        open={modalStatusQC}
-        onClose={this.handleModalStatusQCClose}
+        open={activeModal === "UPDATE_STATUS_QC"}
+        onClose={this.handleModal}
       >
-        <Modal.Header>UPDATE STATUS QC</Modal.Header>
+        <Modal.Header>
+          UPDATE STATUS QC{" "}
+          <Label color="blue" horizontal size="large">
+            {currentPageModal}/{selectedRow.length}
+          </Label>
+        </Modal.Header>
         <Modal.Content>
           <Form>
             <Form.Input
               label="TRACE ID"
               name="id"
               readOnly
-              value={selectedStok.id}
+              value={
+                selectedRowEdit.length &&
+                selectedRowEdit[currentPageModal - 1].id
+              }
             />
             <Form.Input
               label="MATERIAL NAME"
               name="name"
               readOnly
-              value={getByProperty(
-                materials,
-                "id",
-                selectedStok.materialID,
-                "name"
-              )}
+              value={
+                selectedRowEdit.length &&
+                getByProperty(
+                  materials,
+                  "id",
+                  selectedRowEdit[currentPageModal - 1].materialID,
+                  "name"
+                )
+              }
             />
             <Form.Group widths="equal">
               <Form.Input
@@ -222,12 +275,15 @@ class Transaction extends Component {
                 color="blue"
                 inverted
                 fluid
-                value={getByProperty(
-                  statusQCs,
-                  "id",
-                  selectedStok.statusQCID,
-                  "name"
-                )}
+                value={
+                  selectedRowEdit.length &&
+                  getByProperty(
+                    statusQCs,
+                    "id",
+                    selectedRowEdit[currentPageModal - 1].statusQCID,
+                    "name"
+                  )
+                }
               />
               <Form.Dropdown
                 name="locationID"
@@ -235,19 +291,48 @@ class Transaction extends Component {
                 search
                 fluid
                 selection
+                selectedrowindex={currentPageModal - 1}
                 onChange={this.handleOnChange}
                 options={DinamicList(
                   locationmaps.filter(x => x.traceID === ""),
                   "id",
-                  "location"
+                  "name"
                 )}
-                value={selectedStok.locationID}
+                value={
+                  selectedRowEdit.length &&
+                  selectedRowEdit[currentPageModal - 1].locationID
+                }
               />
             </Form.Group>
           </Form>
         </Modal.Content>
         <Modal.Actions>
-          <Button color="blue" onClick={this.handleSubmit} name="statusqc">
+          <Button.Group floated="left">
+            <Button
+              content="Previous"
+              action="P"
+              icon="left arrow"
+              labelPosition="left"
+              color="blue"
+              onClick={this.handlePageModal}
+              disabled={currentPageModal === 1}
+            />
+            <Button
+              content="Next"
+              action="N"
+              icon="right arrow"
+              labelPosition="right"
+              color="blue"
+              onClick={this.handlePageModal}
+              disabled={currentPageModal === selectedRowEdit.length}
+            />
+          </Button.Group>
+          <Button
+            color="blue"
+            onClick={this.handleSubmit}
+            disabled={_.some(selectedRowEdit, ["locationID", 0])}
+            action="UPDATE_STATUS_QC"
+          >
             <Icon name="save" /> SAVE
           </Button>
         </Modal.Actions>

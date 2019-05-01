@@ -119,11 +119,19 @@ class Material extends Component {
       },
       { key: 2, content: "MATERIAL NAME", name: "name" },
       { key: 3, content: "SUPLIER", name: "suplier" },
-      { key: 4, content: "UNIT" }
+      { key: 4, content: "UNIT" },
+      { key: 5, content: "STATUS", name: "isActive" }
     ];
     const renderBodyRow = (data, i) => ({
       key: `row-${i}`,
-      cells: [data.id, data.name, data.suplier, data.unit]
+      disabled: !data.isActive,
+      cells: [
+        data.id,
+        data.name,
+        data.suplier,
+        data.unit,
+        { key: `status${i}`, content: data.isActive ? "Active" : "Not Active" }
+      ]
     });
     const buttonFooter = (
       <Button.Group>

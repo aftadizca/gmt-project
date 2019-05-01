@@ -21,14 +21,16 @@ const QCButton = props => {
               key={x.id}
               color={STATUS_COLOR[x.id]}
               content={x.name}
-              onClick={() => props.onClick(x.id)}
+              action="STATUS_QC"
+              statusid={x.id}
+              onClick={props.onClick}
             />
           ))}
         </Button.Group>
       }
-      disabled={props.open || false}
+      disabled={props.disabled}
       on="focus"
-      hoverable
+      //hoverable
       position="top center"
     />
   );

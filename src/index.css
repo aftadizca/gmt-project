@@ -256,3 +256,7 @@ code {
 .ui.striped.selectable.selectable.selectable.table tbody tr.active:hover {
   background: #2184d065 !important;
 } */
+
+.ui.popup {
+  z-index: 900;
+}
