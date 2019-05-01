@@ -1,4 +1,4 @@
-import React, { Component } from "react";
+import React, { Component, createRef } from "react";
 import Paginate from "../_helper/paginate";
 import PropTypes from "prop-types";
 import {
@@ -13,7 +13,8 @@ import {
   Checkbox,
   Button,
   Label,
-  Popup
+  Popup,
+  Ref
 } from "semantic-ui-react";
 import { PageSize } from "../_helper/SelectList";
 import _ from "lodash";
@@ -24,6 +25,8 @@ class MyTable extends Component {
     searchValue: "",
     pageSize: 10,
     currentPage: 1,
+    isLoading: false,
+    filteredData: [],
     orderBy: this.props.orderBy,
     orderDirection: this.props.orderDirection
   };
@@ -47,6 +50,17 @@ class MyTable extends Component {
     selectedRow: []
   };
 
+  shouldComponentUpdate(nextProps, nextState) {
+    if (
+      this.state.isLoading === true &&
+      this.state.isLoading === nextState.isLoading
+    ) {
+      return false;
+    }
+    return true;
+  }
+  createdRef = createRef();
+
   handleSelectPageSize = (e, data) => {
     this.setState({ pageSize: data.value });
   };
@@ -56,11 +70,17 @@ class MyTable extends Component {
     this.setState({ currentPage: data.activePage });
   };
 
-  handleOnSearch = e => {
-    this.setState({ searchValue: e.currentTarget.value });
+  changeValue = _.debounce(function(value) {
+    this.setState({ searchValue: value, isLoading: false });
+  }, 1000);
+
+  handleOnSearch = (e, data) => {
+    e.persist();
+    this.setState({ isLoading: true }, this.changeValue(data.value));
   };
 
   handleOnSearchClear = () => {
+    this.createdRef.current.children[0].value = "";
     this.setState({ searchValue: "" });
   };
 
@@ -192,7 +212,7 @@ class MyTable extends Component {
 
     const sortedData = _.orderBy(data, header[orderBy].name, orderDirection);
     //filtering with search
-    const filteredData = Filtering(sortedData, searchValue);
+    const filteredData = Filtering(sortedData, body, searchValue);
     //count length row per page
     const pageLength = Math.ceil(filteredData.length / pageSize);
     //check if current page greater than page size
@@ -211,21 +231,23 @@ class MyTable extends Component {
             </Grid.Column>
             <Grid.Column verticalAlign="middle" textAlign="right">
               {searchBar && (
-                <Input
-                  icon={
-                    <Icon
-                      name={this.state.searchValue.length ? "x" : "search"}
-                      inverted
-                      color="blue"
-                      circular
-                      link
-                      onClick={this.handleOnSearchClear}
-                    />
-                  }
-                  placeholder="SEARCH"
-                  value={this.state.searchValue}
-                  onInput={this.handleOnSearch}
-                />
+                <Ref innerRef={this.createdRef}>
+                  <Input
+                    icon={
+                      <Icon
+                        name={this.state.searchValue.length ? "x" : "search"}
+                        inverted
+                        color="blue"
+                        circular
+                        link
+                        onClick={this.handleOnSearchClear}
+                      />
+                    }
+                    loading={this.state.isLoading}
+                    placeholder="SEARCH"
+                    onChange={this.handleOnSearch}
+                  />
+                </Ref>
               )}
             </Grid.Column>
           </Grid.Row>
