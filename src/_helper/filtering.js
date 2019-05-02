@@ -1,7 +1,7 @@
 import _ from "lodash";
 
 export default function Filtering(data, rowBuilder, filterText) {
-  //console.time("filtering");
+  console.time("filtering");
   if (data.length !== 0 && filterText.trim() !== "") {
     //const a = Object.keys(data[0]);
     var x = data.filter((d, i) => {
@@ -18,16 +18,16 @@ export default function Filtering(data, rowBuilder, filterText) {
     });
 
     //console.log({ x });
-    //console.timeEnd("filtering");
+    console.timeEnd("filtering");
     return x;
   } else {
-    //console.timeEnd("filtering");
-    return data;
+    console.timeEnd("filtering");
+    return;
   }
 }
 
 function traverseSearch(object, search) {
-  if (typeof object === "string") {
+  if (typeof object === "string" || typeof object === "number") {
     if (
       object
         .toString()
@@ -35,12 +35,13 @@ function traverseSearch(object, search) {
         .includes(search.toString().toLowerCase())
     ) {
       return true;
-    } else {
-      return false;
     }
   } else {
   }
   if (typeof object === "object") {
+    if (typeof object.content === "object") {
+      return false;
+    }
     if (
       object.content
         .toString()
@@ -48,8 +49,7 @@ function traverseSearch(object, search) {
         .includes(search.toString().toLowerCase())
     ) {
       return true;
-    } else {
-      return false;
     }
   }
+  return false;
 }
