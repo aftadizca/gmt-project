@@ -4,16 +4,24 @@ export default function Filtering(data, rowBuilder, filterText) {
   console.time("filtering");
   if (data.length !== 0 && filterText.trim() !== "") {
     //const a = Object.keys(data[0]);
+    let index = -1;
     var x = data.filter((d, i) => {
       let row = rowBuilder(d, i);
-      //console.log(row);
       let found = false;
-      _.forEach(row.cells, x => {
-        if (traverseSearch(x, filterText)) {
+      if (index > -1) {
+        if (traverseSearch(row.cells[index], filterText)) {
           found = true;
-          return false;
         }
-      });
+      } else {
+        _.forEach(row.cells, (x, i) => {
+          if (traverseSearch(x, filterText)) {
+            index = i;
+            found = true;
+            return false;
+          }
+        });
+      }
+      console.log(row, found, index);
       return found;
     });
 
@@ -22,7 +30,7 @@ export default function Filtering(data, rowBuilder, filterText) {
     return x;
   } else {
     console.timeEnd("filtering");
-    return;
+    return false;
   }
 }
 

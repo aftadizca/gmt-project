@@ -19,6 +19,8 @@ import {
 import { PageSize } from "../_helper/SelectList";
 import _ from "lodash";
 import Filtering from "../_helper/filtering";
+import { AppContext } from "../AppProvider";
+import { getByProperty } from "../_helper/tool";
 
 class MyTable extends Component {
   state = {
@@ -31,6 +33,7 @@ class MyTable extends Component {
     orderDirection: this.props.orderDirection
   };
 
+  static contextType = AppContext;
   static propTypes = {
     searchBar: PropTypes.bool,
     orderBy: PropTypes.number,
@@ -85,6 +88,7 @@ class MyTable extends Component {
   };
 
   handleSort = e => {
+    console.log(e.target.attributes);
     if (e.target.attributes.name && e.target.nodeName === "TH") {
       const a = this.props.header;
       _.forEach(a, (x, i) => {
@@ -210,9 +214,28 @@ class MyTable extends Component {
       textAlign: "center"
     });
 
-    const sortedData = _.orderBy(data, header[orderBy].name, orderDirection);
+    console.log();
+
+    const a = (header, x) => {
+      if (header.table) {
+        return getByProperty(
+          this.context[header.table],
+          "id",
+          x[header.name],
+          header.value || "name"
+        );
+      } else {
+        return x[header.name];
+      }
+    };
+
+    const sortedData = _.orderBy(
+      data,
+      x => a(header[orderBy], x),
+      orderDirection
+    );
     //filtering with search
-    const filteredData = Filtering(sortedData, body, searchValue);
+    const filteredData = Filtering(sortedData, body, searchValue) || sortedData;
     //count length row per page
     const pageLength = Math.ceil(filteredData.length / pageSize);
     //check if current page greater than page size
@@ -255,6 +278,7 @@ class MyTable extends Component {
           <Grid.Row>
             <Grid.Column>
               <Table
+                // size="small"
                 celled
                 sortable
                 selectable

@@ -64,6 +64,9 @@ class Transaction extends Component {
         }
         break;
 
+      case "EDIT_STOK":
+        break;
+
       default:
         break;
     }
@@ -131,8 +134,25 @@ class Transaction extends Component {
 
     const materialStockHeader = [
       { key: 1, content: "TRACE ID", name: "id" },
-      { key: 2, content: "MATERIAL NAME", name: "materialID" },
-      { key: 3, content: "LOCATION", name: "locationID" },
+      {
+        key: 2,
+        content: "MATERIAL NAME",
+        name: "materialID",
+        table: "materials"
+      },
+      {
+        key: 44,
+        content: "SUPLIER",
+        name: "materialID",
+        table: "materials",
+        value: "suplier"
+      },
+      {
+        key: 3,
+        content: "LOCATION",
+        name: "locationID",
+        table: "locationmaps"
+      },
       { key: 5, content: "LOT", name: "lot" },
       { key: 6, content: "INCOMING DATE", name: "comingDate" },
       { key: 7, content: "EXP", name: "expiredDate" },
@@ -146,6 +166,10 @@ class Transaction extends Component {
         {
           key: `material-${i}`,
           content: getByProperty(materials, "id", data.materialID, "name")
+        },
+        {
+          key: `suplier-${i}`,
+          content: getByProperty(materials, "id", data.materialID, "suplier")
         },
         {
           key: `location-${i}`,
@@ -216,8 +240,9 @@ class Transaction extends Component {
           <MyTable.Button
             label="Edit"
             icon="edit"
+            action={"EDIT_STOK"}
             disabled={!(selectedRow.length === 1)}
-            //onClick={this.handleAddMaterialOpen}
+            onClick={this.handleModal}
           />
         </Button.Group>{" "}
         <QCButton
