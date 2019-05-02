@@ -28,7 +28,6 @@ import _ from "lodash";
  */
 
 export function getByProperty(object, key, value, returnedKey) {
-  //console.log({ object, key, value, returnedKey });
   if (object.length === 0) {
     return;
   }
