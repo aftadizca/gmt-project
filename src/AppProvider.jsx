@@ -2,31 +2,46 @@ import React, { Component } from "react";
 import { Loading, Toast, DeleteAlert } from "./_helper/CostumToast";
 import api from "./_helper/api";
 import _ from "lodash";
-import { filterWithArray } from "./_helper/tool";
+import { DB } from "./_helper/constant";
+import { Icon } from "semantic-ui-react";
 
 export const AppContext = React.createContext();
 
 class AppProvider extends Component {
   state = {
-    materials: [],
-    statusQCs: [],
-    locationmaps: [],
-    locations: [],
-    stoks: [],
+    [DB.materials]: [],
+    [DB.statusQCs]: [],
+    [DB.locationmaps]: [],
+    [DB.locations]: [],
+    [DB.stoks]: [],
     getAPI: (url, success) => {
       Loading.fire();
       const prom = [];
       url.forEach((x, i) => {
         prom[i] = api.get(x);
       });
-      Promise.all(prom).then(data => {
-        const d = {};
-        data.forEach((x, i) => {
-          d[url[i] + "s"] = x.data;
+      Promise.all(prom)
+        .then(data => {
+          const d = {};
+          data.forEach((x, i) => {
+            d[url[i] + "s"] = x.data;
+          });
+          this.setState(d);
+          success && success();
+          Loading.close();
+        })
+        .catch(({ response }) => {
+          if (response) {
+            console.error("GET ERROR", response);
+            if (response.status >= 400) {
+              Loading.close();
+              Toast("Server error", "error").fire();
+            }
+          } else {
+            Loading.close();
+            Toast("Server not Available", "error", false).fire();
+          }
         });
-        this.setState(d, () => success && success());
-        Loading.close();
-      });
     },
     postAPI: (url, postdata, success, error) => {
       Loading.fire();
@@ -69,9 +84,13 @@ class AppProvider extends Component {
                 [state]: _.orderBy([postdata, ...m], "id", "asc")
               });
             } else {
-              const m = filterWithArray(this.state[state], postdata, "id");
+              const filtered = _.differenceBy(
+                this.state[state],
+                postdata,
+                "id"
+              );
               this.setState({
-                [state]: _.orderBy([...postdata, ...m], "id", "asc")
+                [state]: _.orderBy([...postdata, ...filtered], "id", "asc")
               });
             }
 
@@ -102,7 +121,9 @@ class AppProvider extends Component {
             .delete(`${url}`, { data: data })
             .then(({ status }) => {
               if (status === 200) {
-                const filtered = filterWithArray(this.state[state], data);
+                console.time("delete");
+                const filtered = _.differenceBy(this.state[state], data, "id");
+                console.timeEnd("delete");
                 this.setState(
                   { [state]: filtered },
                   () => success && success()
@@ -135,6 +156,19 @@ class AppProvider extends Component {
       });
 
       this.setState({ locationmaps: _.orderBy(locationmaps, "name", "asc") });
+    },
+    useRelation: ({ db, key, value }) => {
+      //console.time("useRelation");
+      try {
+        let found = this.state[db].find(x => {
+          return x.id === key;
+        });
+        //console.timeEnd("useRelation");
+        return found[value];
+      } catch (error) {
+        //console.log({ error });
+        return <Icon name="question" color="red" size="small" />;
+      }
     }
   };
 

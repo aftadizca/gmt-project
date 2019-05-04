@@ -8,13 +8,13 @@ import {
   STATUS_COLOR
 } from "../_helper/constant";
 import { AppContext } from "./../AppProvider";
-import { getByProperty } from "../_helper/tool";
 import LabelTab from "./../_common/LabelTab";
 import { NavLink } from "react-router-dom";
 import QCButton from "../_common/QCButton";
 import { DinamicList } from "../_helper/SelectList";
 import { Toast } from "./../_helper/CostumToast";
 import _ from "lodash";
+import { DB } from "./../_helper/constant";
 
 class Transaction extends Component {
   static contextType = AppContext;
@@ -26,10 +26,6 @@ class Transaction extends Component {
     currentPageModal: 1,
     activeModal: ""
   };
-
-  componentDidMount() {
-    console.log("Transaction DidMounted");
-  }
 
   handleOnChange = (e, data) => {
     console.log("handleOnChange", { e, data });
@@ -121,7 +117,7 @@ class Transaction extends Component {
 
   render() {
     document.title = this.props.match.params.tab.toUpperCase() + " - " + TITLE;
-    const { materials, locationmaps, statusQCs, stoks } = this.context;
+    const { locationmaps, stoks, useRelation } = this.context;
     const {
       activeModal,
       selectedRow,
@@ -165,15 +161,27 @@ class Transaction extends Component {
         data.id,
         {
           key: `material-${i}`,
-          content: getByProperty(materials, "id", data.materialID, "name")
+          content: useRelation({
+            db: DB.materials,
+            key: data.materialID,
+            value: "name"
+          })
         },
         {
           key: `suplier-${i}`,
-          content: getByProperty(materials, "id", data.materialID, "suplier")
+          content: useRelation({
+            db: DB.materials,
+            key: data.materialID,
+            value: "suplier"
+          })
         },
         {
           key: `location-${i}`,
-          content: getByProperty(locationmaps, "id", data.locationID, "name")
+          content: useRelation({
+            db: DB.locationmaps,
+            key: data.locationID,
+            value: "name"
+          })
         },
         data.lot,
         {
@@ -195,7 +203,11 @@ class Transaction extends Component {
           key: `statusQC-${i}`,
           content: (
             <Label tag color={STATUS_COLOR[data.statusQCID]}>
-              {getByProperty(statusQCs, "id", data.statusQCID, "name")}
+              {useRelation({
+                db: DB.statusQCs,
+                key: data.statusQCID,
+                value: "name"
+              })}
             </Label>
           )
         }
@@ -284,12 +296,11 @@ class Transaction extends Component {
               readOnly
               value={
                 selectedRowEdit.length &&
-                getByProperty(
-                  materials,
-                  "id",
-                  selectedRowEdit[currentPageModal - 1].materialID,
-                  "name"
-                )
+                useRelation({
+                  db: DB.materials,
+                  key: selectedRowEdit[currentPageModal - 1].materialID,
+                  value: "name"
+                })
               }
             />
             <Form.Group widths="equal">
@@ -302,12 +313,11 @@ class Transaction extends Component {
                 fluid
                 value={
                   selectedRowEdit.length &&
-                  getByProperty(
-                    statusQCs,
-                    "id",
-                    selectedRowEdit[currentPageModal - 1].statusQCID,
-                    "name"
-                  )
+                  useRelation({
+                    db: DB.statusQCs,
+                    key: selectedRowEdit[currentPageModal - 1].statusQCID,
+                    value: "name"
+                  })
                 }
               />
               <Form.Dropdown

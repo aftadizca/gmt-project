@@ -20,7 +20,6 @@ import { PageSize } from "../_helper/SelectList";
 import _ from "lodash";
 import Filtering from "../_helper/filtering";
 import { AppContext } from "../AppProvider";
-import { getByProperty } from "../_helper/tool";
 
 class MyTable extends Component {
   state = {
@@ -28,12 +27,12 @@ class MyTable extends Component {
     pageSize: 10,
     currentPage: 1,
     isLoading: false,
-    filteredData: [],
     orderBy: this.props.orderBy,
     orderDirection: this.props.orderDirection
   };
 
   static contextType = AppContext;
+  createdRef = createRef();
   static propTypes = {
     searchBar: PropTypes.bool,
     orderBy: PropTypes.number,
@@ -62,7 +61,6 @@ class MyTable extends Component {
     }
     return true;
   }
-  createdRef = createRef();
 
   handleSelectPageSize = (e, data) => {
     this.setState({ pageSize: data.value });
@@ -88,7 +86,6 @@ class MyTable extends Component {
   };
 
   handleSort = e => {
-    console.log(e.target.attributes);
     if (e.target.attributes.name && e.target.nodeName === "TH") {
       const a = this.props.header;
       _.forEach(a, (x, i) => {
@@ -218,12 +215,11 @@ class MyTable extends Component {
 
     const a = (header, x) => {
       if (header.table) {
-        return getByProperty(
-          this.context[header.table],
-          "id",
-          x[header.name],
-          header.value || "name"
-        );
+        return this.context.useRelation({
+          db: header.table,
+          key: x[header.name],
+          value: header.value || "name"
+        });
       } else {
         return x[header.name];
       }

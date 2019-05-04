@@ -5,6 +5,7 @@ import { UnitList } from "../_helper/SelectList";
 import { TypeList } from "./../_helper/SelectList";
 import { TITLE } from "../_helper/constant";
 import { AppContext } from "./../AppProvider";
+import { DeleteAlert } from "../_helper/CostumToast";
 
 class Material extends Component {
   static contextType = AppContext;
@@ -20,9 +21,16 @@ class Material extends Component {
   }
 
   handleDelete = () => {
-    this.context.deleteAPI("material", this.state.selectedRow, () =>
-      this.setState({ selectedRow: [] })
-    );
+    const dataToDelete = [...this.state.selectedRow];
+    dataToDelete.forEach(x => (x.isActive = false));
+    console.log(dataToDelete);
+    DeleteAlert.fire().then(result => {
+      if (result.value) {
+        this.context.putAPI("material", undefined, dataToDelete, () =>
+          this.setState({ selectedRow: [] })
+        );
+      }
+    });
   };
 
   //handle open and close Modal
@@ -158,6 +166,7 @@ class Material extends Component {
           icon="delete"
           color="red"
           action="DELETE_MATERIAL"
+          disabled={selectedRow.length < 1}
           onClick={this.handleDelete}
         />
       </Button.Group>

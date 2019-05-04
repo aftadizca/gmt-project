@@ -3,7 +3,6 @@ import _ from "lodash";
 export default function Filtering(data, rowBuilder, filterText) {
   console.time("filtering");
   if (data.length !== 0 && filterText.trim() !== "") {
-    //const a = Object.keys(data[0]);
     let index = -1;
     var x = data.filter((d, i) => {
       let row = rowBuilder(d, i);
@@ -21,11 +20,8 @@ export default function Filtering(data, rowBuilder, filterText) {
           }
         });
       }
-      console.log(row, found, index);
       return found;
     });
-
-    //console.log({ x });
     console.timeEnd("filtering");
     return x;
   } else {

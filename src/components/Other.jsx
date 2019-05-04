@@ -123,7 +123,7 @@ class Other extends Component {
                   <MyTable.Button
                     label="Refresh"
                     icon="refresh"
-                    onClick={() => this.context.getAPI(["locationmap"])}
+                    onClick={() => this.context.locationMap()}
                   />
                 </Button.Group>
               }
