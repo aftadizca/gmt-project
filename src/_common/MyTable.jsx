@@ -86,19 +86,18 @@ class MyTable extends Component {
   };
 
   handleSort = e => {
-    if (e.target.attributes.name && e.target.nodeName === "TH") {
-      const a = this.props.header;
-      _.forEach(a, (x, i) => {
-        if (
-          x.content !== "" &&
-          (e.target.attributes.name &&
-            x.name === e.target.attributes.name.value)
-        ) {
-          const direction = x.className === "asc" ? "desc" : "asc";
-          this.setState({ orderBy: i, orderDirection: direction });
-        }
-      });
-    }
+    console.time("sort");
+    try {
+      if (e.target.nodeName === "TH") {
+        this.props.header.forEach((x, i) => {
+          if (x.content === e.target.innerText) {
+            const direction = x.className === "asc" ? "desc" : "asc";
+            this.setState({ orderBy: i, orderDirection: direction });
+          }
+        });
+      }
+    } catch (error) {}
+    console.timeEnd("sort");
   };
 
   handleSelectionOnChange = (data, checked) => {
@@ -136,7 +135,7 @@ class MyTable extends Component {
 
     //show order icon in header
     const headerWithOrder = header;
-    _.forEach(headerWithOrder, (x, i) => {
+    headerWithOrder.forEach((x, i) => {
       if (orderBy === i) {
         x.className = orderDirection;
       } else {
@@ -211,9 +210,7 @@ class MyTable extends Component {
       textAlign: "center"
     });
 
-    console.log();
-
-    const a = (header, x) => {
+    const orderFunction = (header, x) => {
       if (header.table) {
         return this.context.useRelation({
           db: header.table,
@@ -224,10 +221,9 @@ class MyTable extends Component {
         return x[header.name];
       }
     };
-
     const sortedData = _.orderBy(
       data,
-      x => a(header[orderBy], x),
+      x => orderFunction(header[orderBy], x),
       orderDirection
     );
     //filtering with search
@@ -239,9 +235,31 @@ class MyTable extends Component {
     //Pagination
     const paginatedData = Paginate(filteredData, cPage, pageSize);
 
+    const table = (
+      <Table
+        celled
+        sortable
+        compact
+        selectable
+        definition={selection}
+        onClick={this.handleSort}
+        textAlign="center"
+        headerRow={selection ? hr : headerWithOrder}
+        renderBodyRow={
+          paginatedData.length !== 0
+            ? selection
+              ? br
+              : body
+            : renderBodyRowEmpty
+        }
+        tableData={paginatedData.length !== 0 ? paginatedData : noData}
+        footerRow={button && (selection ? footerWithCb : renderFooter)}
+      />
+    );
+
     return (
       <React.Fragment>
-        <Grid padded textAlign="center">
+        <Grid textAlign="center">
           <Grid.Row columns={2}>
             <Grid.Column>
               <Segment color="blue" inverted>
@@ -272,27 +290,7 @@ class MyTable extends Component {
           </Grid.Row>
 
           <Grid.Row>
-            <Grid.Column>
-              <Table
-                // size="small"
-                celled
-                sortable
-                selectable
-                definition={selection}
-                onClick={this.handleSort}
-                textAlign="center"
-                headerRow={selection ? hr : headerWithOrder}
-                renderBodyRow={
-                  paginatedData.length !== 0
-                    ? selection
-                      ? br
-                      : body
-                    : renderBodyRowEmpty
-                }
-                tableData={paginatedData.length !== 0 ? paginatedData : noData}
-                footerRow={button && (selection ? footerWithCb : renderFooter)}
-              />
-            </Grid.Column>
+            <Grid.Column textAlign="center">{table}</Grid.Column>
           </Grid.Row>
         </Grid>
 

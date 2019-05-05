@@ -21,7 +21,7 @@ code {
 
 .ui.sortable.table thead th.desc,
 .ui.sortable.table thead th.asc {
-  background: rgba(0, 0, 0, 0.05);
+  background: rgba(33, 132, 208, 0.192) 0;
   color: rgba(0, 0, 0, 0.95);
 }
 
@@ -36,18 +36,20 @@ code {
 }
 
 .ui.sortable.table thead th.desc:after {
-  content: "\f15e";
-  display: inline-block;
-  float: right;
-  font-size: 1.2rem;
+  content: " \f15d";
+  position: absolute;
+  display: contents;
+  font-size: 1rem;
+  z-index: 5;
   color: #2185d0;
 }
 
 .ui.sortable.table thead th.asc:after {
-  content: "\f15d";
-  float: right;
-  display: inline-block;
-  font-size: 1.2rem;
+  content: " \f15e";
+  position: absolute;
+  display: contents;
+  font-size: 1rem;
+  z-index: 5;
   color: #2185d0;
 }
 
