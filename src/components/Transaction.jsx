@@ -134,20 +134,20 @@ class Transaction extends Component {
         key: 2,
         content: "MATERIAL NAME",
         name: "materialID",
-        table: "materials"
+        table: DB.materials
       },
       {
-        key: 44,
+        key: 9,
         content: "SUPLIER",
         name: "materialID",
-        table: "materials",
+        table: DB.materials,
         value: "suplier"
       },
       {
         key: 3,
         content: "LOCATION",
         name: "locationID",
-        table: "locationmaps"
+        table: DB.locationmaps
       },
       { key: 5, content: "LOT", name: "lot" },
       { key: 6, content: "INCOMING DATE", name: "comingDate" },
