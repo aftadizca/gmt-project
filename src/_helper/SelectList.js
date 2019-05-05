@@ -22,9 +22,11 @@ export const TypeList = [
 ];
 
 export function DinamicList(data, value, text) {
-  const n = [];
-  data.forEach((x, i) => {
-    n[i] = { key: i, value: x[value], text: x[text] };
-  });
-  return n;
+  try {
+    return data.map((x, i) => {
+      return { key: i, value: x[value], text: x[text] };
+    });
+  } catch (error) {
+    console.log(error);
+  }
 }
