@@ -3,23 +3,16 @@ import _ from "lodash";
 export default function Filtering(data, rowBuilder, filterText) {
   console.time("filtering");
   if (data.length !== 0 && filterText.trim() !== "") {
-    let index = -1;
     var x = data.filter((d, i) => {
       let row = rowBuilder(d, i);
       let found = false;
-      if (index > -1) {
-        if (traverseSearch(row.cells[index], filterText)) {
+      _.forEach(row.cells, (x, i2) => {
+        if (traverseSearch(x, filterText)) {
           found = true;
+          return false;
         }
-      } else {
-        _.forEach(row.cells, (x, i) => {
-          if (traverseSearch(x, filterText)) {
-            index = i;
-            found = true;
-            return false;
-          }
-        });
-      }
+        return !found;
+      });
       return found;
     });
     console.timeEnd("filtering");
