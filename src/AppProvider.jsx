@@ -145,10 +145,9 @@ class AppProvider extends Component {
       const locationmaps = this.state.locations.map(x => {
         const traceID = _.find(stok, ["locationID", x.id]);
         if (traceID) {
-          const materialName = _.find(this.state.materials, [
-            "id",
-            traceID.materialID
-          ]);
+          const materialName = this.state[DB.materials].find(
+            x => x.id === traceID.materialID
+          );
           return { ...x, traceID: traceID.id, materialName: materialName.name };
         } else {
           return { ...x, traceID: "", materialName: "" };
