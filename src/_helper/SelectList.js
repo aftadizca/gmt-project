@@ -24,7 +24,7 @@ export const TypeList = [
 export function DinamicList(data, value, text) {
   try {
     return data.map((x, i) => {
-      return { key: i, value: x[value], text: x[text] };
+      return { key: i, value: x[value], text: text(x) };
     });
   } catch (error) {
     console.log(error);

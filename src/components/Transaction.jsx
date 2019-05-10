@@ -5,7 +5,9 @@ import {
   TITLE,
   LOCALE_DATE,
   OPTIONS_DATE,
-  STATUS_COLOR
+  STATUS_COLOR,
+  INCOMING,
+  STOK
 } from "../_helper/constant";
 import { AppContext } from "./../AppProvider";
 import LabelTab from "./../_common/LabelTab";
@@ -15,6 +17,8 @@ import { DinamicList } from "../_helper/SelectList";
 import { Toast } from "./../_helper/CostumToast";
 import _ from "lodash";
 import { DB } from "./../_helper/constant";
+import CleaveMod from "./../_common/CleaveMod";
+import { checkForm } from "../_helper/tool";
 
 class Transaction extends Component {
   static contextType = AppContext;
@@ -24,11 +28,19 @@ class Transaction extends Component {
     selectedRowEdit: [],
     modalStatusQC: false,
     currentPageModal: 1,
-    activeModal: ""
+    activeModal: "",
+    modalError: "",
+    newStok: {
+      expiredDate: "",
+      lot: "",
+      materialID: "",
+      qty: null,
+      pallet: null
+    }
   };
 
-  handleOnChange = (e, data) => {
-    console.log("handleOnChange", { e, data });
+  handleOnChangeQC = (e, data) => {
+    console.log("handleOnChangeQC", { e, data });
     const selectedRowEdit = [...this.state.selectedRowEdit];
     selectedRowEdit[data.selectedrowindex] = {
       ...selectedRowEdit[data.selectedrowindex],
@@ -36,6 +48,16 @@ class Transaction extends Component {
     };
     this.setState({ selectedRowEdit });
   };
+
+  handleOnChangeAdd = _.debounce(
+    (e, data) => {
+      console.log("handleOnChangeAdd", { e, data });
+      let newStok = { ...this.state.newStok, [data.name]: data.value };
+      this.setState({ newStok });
+    },
+    500,
+    { trailing: true }
+  );
 
   //handle open and close modal
   handleModal = (e, data) => {
@@ -46,21 +68,22 @@ class Transaction extends Component {
     }
 
     switch (data.action) {
-      case "STATUS_QC":
+      case STOK.updateQC:
         const selectedRowEdit = _.cloneDeep(this.state.selectedRow);
         selectedRowEdit.map(x => (x.statusQCID = data.statusid));
         if (_.find(selectedRowEdit, ["locationID", 0])) {
           this.setState({ selectedRowEdit }, () =>
-            this.setState({ activeModal: "UPDATE_STATUS_QC" })
+            this.setState({ activeModal: STOK.updateQC })
           );
         } else {
           this.setState({ selectedRowEdit }, () =>
-            this.handleSubmit(e, { action: "UPDATE_STATUS_QC" })
+            this.handleSubmit(e, { action: STOK.updateQC })
           );
         }
         break;
 
-      case "EDIT_STOK":
+      case INCOMING.add:
+        this.setState({ activeModal: INCOMING.add });
         break;
 
       default:
@@ -82,7 +105,14 @@ class Transaction extends Component {
     this.setState({
       activeModal: "",
       currentPageModal: 1,
-      selectedRowEdit: []
+      selectedRowEdit: [],
+      newStok: {
+        expiredDate: "",
+        lot: "",
+        materialID: "",
+        qty: null,
+        pallet: null
+      }
     });
   };
 
@@ -91,7 +121,7 @@ class Transaction extends Component {
     console.log("handleSubmit", { e, data });
     const { selectedRowEdit } = this.state;
     switch (data.action) {
-      case "UPDATE_STATUS_QC":
+      case STOK.updateQC:
         this.context.putAPI(
           "stok",
           undefined,
@@ -103,6 +133,13 @@ class Transaction extends Component {
           },
           response => Toast(response.data, "error").fire()
         );
+        break;
+      case INCOMING.add:
+        const newStok = {
+          ...this.state.newStok,
+          expiredDate: new Date(this.state.newStok.expiredDate).toJSON()
+        };
+        this.context.postAPI("stok", newStok, () => this.resetModal());
         break;
 
       default:
@@ -122,6 +159,7 @@ class Transaction extends Component {
       activeModal,
       selectedRow,
       selectedRowEdit,
+      newStok,
       currentPageModal
     } = this.state;
 
@@ -181,7 +219,7 @@ class Transaction extends Component {
             db: DB.locationmaps,
             key: data.locationID,
             value: "name"
-          })
+          }) || <Icon name="question" color="red" size="small" />
         },
         data.lot,
         {
@@ -224,8 +262,9 @@ class Transaction extends Component {
           />
           <MyTable.Button
             label="Add"
+            action={INCOMING.add}
             icon="add"
-            //onClick={this.handleAddMaterialOpen}
+            onClick={this.handleModal}
           />
           <MyTable.Button
             label="Edit"
@@ -252,7 +291,7 @@ class Transaction extends Component {
           <MyTable.Button
             label="Edit"
             icon="edit"
-            action={"EDIT_STOK"}
+            action={STOK.edit}
             disabled={!(selectedRow.length === 1)}
             onClick={this.handleModal}
           />
@@ -270,7 +309,7 @@ class Transaction extends Component {
         closeOnDimmerClick={false}
         closeIcon
         size="small"
-        open={activeModal === "UPDATE_STATUS_QC"}
+        open={activeModal === STOK.updateQC}
         onClose={this.handleModal}
       >
         <Modal.Header>
@@ -323,15 +362,16 @@ class Transaction extends Component {
               <Form.Dropdown
                 name="locationID"
                 label="LOCATION"
+                placeholder="Select Location"
                 search
                 fluid
                 selection
                 selectedrowindex={currentPageModal - 1}
-                onChange={this.handleOnChange}
+                onChange={this.handleOnChangeQC}
                 options={DinamicList(
                   locationmaps.filter(x => x.traceID === ""),
                   "id",
-                  "name"
+                  x => x.name
                 )}
                 value={
                   selectedRowEdit.length &&
@@ -366,7 +406,92 @@ class Transaction extends Component {
             color="blue"
             onClick={this.handleSubmit}
             disabled={_.some(selectedRowEdit, ["locationID", 0])}
-            action="UPDATE_STATUS_QC"
+            action={STOK.updateQC}
+          >
+            <Icon name="save" /> SAVE
+          </Button>
+        </Modal.Actions>
+      </Modal>
+    );
+
+    const addIncomingModal = (
+      <Modal
+        closeOnDimmerClick={false}
+        closeIcon
+        size="small"
+        open={activeModal === INCOMING.add}
+        onClose={this.handleModal}
+      >
+        <Modal.Header>ADD STOCK</Modal.Header>
+        <Modal.Content>
+          <Form>
+            <Form.Dropdown
+              label="MATERIAL NAME"
+              name="materialID"
+              placeholder="MATERIAL - SUPLIER"
+              search
+              fluid
+              selection
+              options={DinamicList(
+                this.context[DB.materials],
+                "id",
+                x => `${x.name} - ${x.suplier}`
+              )}
+              onChange={this.handleOnChangeAdd}
+              value={newStok.materialID}
+            />
+            <CleaveMod
+              label="EXPIRED DATE"
+              placeholder="MM-DD-YYYY"
+              name="expiredDate"
+              onChange={this.handleOnChangeAdd}
+              options={{
+                date: true,
+                delimiter: "/",
+                datePattern: ["m", "d", "Y"]
+              }}
+            />
+            <CleaveMod
+              label="LOT / PRODUCTION CODE"
+              name="lot"
+              placeholder="LOT"
+              options={{ uppercase: true }}
+              onChange={this.handleOnChangeAdd}
+            />
+            <Form.Group widths="equal">
+              <CleaveMod
+                label={"TOTAL INCOMING"}
+                name="qty"
+                placeholder="TOTAL INCOMING"
+                onChange={this.handleOnChangeAdd}
+                rawValue={true}
+                options={{
+                  numeral: true,
+                  numeralThousandsGroupStyle: "thousand",
+                  rawValueTrimPrefix: true
+                }}
+              />
+              <CleaveMod
+                label="QTY PER PALLET"
+                name="pallet"
+                placeholder="QTY PER PALLET"
+                rawValue={true}
+                onChange={this.handleOnChangeAdd}
+                options={{
+                  numeral: true,
+                  numeralThousandsGroupStyle: "thousand",
+                  rawValueTrimPrefix: true
+                }}
+              />
+            </Form.Group>
+          </Form>
+        </Modal.Content>
+        <Modal.Actions>
+          <Button
+            color="blue"
+            onClick={this.handleSubmit}
+            disabled={!checkForm(newStok)}
+            action={INCOMING.add}
           >
             <Icon name="save" /> SAVE
           </Button>
@@ -466,6 +591,7 @@ class Transaction extends Component {
     return (
       <React.Fragment>
         {updateStatusModal}
+        {addIncomingModal}
         <Tab
           menu={{
             borderless: true,

@@ -25,3 +25,14 @@ export const DB = Object.freeze({
   locations: "locations",
   stoks: "stoks"
 });
+
+export const STOK = Object.freeze({
+  edit: "STOK_EDIT",
+  updateQC: "UPDATE_QC"
+});
+
+export const INCOMING = Object.freeze({
+  add: "INCOMING_ADD",
+  edit: "INCOMING_EDIT",
+  updateQC: "UPDATE_QC"
+});

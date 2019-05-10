@@ -1,6 +1,6 @@
 import React from "react";
 import { Popup, Button, Icon } from "semantic-ui-react";
-import { STATUS_COLOR } from "../_helper/constant";
+import { STATUS_COLOR, STOK } from "../_helper/constant";
 
 const QCButton = props => {
   const btn = props.button.filter(x => x.id > 1);
@@ -21,7 +21,7 @@ const QCButton = props => {
               key={x.id}
               color={STATUS_COLOR[x.id]}
               content={x.name}
-              action="STATUS_QC"
+              action={STOK.updateQC}
               statusid={x.id}
               onClick={props.onClick}
             />

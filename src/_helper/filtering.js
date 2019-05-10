@@ -28,8 +28,8 @@ function traverseSearch(object, search) {
     if (
       object
         .toString()
-        .toLowerCase()
-        .includes(search.toString().toLowerCase())
+        .toUpperCase()
+        .includes(search.toString().toUpperCase())
     ) {
       return true;
     }
@@ -42,8 +42,8 @@ function traverseSearch(object, search) {
     if (
       object.content
         .toString()
-        .toLowerCase()
-        .includes(search.toString().toLowerCase())
+        .toUpperCase()
+        .includes(search.toString().toUpperCase())
     ) {
       return true;
     }

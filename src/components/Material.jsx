@@ -303,7 +303,7 @@ class Material extends Component {
             title="MATERIAL"
             header={headerRow}
             body={renderBodyRow}
-            data={materials}
+            data={materials.filter(x => x.isActive)}
             orderBy={0}
             selection
             selectedRow={selectedRow}

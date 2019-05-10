@@ -3,7 +3,6 @@ import { Loading, Toast, DeleteAlert } from "./_helper/CostumToast";
 import api from "./_helper/api";
 import _ from "lodash";
 import { DB } from "./_helper/constant";
-import { Icon } from "semantic-ui-react";
 
 export const AppContext = React.createContext();
 
@@ -166,7 +165,7 @@ class AppProvider extends Component {
         return found[value];
       } catch (error) {
         //console.log({ error });
-        return <Icon name="question" color="red" size="small" />;
+        return false;
       }
     }
   };
