@@ -90,7 +90,7 @@ class MyTable extends Component {
 
   handleSort = e => {
     try {
-      if (e.target.nodeName === "TH") {
+      if (e.target.nodeName === "TH" && e.target.attributes.name) {
         this.props.header.forEach((x, i) => {
           if (x.content === e.target.innerText) {
             const direction = x.className === "asc" ? "desc" : "asc";
@@ -240,6 +240,7 @@ class MyTable extends Component {
     //Pagination
     const paginatedData = Paginate(filteredData, cPage, pageSize);
 
+    //#region RENDER ELEMENT
     const search = searchBar && (
       <Ref innerRef={this.createdRef}>
         <Input
@@ -307,6 +308,7 @@ class MyTable extends Component {
           totalPages={pageLength}
         />
       );
+    //#endregion
 
     return (
       <React.Fragment>
