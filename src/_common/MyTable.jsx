@@ -22,15 +22,7 @@ import Filtering from "../_helper/filtering";
 import { AppContext } from "../AppProvider";
 
 class MyTable extends Component {
-  state = {
-    searchValue: "",
-    pageSize: 10,
-    currentPage: 1,
-    isLoading: false,
-    orderBy: this.props.orderBy,
-    orderDirection: this.props.orderDirection
-  };
-
+  //#region STATIC & PROPTYPES
   static contextType = AppContext;
   createdRef = createRef();
   static propTypes = {
@@ -43,13 +35,22 @@ class MyTable extends Component {
     data: PropTypes.array.isRequired,
     button: PropTypes.element
   };
-
   static defaultProps = {
     searchBar: false,
     orderDirection: "asc",
     selection: false,
     orderBy: 0,
     selectedRow: []
+  };
+  //#endregion
+
+  state = {
+    searchValue: "",
+    pageSize: 10,
+    currentPage: 1,
+    isLoading: false,
+    orderBy: this.props.orderBy,
+    orderDirection: this.props.orderDirection
   };
 
   shouldComponentUpdate(nextProps, nextState) {
@@ -62,6 +63,7 @@ class MyTable extends Component {
     return true;
   }
 
+  //#region PAGINATION
   handleSelectPageSize = (e, data) => {
     this.setState({ pageSize: data.value });
   };
@@ -70,6 +72,7 @@ class MyTable extends Component {
     //clear selection before unmounting
     this.setState({ currentPage: data.activePage });
   };
+  //#endregion
 
   changeValue = _.debounce(function(value) {
     this.setState({ searchValue: value, isLoading: false });
@@ -86,7 +89,6 @@ class MyTable extends Component {
   };
 
   handleSort = e => {
-    console.time("sort");
     try {
       if (e.target.nodeName === "TH") {
         this.props.header.forEach((x, i) => {
@@ -97,15 +99,15 @@ class MyTable extends Component {
         });
       }
     } catch (error) {}
-    console.timeEnd("sort");
   };
 
+  //#region SELECTION
   handleSelectionOnChange = (data, checked) => {
     let selectedRow = [];
     if (checked) {
       selectedRow = [...this.props.selectedRow, data];
     } else {
-      selectedRow = this.props.selectedRow.filter(x => !_.isEqual(x, data));
+      selectedRow = this.props.selectedRow.filter(x => !(x.id === data.id));
     }
     this.props.onSelectedChange && this.props.onSelectedChange(selectedRow);
   };
@@ -113,8 +115,10 @@ class MyTable extends Component {
   handleClearSelection = () => {
     this.props.onSelectedChange && this.props.onSelectedChange([]);
   };
+  //#endregion
 
   render() {
+    //#region DESTRUCTURING
     const {
       data,
       title,
@@ -132,6 +136,7 @@ class MyTable extends Component {
       orderBy,
       orderDirection
     } = this.state;
+    //#endregion
 
     //show order icon in header
     const headerWithOrder = header;
@@ -235,6 +240,25 @@ class MyTable extends Component {
     //Pagination
     const paginatedData = Paginate(filteredData, cPage, pageSize);
 
+    const search = searchBar && (
+      <Ref innerRef={this.createdRef}>
+        <Input
+          icon={
+            <Icon
+              name={this.state.searchValue.length ? "x" : "search"}
+              inverted
+              color="blue"
+              circular
+              link
+              onClick={this.handleOnSearchClear}
+            />
+          }
+          loading={this.state.isLoading}
+          placeholder="SEARCH"
+          onChange={this.handleOnSearch}
+        />
+      </Ref>
+    );
     const table = (
       <Table
         celled
@@ -256,6 +280,33 @@ class MyTable extends Component {
         footerRow={button && (selection ? footerWithCb : renderFooter)}
       />
     );
+    const pageSizeSelector = (
+      <Popup
+        content="Select row size per table"
+        position="top center"
+        trigger={
+          <Select
+            style={{ marginRight: 10, verticalAlign: "middle" }}
+            onChange={this.handleSelectPageSize}
+            compact
+            options={PageSize}
+            defaultValue={pageSize}
+          />
+        }
+      />
+    );
+    const pagination =
+      pageLength <= 1 ? (
+        ""
+      ) : (
+        <Pagination
+          activePage={cPage}
+          boundaryRange={2}
+          onPageChange={this.handlePageChange}
+          siblingRange={3}
+          totalPages={pageLength}
+        />
+      );
 
     return (
       <React.Fragment>
@@ -267,28 +318,9 @@ class MyTable extends Component {
               </Segment>
             </Grid.Column>
             <Grid.Column verticalAlign="middle" textAlign="right">
-              {searchBar && (
-                <Ref innerRef={this.createdRef}>
-                  <Input
-                    icon={
-                      <Icon
-                        name={this.state.searchValue.length ? "x" : "search"}
-                        inverted
-                        color="blue"
-                        circular
-                        link
-                        onClick={this.handleOnSearchClear}
-                      />
-                    }
-                    loading={this.state.isLoading}
-                    placeholder="SEARCH"
-                    onChange={this.handleOnSearch}
-                  />
-                </Ref>
-              )}
+              {search}
             </Grid.Column>
           </Grid.Row>
-
           <Grid.Row>
             <Grid.Column textAlign="center">{table}</Grid.Column>
           </Grid.Row>
@@ -296,31 +328,8 @@ class MyTable extends Component {
 
         <Grid verticalAlign="middle" padded>
           <Grid.Column textAlign="center">
-            <Popup
-              content="Select row size per table"
-              position="top center"
-              trigger={
-                <Select
-                  style={{ marginRight: 10, verticalAlign: "middle" }}
-                  onChange={this.handleSelectPageSize}
-                  compact
-                  options={PageSize}
-                  defaultValue={pageSize}
-                />
-              }
-            />
-
-            {pageLength <= 1 ? (
-              ""
-            ) : (
-              <Pagination
-                activePage={cPage}
-                boundaryRange={2}
-                onPageChange={this.handlePageChange}
-                siblingRange={3}
-                totalPages={pageLength}
-              />
-            )}
+            {pageSizeSelector}
+            {pagination}
           </Grid.Column>
         </Grid>
       </React.Fragment>
