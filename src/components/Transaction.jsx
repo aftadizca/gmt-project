@@ -152,6 +152,10 @@ class Transaction extends Component {
     this.setState({ selectedRow: data });
   };
 
+  handleTabChange = () => {
+    this.setState({ selectedRow: [] });
+  };
+
   render() {
     document.title = this.props.match.params.tab.toUpperCase() + " - " + TITLE;
     const { locationmaps, stoks, useRelation } = this.context;
@@ -599,6 +603,7 @@ class Transaction extends Component {
             pointing: true,
             inverted: true
           }}
+          onTabChange={this.handleTabChange}
           activeIndex={TabIndex[this.props.match.params.tab]}
           panes={panes}
         />
