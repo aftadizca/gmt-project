@@ -189,14 +189,16 @@ class Transaction extends Component {
         key: 3,
         content: "LOCATION",
         name: "locationID",
-        table: DB.locationmaps
+        table: DB.locationmaps,
+        skip: true
       },
       { key: 5, content: "LOT", name: "lot" },
       { key: 6, content: "INCOMING DATE", name: "comingDate" },
       { key: 7, content: "EXP", name: "expiredDate" },
       { key: 8, content: "QTY", name: "qty" },
-      { key: 4, content: "STATUS QC", name: "statusQCID" }
+      { key: 4, content: "STATUS QC", name: "statusQCID", skip: true }
     ];
+
     const materialStockRow = (data, i) => ({
       key: `row-${i}`,
       cells: [

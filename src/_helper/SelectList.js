@@ -21,11 +21,25 @@ export const TypeList = [
   { key: 5, value: "SEDOTAN", text: "SEDOTAN" }
 ];
 
-export function DinamicList(data, value, text) {
+/**P
+ * Create list for Dropdown
+ * @param {Array} data
+ * @param {String} value Value of List
+ * @param {Function} text Display list
+ */
+export function DinamicList(
+  data,
+  value,
+  text,
+  index = false,
+  label = { circular: true, empty: true, color: "blue" }
+) {
   try {
-    return data.map((x, i) => {
-      return { key: i, value: x[value], text: text(x) };
-    });
+    return data
+      .filter(x => x[value] !== undefined && !x["skip"])
+      .map((x, i) => {
+        return { key: i, value: index ? i : x[value], text: text(x), label };
+      });
   } catch (error) {
     console.log(error);
   }

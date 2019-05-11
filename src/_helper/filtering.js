@@ -1,19 +1,13 @@
 import _ from "lodash";
 
-export default function Filtering(data, rowBuilder, filterText) {
+export default function Filtering(data, rowBuilder, filterText, index) {
   console.time("filtering");
   if (data.length !== 0 && filterText.trim() !== "") {
     var x = data.filter((d, i) => {
-      let row = rowBuilder(d, i);
-      let found = false;
-      _.forEach(row.cells, (x, i2) => {
-        if (traverseSearch(x, filterText)) {
-          found = true;
-          return false;
-        }
-        return !found;
-      });
-      return found;
+      const row = rowBuilder(d, i).cells[index];
+      const rowSelect = typeof row === "object" ? row.content : row;
+      const regex = new RegExp(filterText, "i");
+      return regex.test(rowSelect.toString());
     });
     console.timeEnd("filtering");
     return x;

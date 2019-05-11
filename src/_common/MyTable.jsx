@@ -14,9 +14,10 @@ import {
   Button,
   Label,
   Popup,
-  Ref
+  Ref,
+  Dropdown
 } from "semantic-ui-react";
-import { PageSize } from "../_helper/SelectList";
+import { PageSize, DinamicList } from "../_helper/SelectList";
 import _ from "lodash";
 import Filtering from "../_helper/filtering";
 import { AppContext } from "../AppProvider";
@@ -45,12 +46,13 @@ class MyTable extends Component {
   //#endregion
 
   state = {
-    searchValue: "",
     pageSize: 10,
     currentPage: 1,
     isLoading: false,
     orderBy: this.props.orderBy,
-    orderDirection: this.props.orderDirection
+    orderDirection: this.props.orderDirection,
+    filterValue: 0,
+    searchValue: ""
   };
 
   shouldComponentUpdate(nextProps, nextState) {
@@ -101,6 +103,11 @@ class MyTable extends Component {
     } catch (error) {}
   };
 
+  handleFilterChange = (e, data) => {
+    console.log(data);
+    this.setState({ filterValue: data.value });
+  };
+
   //#region SELECTION
   handleSelectionOnChange = (data, checked) => {
     let selectedRow = [];
@@ -134,9 +141,12 @@ class MyTable extends Component {
       currentPage,
       searchValue,
       orderBy,
-      orderDirection
+      orderDirection,
+      filterValue
     } = this.state;
     //#endregion
+
+    const filterList = DinamicList(header, "name", x => x.content, true);
 
     //show order icon in header
     const headerWithOrder = header;
@@ -232,7 +242,8 @@ class MyTable extends Component {
       orderDirection
     );
     //filtering with search
-    const filteredData = Filtering(sortedData, body, searchValue) || sortedData;
+    const filteredData =
+      Filtering(sortedData, body, searchValue, filterValue) || sortedData;
     //count length row per page
     const pageLength = Math.ceil(filteredData.length / pageSize);
     //check if current page greater than page size
@@ -242,23 +253,44 @@ class MyTable extends Component {
 
     //#region RENDER ELEMENT
     const search = searchBar && (
-      <Ref innerRef={this.createdRef}>
-        <Input
-          icon={
-            <Icon
-              name={this.state.searchValue.length ? "x" : "search"}
-              inverted
-              color="blue"
-              circular
-              link
-              onClick={this.handleOnSearchClear}
+      <div>
+        <Segment.Group horizontal>
+          <Segment>
+            <Ref innerRef={this.createdRef}>
+              <Input
+                icon={
+                  <Icon
+                    name={this.state.searchValue.length ? "x" : "search"}
+                    inverted
+                    color="blue"
+                    circular
+                    link
+                    onClick={this.handleOnSearchClear}
+                  />
+                }
+                loading={this.state.isLoading}
+                placeholder="SEARCH"
+                fluid
+                onChange={this.handleOnSearch}
+              />
+            </Ref>
+          </Segment>
+          <Segment>
+            <Dropdown
+              button
+              className="button icon"
+              fluid
+              floating
+              scrolling
+              labeled
+              onChange={this.handleFilterChange}
+              icon="filter"
+              value={filterValue}
+              options={filterList}
             />
-          }
-          loading={this.state.isLoading}
-          placeholder="SEARCH"
-          onChange={this.handleOnSearch}
-        />
-      </Ref>
+          </Segment>
+        </Segment.Group>
+      </div>
     );
     const table = (
       <Table
@@ -313,7 +345,7 @@ class MyTable extends Component {
     return (
       <React.Fragment>
         <Grid textAlign="center">
-          <Grid.Row columns={2}>
+          <Grid.Row columns={2} verticalAlign="middle">
             <Grid.Column>
               <Segment color="blue" inverted>
                 <Header as="h1">{title} </Header>

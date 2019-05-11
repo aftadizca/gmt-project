@@ -12,10 +12,7 @@ export const LOCALE_DATE = "id-ID";
 export const OPTIONS_DATE = Object.freeze({
   year: "numeric",
   month: "2-digit",
-  day: "2-digit",
-  hourCycle: "h23",
-  hour: "2-digit",
-  minute: "2-digit"
+  day: "2-digit"
 });
 
 export const DB = Object.freeze({
