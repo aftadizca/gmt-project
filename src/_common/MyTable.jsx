@@ -278,7 +278,7 @@ class MyTable extends Component {
           <Segment>
             <Dropdown
               button
-              className="button icon"
+              className="icon"
               fluid
               floating
               scrolling

@@ -15,6 +15,18 @@ export const OPTIONS_DATE = Object.freeze({
   day: "2-digit"
 });
 
+export const CLEAVE_DATE_OPTIONS = Object.freeze({
+  date: {
+    date: true,
+    delimiter: "/",
+    datePattern: ["m", "d", "Y"]
+  },
+  numeric: {
+    numeral: true,
+    numeralThousandsGroupStyle: "thousand"
+  }
+});
+
 export const DB = Object.freeze({
   materials: "materials",
   statusQCs: "statusQCs",
@@ -32,4 +44,12 @@ export const INCOMING = Object.freeze({
   add: "INCOMING_ADD",
   edit: "INCOMING_EDIT",
   updateQC: "UPDATE_QC"
+});
+
+export const TAB = Object.freeze({
+  transaction: {
+    stok: 0,
+    incoming: 1,
+    outcoming: 2
+  }
 });

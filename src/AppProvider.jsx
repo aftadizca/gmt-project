@@ -155,7 +155,7 @@ class AppProvider extends Component {
 
       this.setState({ locationmaps: _.orderBy(locationmaps, "name", "asc") });
     },
-    useRelation: ({ db, key, value }) => {
+    useRelation: (db, key, value) => {
       //console.time("useRelation");
       try {
         let found = this.state[db].find(x => {

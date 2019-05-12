@@ -7,7 +7,9 @@ import {
   OPTIONS_DATE,
   STATUS_COLOR,
   INCOMING,
-  STOK
+  STOK,
+  CLEAVE_DATE_OPTIONS,
+  TAB
 } from "../_helper/constant";
 import { AppContext } from "./../AppProvider";
 import LabelTab from "./../_common/LabelTab";
@@ -158,6 +160,7 @@ class Transaction extends Component {
 
   render() {
     document.title = this.props.match.params.tab.toUpperCase() + " - " + TITLE;
+    //#region DESTUCTURING STATE & PROPS
     const { locationmaps, stoks, useRelation } = this.context;
     const {
       activeModal,
@@ -166,7 +169,7 @@ class Transaction extends Component {
       newStok,
       currentPageModal
     } = this.state;
-
+    //#endregion
     const incoming = stoks.filter(x => x.statusQCID === 1);
     const stokAll = stoks.filter(x => x.statusQCID > 1 && x.qty > 0);
 
@@ -183,49 +186,38 @@ class Transaction extends Component {
         content: "SUPLIER",
         name: "materialID",
         table: DB.materials,
-        value: "suplier"
+        skip: "true"
       },
       {
         key: 3,
         content: "LOCATION",
         name: "locationID",
         table: DB.locationmaps,
-        skip: true
+        skip: "true"
       },
       { key: 5, content: "LOT", name: "lot" },
       { key: 6, content: "INCOMING DATE", name: "comingDate" },
       { key: 7, content: "EXP", name: "expiredDate" },
       { key: 8, content: "QTY", name: "qty" },
-      { key: 4, content: "STATUS QC", name: "statusQCID", skip: true }
+      { key: 4, content: "STATUS QC", name: "statusQCID", skip: "true" }
     ];
-
     const materialStockRow = (data, i) => ({
       key: `row-${i}`,
       cells: [
         data.id,
         {
           key: `material-${i}`,
-          content: useRelation({
-            db: DB.materials,
-            key: data.materialID,
-            value: "name"
-          })
+          content: useRelation(DB.materials, data.materialID, "name")
         },
         {
           key: `suplier-${i}`,
-          content: useRelation({
-            db: DB.materials,
-            key: data.materialID,
-            value: "suplier"
-          })
+          content: useRelation(DB.materials, data.materialID, "suplier")
         },
         {
           key: `location-${i}`,
-          content: useRelation({
-            db: DB.locationmaps,
-            key: data.locationID,
-            value: "name"
-          }) || <Icon name="question" color="red" size="small" />
+          content: useRelation(DB.locationmaps, data.locationID, "name") || (
+            <Icon name="question" color="red" size="small" />
+          )
         },
         data.lot,
         {
@@ -247,17 +239,14 @@ class Transaction extends Component {
           key: `statusQC-${i}`,
           content: (
             <Label tag color={STATUS_COLOR[data.statusQCID]}>
-              {useRelation({
-                db: DB.statusQCs,
-                key: data.statusQCID,
-                value: "name"
-              })}
+              {useRelation(DB.statusQCs, data.statusQCID, "name")}
             </Label>
           )
         }
       ]
     });
 
+    //#region BUTTON BAR
     const incomingButton = (
       <React.Fragment>
         <Button.Group>
@@ -309,7 +298,8 @@ class Transaction extends Component {
         />
       </React.Fragment>
     );
-
+    //#endregion
+    //#region MODAL
     const updateStatusModal = (
       <Modal
         closeOnDimmerClick={false}
@@ -341,11 +331,11 @@ class Transaction extends Component {
               readOnly
               value={
                 selectedRowEdit.length &&
-                useRelation({
-                  db: DB.materials,
-                  key: selectedRowEdit[currentPageModal - 1].materialID,
-                  value: "name"
-                })
+                useRelation(
+                  DB.materials,
+                  selectedRowEdit[currentPageModal - 1].materialID,
+                  "name"
+                )
               }
             />
             <Form.Group widths="equal">
@@ -358,11 +348,11 @@ class Transaction extends Component {
                 fluid
                 value={
                   selectedRowEdit.length &&
-                  useRelation({
-                    db: DB.statusQCs,
-                    key: selectedRowEdit[currentPageModal - 1].statusQCID,
-                    value: "name"
-                  })
+                  useRelation(
+                    DB.statusQCs,
+                    selectedRowEdit[currentPageModal - 1].statusQCID,
+                    "name"
+                  )
                 }
               />
               <Form.Dropdown
@@ -419,7 +409,6 @@ class Transaction extends Component {
         </Modal.Actions>
       </Modal>
     );
-
     const addIncomingModal = (
       <Modal
         closeOnDimmerClick={false}
@@ -448,14 +437,10 @@ class Transaction extends Component {
             />
             <CleaveMod
               label="EXPIRED DATE"
-              placeholder="MM-DD-YYYY"
+              placeholder="MM/DD/YYYY"
               name="expiredDate"
               onChange={this.handleOnChangeAdd}
-              options={{
-                date: true,
-                delimiter: "/",
-                datePattern: ["m", "d", "Y"]
-              }}
+              options={CLEAVE_DATE_OPTIONS.date}
             />
             <CleaveMod
               label="LOT / PRODUCTION CODE"
@@ -471,11 +456,7 @@ class Transaction extends Component {
                 placeholder="TOTAL INCOMING"
                 onChange={this.handleOnChangeAdd}
                 rawValue={true}
-                options={{
-                  numeral: true,
-                  numeralThousandsGroupStyle: "thousand",
-                  rawValueTrimPrefix: true
-                }}
+                options={CLEAVE_DATE_OPTIONS.numeric}
               />
               <CleaveMod
                 label="QTY PER PALLET"
@@ -483,11 +464,7 @@ class Transaction extends Component {
                 placeholder="QTY PER PALLET"
                 rawValue={true}
                 onChange={this.handleOnChangeAdd}
-                options={{
-                  numeral: true,
-                  numeralThousandsGroupStyle: "thousand",
-                  rawValueTrimPrefix: true
-                }}
+                options={CLEAVE_DATE_OPTIONS.numeric}
               />
             </Form.Group>
           </Form>
@@ -504,12 +481,7 @@ class Transaction extends Component {
         </Modal.Actions>
       </Modal>
     );
-
-    const TabIndex = {
-      stok: 0,
-      incoming: 1,
-      outcoming: 2
-    };
+    //#endregion
 
     const panes = [
       {
@@ -606,7 +578,7 @@ class Transaction extends Component {
             inverted: true
           }}
           onTabChange={this.handleTabChange}
-          activeIndex={TabIndex[this.props.match.params.tab]}
+          activeIndex={TAB.transaction[this.props.match.params.tab]}
           panes={panes}
         />
       </React.Fragment>

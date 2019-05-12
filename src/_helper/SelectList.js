@@ -36,7 +36,7 @@ export function DinamicList(
 ) {
   try {
     return data
-      .filter(x => x[value] !== undefined && !x["skip"])
+      .filter(x => x[value] !== undefined && x.skip !== "true")
       .map((x, i) => {
         return { key: i, value: index ? i : x[value], text: text(x), label };
       });

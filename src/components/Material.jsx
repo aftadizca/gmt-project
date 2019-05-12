@@ -22,7 +22,7 @@ class Material extends Component {
 
   handleDelete = () => {
     const dataToDelete = [...this.state.selectedRow];
-    dataToDelete.forEach(x => (x.isActive = false));
+    dataToDelete.forEach(x => (x.isDeleted = true));
     console.log(dataToDelete);
     DeleteAlert.fire().then(result => {
       if (result.value) {
@@ -127,19 +127,12 @@ class Material extends Component {
       },
       { key: 2, content: "MATERIAL NAME", name: "name" },
       { key: 3, content: "SUPLIER", name: "suplier" },
-      { key: 4, content: "UNIT" },
-      { key: 5, content: "STATUS", name: "isActive" }
+      { key: 4, content: "UNIT" }
     ];
     const renderBodyRow = (data, i) => ({
       key: `row-${i}`,
-      disabled: !data.isActive,
-      cells: [
-        data.id,
-        data.name,
-        data.suplier,
-        data.unit,
-        { key: `status${i}`, content: data.isActive ? "Active" : "Not Active" }
-      ]
+      disabled: data.isDeleted,
+      cells: [data.id, data.name, data.suplier, data.unit]
     });
     const buttonFooter = (
       <Button.Group>
@@ -303,7 +296,7 @@ class Material extends Component {
             title="MATERIAL"
             header={headerRow}
             body={renderBodyRow}
-            data={materials.filter(x => x.isActive)}
+            data={materials.filter(x => !x.isDeleted)}
             orderBy={0}
             selection
             selectedRow={selectedRow}

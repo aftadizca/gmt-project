@@ -3,14 +3,10 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
-    "@fortawesome/fontawesome-svg-core": "^1.2.17",
-    "@fortawesome/free-solid-svg-icons": "^5.8.1",
-    "@fortawesome/react-fontawesome": "^0.1.4",
     "axios": "^0.18.0",
     "bootstrap": "^4.3.1",
     "chart.js": "^2.8.0",
     "cleave.js": "^1.4.10",
-    "dotnetify": "^3.3.1",
     "font-awesome": "^4.7.0",
     "linq": "^3.2.0",
     "lodash": "^4.17.11",
@@ -23,7 +19,8 @@
     "semantic-ui-css": "^2.4.1",
     "semantic-ui-react": "^0.86.0",
     "sweetalert2": "^8.8.1",
-    "sweetalert2-react-content": "^1.1.0"
+    "sweetalert2-react-content": "^1.1.0",
+    "tar": "^4.4.8"
   },
   "scripts": {
     "start": "react-scripts start",
