@@ -41,6 +41,7 @@ class Transaction extends Component {
     }
   };
 
+  //#region EVENT
   handleOnChangeQC = (e, data) => {
     console.log("handleOnChangeQC", { e, data });
     const selectedRowEdit = [...this.state.selectedRowEdit];
@@ -53,12 +54,12 @@ class Transaction extends Component {
 
   handleOnChangeAdd = _.debounce(
     (e, data) => {
-      console.log("handleOnChangeAdd", { e, data });
+      //console.log("handleOnChangeAdd", { e, data });
       let newStok = { ...this.state.newStok, [data.name]: data.value };
       this.setState({ newStok });
     },
     500,
-    { trailing: true }
+    { leading: true, trailing: true }
   );
 
   //handle open and close modal
@@ -139,9 +140,15 @@ class Transaction extends Component {
       case INCOMING.add:
         const newStok = {
           ...this.state.newStok,
-          expiredDate: new Date(this.state.newStok.expiredDate).toJSON()
+          expiredDate: new Date(this.state.newStok.expiredDate).toISOString()
         };
-        this.context.postAPI("stok", newStok, () => this.resetModal());
+        this.context.postAPI(
+          "stok",
+          newStok,
+          () => this.resetModal(),
+          response =>
+            Toast("Opps.. Something wrong.. Try Again!", "error").fire()
+        );
         break;
 
       default:
@@ -157,6 +164,8 @@ class Transaction extends Component {
   handleTabChange = () => {
     this.setState({ selectedRow: [] });
   };
+
+  //#endregion
 
   render() {
     document.title = this.props.match.params.tab.toUpperCase() + " - " + TITLE;
