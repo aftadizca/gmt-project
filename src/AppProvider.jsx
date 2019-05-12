@@ -49,7 +49,12 @@ class AppProvider extends Component {
         .post(url, postdata)
         .then(({ status, data }) => {
           if (status === 201) {
-            const x = [data, ...this.state[state]];
+            let x = [];
+            if (typeof data === "object") {
+              x = [...data, ...this.state[state]];
+            } else {
+              x = [data, ...this.state[state]];
+            }
             this.setState({ [state]: x });
             Loading.close();
             success(data);
