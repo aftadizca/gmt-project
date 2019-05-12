@@ -53,3 +53,18 @@ export const TAB = Object.freeze({
     outcoming: 2
   }
 });
+
+export const MONTH_NAME = Object.freeze([
+  "January",
+  "February",
+  "Maret",
+  "April",
+  "May",
+  "June",
+  "July",
+  "August",
+  "September",
+  "October",
+  "November",
+  "December"
+]);

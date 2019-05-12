@@ -20,16 +20,14 @@ export function checkForm(data) {
   let valid = true;
   data &&
     Object.keys(data).forEach(x => {
-      if (Number.isInteger(data[x])) {
-      } else {
-        if (
-          data[x] === "" ||
-          data[x] === null ||
-          data[x] === undefined ||
-          data[x].toString() === "NaN"
-        ) {
-          valid = false;
-        }
+      if (
+        data[x] === "" ||
+        data[x] === null ||
+        data[x] === undefined ||
+        data[x].toString() === "NaN" ||
+        data[x] === 0
+      ) {
+        valid = false;
       }
     });
   return valid;
