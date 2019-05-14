@@ -108,7 +108,11 @@ class AppProvider extends Component {
             console.error("PUT ERROR", errors.response);
             if (errors.response.status >= 400) {
               Loading.close();
-              error(errors.response);
+              if (error) {
+                error(errors.response);
+              } else {
+                Toast(errors.response.data, "error").fire();
+              }
             } else if (errors.response.status >= 500) {
               Loading.close();
               Toast("Server Error!", "error").fire();
@@ -124,14 +128,12 @@ class AppProvider extends Component {
           api
             .delete(`${url}`, { data: data })
             .then(({ status }) => {
-              if (status === 200) {
-                console.time("delete");
+              if (status === 204) {
                 const filtered = _.differenceBy(this.state[state], data, "id");
-                console.timeEnd("delete");
-                this.setState(
-                  { [state]: filtered },
-                  () => success && success()
-                );
+                this.setState({
+                  [state]: _.orderBy([...data, ...filtered], "id", "asc")
+                });
+                success && success();
                 Loading.close();
                 Toast("Successfully delete item!").fire();
               }
@@ -139,7 +141,7 @@ class AppProvider extends Component {
             .catch(errors => {
               Loading.close();
               error(errors);
-              Toast("Delete failed", "error").fire();
+              Toast(errors.data, "error").fire();
             });
         }
       });
