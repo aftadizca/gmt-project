@@ -7,6 +7,30 @@ import { DB } from "./_helper/constant";
 export const AppContext = React.createContext();
 
 class AppProvider extends Component {
+  handleApiError = (err, errCall) => {
+    if (err.response) {
+      switch (err.response.status) {
+        case 400:
+        case 401:
+        case 404:
+          Loading.close();
+          if (errCall) {
+            errCall(err.response);
+          } else {
+            Toast(err.response.data, "error").fire();
+          }
+          break;
+        default:
+          Loading.close();
+          Toast("Server error !!", "error").fire();
+          break;
+      }
+    } else {
+      Loading.close();
+      Toast("Network error !!", "error").fire();
+    }
+  };
+
   state = {
     [DB.materials]: [],
     [DB.statusQCs]: [],
@@ -29,17 +53,8 @@ class AppProvider extends Component {
           success && success();
           Loading.close();
         })
-        .catch(({ response }) => {
-          if (response) {
-            console.error("GET ERROR", response);
-            if (response.status >= 400) {
-              Loading.close();
-              Toast("Server error", "error").fire();
-            }
-          } else {
-            Loading.close();
-            Toast("Server not Available", "error", false).fire();
-          }
+        .catch(err => {
+          this.handleApiError(err);
         });
     },
     postAPI: (url, postdata, success, error) => {
@@ -61,63 +76,43 @@ class AppProvider extends Component {
             Toast("Item succesfully added!").fire();
           }
         })
-        .catch(({ response }) => {
-          if (response) {
-            console.error("POST ERROR", response);
-            if (response.status >= 400) {
-              Loading.close();
-              error(response);
-            } else if (response.status >= 500) {
-              Loading.close();
-              Toast("Server Error!", "error").fire();
-            }
-          }
+        .catch(err => {
+          this.handleApiError(err, error);
         });
     },
-    putAPI: (url, id, postdata, success, error) => {
+    putAPI: (url, postdata, success, error) => {
       Loading.fire();
-      console.log("putAPI", { url, id, postdata, success, error });
+      console.log("putAPI", {
+        url,
+        postdata,
+        success,
+        error
+      });
       const state = url + "s";
       api
-        .put(`${url}${id ? "/" + id : ""}`, postdata)
-        .then(({ status }) => {
-          if (status === 204) {
-            if (id) {
-              const m = this.state[state].filter(x => x.id !== postdata.id);
+        .put(`${url}`, postdata)
+        .then(({ status, data }) => {
+          console.log("is array", Array.isArray(data));
+          if (status === 200) {
+            if (!Array.isArray(data)) {
+              const m = this.state[state].filter(x => x.id !== data.id);
               this.setState({
-                [state]: _.orderBy([postdata, ...m], "id", "asc")
+                [state]: _.orderBy([data, ...m], "id", "asc")
               });
             } else {
-              const filtered = _.differenceBy(
-                this.state[state],
-                postdata,
-                "id"
-              );
+              const filtered = _.differenceBy(this.state[state], data, "id");
               this.setState({
-                [state]: _.orderBy([...postdata, ...filtered], "id", "asc")
+                [state]: _.orderBy([...data, ...filtered], "id", "asc")
               });
             }
-
-            Loading.close();
-            success();
-            Toast("Item successfully edited!").fire();
           }
+          Loading.close();
+          success && success();
+          Toast("Item successfully edited!").fire();
         })
-        .catch(errors => {
-          if (errors.response) {
-            console.error("PUT ERROR", errors.response);
-            if (errors.response.status >= 400) {
-              Loading.close();
-              if (error) {
-                error(errors.response);
-              } else {
-                Toast(errors.response.data, "error").fire();
-              }
-            } else if (errors.response.status >= 500) {
-              Loading.close();
-              Toast("Server Error!", "error").fire();
-            }
-          }
+        .catch(err => {
+          console.error("PUT ERROR", err.response);
+          this.handleApiError(err, error);
         });
     },
     deleteAPI: (url, data, success, error) => {
@@ -138,10 +133,8 @@ class AppProvider extends Component {
                 Toast("Successfully delete item!").fire();
               }
             })
-            .catch(errors => {
-              Loading.close();
-              error(errors);
-              Toast(errors.data, "error").fire();
+            .catch(err => {
+              this.handleApiError(err, error);
             });
         }
       });
@@ -163,15 +156,12 @@ class AppProvider extends Component {
       this.setState({ locationmaps: _.orderBy(locationmaps, "name", "asc") });
     },
     useRelation: (db, key, value) => {
-      //console.time("useRelation");
       try {
         let found = this.state[db].find(x => {
           return x.id === key;
         });
-        //console.timeEnd("useRelation");
         return found[value];
       } catch (error) {
-        //console.log({ error });
         return false;
       }
     }
