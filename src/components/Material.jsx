@@ -5,7 +5,6 @@ import { UnitList } from "../_helper/SelectList";
 import { TypeList } from "./../_helper/SelectList";
 import { TITLE } from "../_helper/constant";
 import { AppContext } from "./../AppProvider";
-import { DeleteAlert } from "../_helper/CostumToast";
 
 class Material extends Component {
   static contextType = AppContext;
@@ -21,16 +20,12 @@ class Material extends Component {
   }
 
   handleDelete = () => {
-    const dataToDelete = [...this.state.selectedRow];
-    dataToDelete.forEach(x => (x.isDeleted = true));
-    console.log(dataToDelete);
-    DeleteAlert.fire().then(result => {
-      if (result.value) {
-        this.context.putAPI("material", undefined, dataToDelete, () =>
-          this.setState({ selectedRow: [] })
-        );
-      }
+    const dataToDelete = this.state.selectedRow.map(x => {
+      return { ...x, isDeleted: true };
     });
+    this.context.deleteAPI("material", dataToDelete, () =>
+      this.setState({ selectedRow: [] })
+    );
   };
 
   //handle open and close Modal
@@ -61,7 +56,6 @@ class Material extends Component {
       if (data.action === "Edit") {
         this.context.putAPI(
           "material",
-          this.state.material.id,
           this.state.material,
           () => {
             this.setState({
@@ -88,7 +82,7 @@ class Material extends Component {
           },
           response => {
             this.setState({
-              modalError: { error: true, msg: response.data.error }
+              modalError: { error: true, msg: response.data }
             });
           }
         );
