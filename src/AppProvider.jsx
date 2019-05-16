@@ -7,7 +7,7 @@ import { DB } from "./_helper/constant";
 export const AppContext = React.createContext();
 
 class AppProvider extends Component {
-  handleApiError = (err, errCall) => {
+  handleApiError = (err, errCall, repeatFunc) => {
     if (err.response) {
       switch (err.response.status) {
         case 400:
@@ -26,10 +26,18 @@ class AppProvider extends Component {
           break;
       }
     } else {
-      Loading.close();
-      Toast("Network error !!", "error").fire();
+      if (this.timer) {
+      } else {
+        Loading.close();
+        this.timer = setInterval(() => {
+          repeatFunc();
+        }, 2000);
+        Toast("Network error !!", "error", false).fire();
+      }
     }
   };
+
+  timer = false;
 
   state = {
     [DB.materials]: [],
@@ -38,7 +46,7 @@ class AppProvider extends Component {
     [DB.locations]: [],
     [DB.stoks]: [],
     getAPI: (url, success) => {
-      Loading.fire();
+      !this.timer && Loading.fire();
       const prom = [];
       url.forEach((x, i) => {
         prom[i] = api.get(x);
@@ -51,10 +59,14 @@ class AppProvider extends Component {
           });
           this.setState(d);
           success && success();
+          clearInterval(this.timer);
+          this.timer = false;
           Loading.close();
         })
         .catch(err => {
-          this.handleApiError(err);
+          this.handleApiError(err, undefined, () =>
+            this.state.getAPI(url, success)
+          );
         });
     },
     postAPI: (url, postdata, success, error) => {
@@ -65,7 +77,7 @@ class AppProvider extends Component {
         .then(({ status, data }) => {
           if (status === 201) {
             let x = [];
-            if (typeof data === "object") {
+            if (Array.isArray(data)) {
               x = [...data, ...this.state[state]];
             } else {
               x = [data, ...this.state[state]];
