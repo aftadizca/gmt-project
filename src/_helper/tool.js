@@ -32,3 +32,13 @@ export function checkForm(data) {
     });
   return valid;
 }
+
+export function randomRgba(tranparensy) {
+  var o = Math.round,
+    r = Math.random,
+    s = 255;
+  return (
+    "rgba(" + o(r() * s) + "," + o(r() * s) + ",255," + tranparensy ||
+    r().toFixed(1) + ")"
+  );
+}

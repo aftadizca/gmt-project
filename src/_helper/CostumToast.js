@@ -28,11 +28,14 @@ export const Loading = Swal.mixin({
 export const Toast = (message, type = "success", timer = 5000) =>
   Swal.mixin({
     toast: true,
-    position: "top-end",
+    position: "bottom-start",
     showConfirmButton: false,
     timer: timer,
     type: type,
     title: message,
-    background: "#f3f4f5",
-    padding: "2rem"
+    background: "rgba(50, 50, 50, 0.85)",
+    padding: "10px",
+    customClass: {
+      title: "toast-title"
+    }
   });

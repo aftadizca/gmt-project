@@ -6,6 +6,7 @@ const CleaveMod = props => {
     <div className="field">
       {props.label ? <label>{props.label}</label> : ""}
       <Cleave
+        readOnly={props.readOnly}
         placeholder={props.placeholder}
         onChange={e =>
           props.onChange(e, {

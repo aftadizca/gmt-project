@@ -262,3 +262,15 @@ code {
 .ui.popup {
   z-index: 900;
 }
+
+.toast-title {
+  font-size: 1.2em !important;
+  font-weight: 900 !important;
+  padding: 10px !important;
+  color: white !important;
+  font-family: Lato, "Helvetica Neue", Arial, Helvetica, sans-serif !important;
+}
+
+input:read-only {
+  background: rgba(0, 0, 0, 0.23) !important;
+}

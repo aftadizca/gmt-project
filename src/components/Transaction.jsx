@@ -42,15 +42,19 @@ class Transaction extends Component {
   };
 
   //#region EVENT
-  handleOnChangeQC = (e, data) => {
-    console.log("handleOnChangeQC", { e, data });
-    const selectedRowEdit = [...this.state.selectedRowEdit];
-    selectedRowEdit[data.selectedrowindex] = {
-      ...selectedRowEdit[data.selectedrowindex],
-      [data.name]: data.value
-    };
-    this.setState({ selectedRowEdit });
-  };
+  handleOnChangeQC = _.debounce(
+    (e, data) => {
+      console.log("handleOnChangeQC", { e, data });
+      const selectedRowEdit = [...this.state.selectedRowEdit];
+      selectedRowEdit[data.selectedrowindex] = {
+        ...selectedRowEdit[data.selectedrowindex],
+        [data.name]: data.value
+      };
+      this.setState({ selectedRowEdit });
+    },
+    500,
+    { leading: true, trailing: true }
+  );
 
   handleOnChangeAdd = _.debounce(
     (e, data) => {
@@ -72,12 +76,15 @@ class Transaction extends Component {
 
     switch (data.action) {
       case STOK.updateQC:
-        const selectedRowEdit = _.cloneDeep(this.state.selectedRow);
-        selectedRowEdit.map(x => (x.statusQCID = data.statusid));
-        if (_.find(selectedRowEdit, ["locationID", 0])) {
+        const selectedRowEdit = this.state.selectedRow.map(x => {
+          return { ...x, statusQCID: data.statusid };
+        });
+        //jika lokasi kosong tampilkan modal
+        if (_.find(selectedRowEdit, ["locationID", "0"])) {
           this.setState({ selectedRowEdit }, () =>
             this.setState({ activeModal: STOK.updateQC })
           );
+          //jika ada lokasi do update StatusQC
         } else {
           this.setState({ selectedRowEdit }, () =>
             this.handleSubmit(e, { action: STOK.updateQC })
@@ -127,7 +134,6 @@ class Transaction extends Component {
       case STOK.updateQC:
         this.context.putAPI(
           "stok",
-          undefined,
           selectedRowEdit,
           () => {
             this.resetModal();
@@ -179,8 +185,8 @@ class Transaction extends Component {
       currentPageModal
     } = this.state;
     //#endregion
-    const incoming = stoks.filter(x => x.statusQCID === 1);
-    const stokAll = stoks.filter(x => x.statusQCID > 1 && x.qty > 0);
+    const incoming = stoks.filter(x => x.statusQCID === "1");
+    const stokAll = stoks.filter(x => x.statusQCID !== "1" && x.qty > 0);
 
     const materialStockHeader = [
       { key: 1, content: "TRACE ID", name: "id" },
@@ -325,7 +331,7 @@ class Transaction extends Component {
         </Modal.Header>
         <Modal.Content>
           <Form>
-            <Form.Input
+            <CleaveMod
               label="TRACE ID"
               name="id"
               readOnly
@@ -410,7 +416,7 @@ class Transaction extends Component {
           <Button
             color="blue"
             onClick={this.handleSubmit}
-            disabled={_.some(selectedRowEdit, ["locationID", 0])}
+            disabled={_.some(selectedRowEdit, ["locationID", "0"])}
             action={STOK.updateQC}
           >
             <Icon name="save" /> SAVE
