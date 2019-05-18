@@ -76,9 +76,13 @@ class MyTable extends Component {
   };
   //#endregion
 
-  changeValue = _.debounce(function(value) {
-    this.setState({ searchValue: value, isLoading: false });
-  }, 1000);
+  changeValue = _.debounce(
+    function(value) {
+      this.setState({ searchValue: value, isLoading: false });
+    },
+    500,
+    { trailing: true }
+  );
 
   handleOnSearch = (e, data) => {
     e.persist();

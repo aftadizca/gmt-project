@@ -53,15 +53,16 @@ class AppProvider extends Component {
       });
       Promise.all(prom)
         .then(data => {
+          clearInterval(this.timer);
+          this.timer = false;
+          Loading.close();
           const d = {};
           data.forEach((x, i) => {
+            console.log(url[i]);
             d[url[i] + "s"] = x.data;
           });
           this.setState(d);
           success && success();
-          clearInterval(this.timer);
-          this.timer = false;
-          Loading.close();
         })
         .catch(err => {
           this.handleApiError(err, undefined, () =>
@@ -151,21 +152,30 @@ class AppProvider extends Component {
         }
       });
     },
-    locationMap: () => {
-      const stok = this.state.stoks.filter(x => x.locationID !== 0);
-      const locationmaps = this.state.locations.map(x => {
-        const traceID = _.find(stok, ["locationID", x.id]);
-        if (traceID) {
-          const materialName = this.state[DB.materials].find(
-            x => x.id === traceID.materialID
-          );
-          return { ...x, traceID: traceID.id, materialName: materialName.name };
-        } else {
-          return { ...x, traceID: "", materialName: "" };
-        }
+    locationMap: async () => {
+      return await new Promise(resolve => {
+        setTimeout(() => {
+          const locationmaps = this.state.locations.map(x => {
+            const traceID = _.find(stok, ["locationID", x.id]);
+            if (traceID) {
+              const materialName = this.state[DB.materials].find(
+                x => x.id === traceID.materialID
+              );
+              return {
+                ...x,
+                traceID: traceID.id,
+                materialName: materialName.name
+              };
+            } else {
+              return { ...x, traceID: "", materialName: "" };
+            }
+          });
+          resolve(locationmaps);
+        }, 1000);
+        const stok = this.state.stoks.filter(x => x.locationID !== 0);
+      }).then(locationmaps => {
+        this.setState({ locationmaps: _.orderBy(locationmaps, "name", "asc") });
       });
-
-      this.setState({ locationmaps: _.orderBy(locationmaps, "name", "asc") });
     },
     useRelation: (db, key, value) => {
       try {
@@ -180,7 +190,7 @@ class AppProvider extends Component {
   };
 
   componentDidMount() {
-    this.state.getAPI(["material", "statusQC", "location", "stok"], () =>
+    this.state.getAPI(["stok", "statusQC", "location", "material"], () =>
       this.state.locationMap()
     );
   }
