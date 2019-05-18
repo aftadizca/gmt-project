@@ -108,7 +108,6 @@ class MyTable extends Component {
   };
 
   handleFilterChange = (e, data) => {
-    console.log(data);
     this.setState({ filterValue: data.value });
   };
 
@@ -125,6 +124,10 @@ class MyTable extends Component {
 
   handleClearSelection = () => {
     this.props.onSelectedChange && this.props.onSelectedChange([]);
+  };
+
+  handleSellectAll = data => {
+    this.props.onSelectedChange && this.props.onSelectedChange(data);
   };
   //#endregion
 
@@ -162,6 +165,32 @@ class MyTable extends Component {
       }
     });
 
+    const orderFunction = (header, x) => {
+      if (header.table) {
+        return this.context.useRelation(
+          header.table,
+          x[header.name],
+          header.value || "name"
+        );
+      } else {
+        return x[header.name];
+      }
+    };
+    const sortedData = _.orderBy(
+      data,
+      x => orderFunction(header[orderBy], x),
+      orderDirection
+    );
+    //filtering with search
+    const filteredData =
+      Filtering(sortedData, body, searchValue, filterValue) || sortedData;
+    //count length row per page
+    const pageLength = Math.ceil(filteredData.length / pageSize);
+    //check if current page greater than page size
+    const cPage = currentPage > pageLength ? pageLength : currentPage;
+    //Pagination
+    const paginatedData = Paginate(filteredData, cPage, pageSize);
+
     //header and body with checkbox
     const hr = [{ key: "cb-0", content: "" }, ...headerWithOrder];
     const br = (data, i) => ({
@@ -191,16 +220,28 @@ class MyTable extends Component {
         colSpan: headerWithOrder.length,
         content: (
           <React.Fragment>
-            {this.props.selectedRow.length !== 0 && (
-              <Button.Group onClick={this.handleClearSelection}>
-                <Button as="div" labelPosition="left">
+            <Button.Group>
+              {this.props.selectedRow.length !== 0 && (
+                <Button
+                  as="div"
+                  labelPosition="left"
+                  onClick={this.handleClearSelection}
+                >
                   <Label basic color="red">
                     {this.props.selectedRow.length}
                   </Label>
-                  <MyTable.Button label="Unselect" icon="erase" color="red" />
+                  <MyTable.Button label="Deselect" icon="erase" color="red" />
                 </Button>
-              </Button.Group>
-            )}{" "}
+              )}
+            </Button.Group>{" "}
+            <Button.Group>
+              <MyTable.Button
+                label="Select all"
+                icon="check"
+                color="blue"
+                onClick={() => this.handleSellectAll(paginatedData)}
+              />
+            </Button.Group>{" "}
             {button}
           </React.Fragment>
         ),
@@ -228,32 +269,6 @@ class MyTable extends Component {
       ],
       textAlign: "center"
     });
-
-    const orderFunction = (header, x) => {
-      if (header.table) {
-        return this.context.useRelation({
-          db: header.table,
-          key: x[header.name],
-          value: header.value || "name"
-        });
-      } else {
-        return x[header.name];
-      }
-    };
-    const sortedData = _.orderBy(
-      data,
-      x => orderFunction(header[orderBy], x),
-      orderDirection
-    );
-    //filtering with search
-    const filteredData =
-      Filtering(sortedData, body, searchValue, filterValue) || sortedData;
-    //count length row per page
-    const pageLength = Math.ceil(filteredData.length / pageSize);
-    //check if current page greater than page size
-    const cPage = currentPage > pageLength ? pageLength : currentPage;
-    //Pagination
-    const paginatedData = Paginate(filteredData, cPage, pageSize);
 
     //#region RENDER ELEMENT
     const search = searchBar && (
