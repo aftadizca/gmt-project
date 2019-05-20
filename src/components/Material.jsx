@@ -66,7 +66,7 @@ class Material extends Component {
           },
           response =>
             this.setState({
-              modalError: { error: true, msg: response.data.error }
+              modalError: { error: true, msg: response.data }
             })
         );
       } else if (data.action === "Add") {

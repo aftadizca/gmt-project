@@ -48,13 +48,13 @@ class Home extends Component {
             </Segment>
             <Segment raised>
               <Label as="h5" color="blue" ribbon size="huge">
-                MATERIAL INCOMING
+                MATERIAL STOK
               </Label>
               <Line data={data} />
             </Segment>
             <Segment raised>
               <Label as="h5" color="blue" ribbon size="huge">
-                MATERIAL INCOMING
+                MATERIAL OUTCOMING
               </Label>
               <Line data={data} />
             </Segment>

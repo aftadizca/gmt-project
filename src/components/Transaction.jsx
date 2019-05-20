@@ -66,6 +66,32 @@ class Transaction extends Component {
     { leading: true, trailing: true }
   );
 
+  handleOnChangeEdit = _.debounce(
+    (e, data) => {
+      console.log("handleEdit", { data });
+      let selectedRowEdit;
+      if (data.value) {
+        selectedRowEdit = [
+          {
+            ...this.state.selectedRowEdit[0],
+            [data.name]: data.value
+          }
+        ];
+      } else {
+        selectedRowEdit = [
+          {
+            ...this.state.selectedRowEdit[0],
+            [data.name]: data.placeholder
+          }
+        ];
+      }
+
+      this.setState({ selectedRowEdit });
+    },
+    500,
+    { leading: true, trailing: true }
+  );
+
   //handle open and close modal
   handleModal = (e, data) => {
     console.log("handleModal", { e, data });
@@ -92,11 +118,9 @@ class Transaction extends Component {
         }
         break;
 
-      case INCOMING.add:
-        this.setState({ activeModal: INCOMING.add });
-        break;
-
       default:
+        this.setState({ activeModal: data.action });
+        this.setState({ selectedRowEdit: [...this.state.selectedRow] });
         break;
     }
   };
@@ -152,8 +176,26 @@ class Transaction extends Component {
           "stok",
           newStok,
           () => this.resetModal(),
-          response =>
-            Toast("Opps.. Something wrong.. Try Again!", "error").fire()
+          () => Toast("Opps.. Something wrong.. Try Again!", "error").fire()
+        );
+        break;
+
+      case INCOMING.edit:
+        const putData = [
+          {
+            ...selectedRowEdit[0],
+            expiredDate: new Date(selectedRowEdit[0].expiredDate).toISOString()
+          }
+        ];
+        this.context.putAPI(
+          "stok",
+          putData,
+          () => {
+            this.resetModal();
+            this.setState({ selectedRow: [], selectedRowEdit: [] });
+            this.context.locationMap();
+          },
+          response => Toast(response.data, "error").fire()
         );
         break;
 
@@ -279,8 +321,9 @@ class Transaction extends Component {
           <MyTable.Button
             label="Edit"
             icon="edit"
+            action={INCOMING.edit}
             disabled={!(selectedRow.length === 1)}
-            //onClick={this.handleAddMaterialOpen}
+            onClick={this.handleModal}
           />
         </Button.Group>{" "}
         <QCButton
@@ -496,6 +539,180 @@ class Transaction extends Component {
         </Modal.Actions>
       </Modal>
     );
+    const editIncomingModal = (
+      <Modal
+        closeOnDimmerClick={false}
+        closeIcon
+        size="small"
+        open={activeModal === INCOMING.edit}
+        onClose={this.handleModal}
+      >
+        <Modal.Header>EDIT INCOMING MATERIAL</Modal.Header>
+        <Modal.Content>
+          <Form>
+            <CleaveMod
+              label="TRACE ID"
+              name="id"
+              readOnly
+              value={selectedRow.length && selectedRow[0].id}
+            />
+            <Form.Dropdown
+              label="MATERIAL NAME"
+              name="materialID"
+              placeholder="MATERIAL - SUPLIER"
+              search
+              fluid
+              selection
+              options={DinamicList(
+                this.context[DB.materials],
+                "id",
+                x => `${x.name} - ${x.suplier}`
+              )}
+              onChange={this.handleOnChangeEdit}
+              value={selectedRowEdit.length && selectedRowEdit[0].materialID}
+            />
+            <Form.Group widths="equal">
+              <CleaveMod
+                label="QTY"
+                name="qty"
+                rawValue={true}
+                placeholder={selectedRow.length && selectedRow[0].qty}
+                onChange={this.handleOnChangeEdit}
+                options={CLEAVE_DATE_OPTIONS.numeric}
+              />
+              <CleaveMod
+                label="EXPIRED DATE"
+                name="expiredDate"
+                placeholder={
+                  selectedRowEdit.length &&
+                  new Date(
+                    Date.parse(selectedRow[0].expiredDate)
+                  ).toLocaleDateString(LOCALE_DATE, OPTIONS_DATE)
+                }
+                onChange={this.handleOnChangeEdit}
+                options={CLEAVE_DATE_OPTIONS.date}
+              />
+              <CleaveMod
+                label="LOT NUMBER"
+                name="lot"
+                placeholder={selectedRow.length && selectedRow[0].lot}
+              />
+              <Form.Dropdown
+                name="locationID"
+                label="LOCATION"
+                placeholder="Select Location"
+                search
+                fluid
+                selection
+                onChange={this.handleOnChangeEdit}
+                options={DinamicList(
+                  locationmaps.filter(x => x.traceID === ""),
+                  "id",
+                  x => x.name
+                )}
+                value={selectedRowEdit.length && selectedRowEdit[0].locationID}
+              />
+            </Form.Group>
+          </Form>
+        </Modal.Content>
+        <Modal.Actions>
+          <Button
+            color="blue"
+            onClick={this.handleSubmit}
+            action={INCOMING.edit}
+          >
+            <Icon name="save" /> SAVE
+          </Button>
+        </Modal.Actions>
+      </Modal>
+    );
+    const editStokModal = (
+      <Modal
+        closeOnDimmerClick={false}
+        closeIcon
+        size="small"
+        open={activeModal === STOK.edit}
+        onClose={this.handleModal}
+      >
+        <Modal.Header>EDIT STOK MATERIAL</Modal.Header>
+        <Modal.Content>
+          <Form>
+            <CleaveMod
+              label="TRACE ID"
+              name="id"
+              readOnly
+              value={selectedRow.length && selectedRow[0].id}
+            />
+            <CleaveMod
+              label="MATERIAL NAME"
+              name="materialID"
+              placeholder="MATERIAL - SUPLIER"
+              search
+              fluid
+              selection
+              readOnly
+              value={selectedRowEdit.length && selectedRowEdit[0].materialID}
+            />
+            <Form.Group widths="equal">
+              <CleaveMod
+                label="QTY"
+                name="qty"
+                readOnly
+                rawValue={true}
+                value={selectedRow.length && selectedRow[0].qty}
+                options={CLEAVE_DATE_OPTIONS.numeric}
+              />
+              <CleaveMod
+                label="EXPIRED DATE"
+                name="expiredDate"
+                readOnly
+                value={
+                  selectedRowEdit.length &&
+                  new Date(
+                    Date.parse(selectedRow[0].expiredDate)
+                  ).toLocaleDateString(LOCALE_DATE, OPTIONS_DATE)
+                }
+                options={CLEAVE_DATE_OPTIONS.date}
+              />
+              <CleaveMod
+                label="LOT NUMBER"
+                name="lot"
+                readOnly
+                value={selectedRow.length && selectedRow[0].lot}
+              />
+              <Form.Dropdown
+                name="locationID"
+                label="LOCATION"
+                search
+                fluid
+                selection
+                onChange={this.handleOnChangeEdit}
+                options={DinamicList(
+                  locationmaps.filter(
+                    x =>
+                      x.traceID === "" ||
+                      (selectedRowEdit.length &&
+                        x.locationID !== selectedRowEdit[0].locationID)
+                  ),
+                  "id",
+                  x => x.name
+                )}
+                value={selectedRowEdit.length && selectedRowEdit[0].locationID}
+              />
+            </Form.Group>
+          </Form>
+        </Modal.Content>
+        <Modal.Actions>
+          <Button
+            color="blue"
+            onClick={this.handleSubmit}
+            action={INCOMING.edit}
+          >
+            <Icon name="save" /> SAVE
+          </Button>
+        </Modal.Actions>
+      </Modal>
+    );
     //#endregion
 
     const panes = [
@@ -552,6 +769,7 @@ class Transaction extends Component {
               selectedRow={selectedRow}
               onSelectedChange={this.handleSelectedChange}
               orderBy={0}
+              orderDirection="desc"
               searchBar
               selection
               button={incomingButton}
@@ -585,6 +803,8 @@ class Transaction extends Component {
       <React.Fragment>
         {updateStatusModal}
         {addIncomingModal}
+        {editIncomingModal}
+        {editStokModal}
         <Tab
           menu={{
             borderless: true,

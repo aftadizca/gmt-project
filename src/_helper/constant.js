@@ -7,7 +7,7 @@ export const STATUS_COLOR = Object.freeze({
   4: "red"
 });
 
-export const LOCALE_DATE = "id-ID";
+export const LOCALE_DATE = "en-En";
 
 export const OPTIONS_DATE = Object.freeze({
   year: "numeric",

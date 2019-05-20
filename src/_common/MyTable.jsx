@@ -167,6 +167,7 @@ class MyTable extends Component {
 
     const orderFunction = (header, x) => {
       if (header.table) {
+        console.log("test");
         return this.context.useRelation(
           header.table,
           x[header.name],
@@ -202,7 +203,11 @@ class MyTable extends Component {
           content: (
             <Checkbox
               toggle
-              checked={_.find(this.props.selectedRow, data) ? true : false}
+              checked={
+                this.props.selectedRow.find(x => x.id === data.id)
+                  ? true
+                  : false
+              }
               onChange={(e, props) =>
                 this.handleSelectionOnChange(data, props.checked)
               }
