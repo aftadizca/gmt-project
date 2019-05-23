@@ -398,15 +398,15 @@ class MyTable extends Component {
 MyTable.Button = props => {
   return (
     <Button
-      animated
+      animated="fade"
       size="mini"
       action={props.action}
       color={props.color || "blue"}
       onClick={props.onClick}
       disabled={props.disabled}
     >
-      <Button.Content visible>{props.label}</Button.Content>
-      <Button.Content hidden>
+      <Button.Content hidden>{props.label}</Button.Content>
+      <Button.Content visible>
         <Icon name={props.icon} />
       </Button.Content>
     </Button>

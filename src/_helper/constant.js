@@ -1,3 +1,5 @@
+import { Line, defaults } from "react-chartjs-2";
+
 export const TITLE = "GUDANG MATERIAL APP";
 
 export const STATUS_COLOR = Object.freeze({
@@ -32,7 +34,8 @@ export const DB = Object.freeze({
   statusQCs: "statusQCs",
   locationmaps: "locationmaps",
   locations: "locations",
-  stoks: "stoks"
+  stoks: "stoks",
+  graphs: "graphs"
 });
 
 export const STOK = Object.freeze({
@@ -55,16 +58,35 @@ export const TAB = Object.freeze({
 });
 
 export const MONTH_NAME = Object.freeze([
-  "January",
-  "February",
-  "Maret",
-  "April",
-  "May",
-  "June",
-  "July",
-  "August",
-  "September",
-  "October",
-  "November",
-  "December"
+  "JAN",
+  "FEB",
+  "MAR",
+  "APR",
+  "MAY",
+  "JUN",
+  "JUL",
+  "AUG",
+  "SEPT",
+  "OCT",
+  "NOV",
+  "DEC"
 ]);
+
+defaults.global.defaultFontFamily = "'Nanum Gothic', sans-serif";
+defaults.global.defaultFontStyle = "bold";
+defaults.global.elements.line.borderWidth = 2;
+defaults.global.elements.point.pointStyle = "crossRot";
+defaults.global.elements.point.radius = 5;
+defaults.global.elements.point.hoverRadius = 10;
+defaults.global.animation.easing = "easeOutBounce";
+defaults.global.tooltips.backgroundColor = "rgba(0,0,0,0.7)";
+defaults.scale.gridLines.drawBorder = false;
+defaults.scale.gridLines.drawTicks = false;
+defaults.scale.gridLines.color = "rgba(33, 133, 208, .2)";
+defaults.scale.ticks.padding = 20;
+defaults.line.scales.xAxes[0] = {
+  ...defaults.line.scales.xAxes[0],
+  gridLines: { display: false }
+};
+console.log({ defaults });
+export { Line };
