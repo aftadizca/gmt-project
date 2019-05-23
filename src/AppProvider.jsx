@@ -45,6 +45,7 @@ class AppProvider extends Component {
     [DB.locationmaps]: [],
     [DB.locations]: [],
     [DB.stoks]: [],
+    [DB.graphs]: [],
     getAPI: (url, success) => {
       !this.timer && Loading.fire();
       const prom = [];
@@ -79,9 +80,9 @@ class AppProvider extends Component {
           if (status === 201) {
             let x = [];
             if (Array.isArray(data)) {
-              x = [...data, ...this.state[state]];
+              x = _.sortBy([...data, ...this.state[state]], "id");
             } else {
-              x = [data, ...this.state[state]];
+              x = _.sortBy([data, ...this.state[state]], "id");
             }
             this.setState({ [state]: x });
             Loading.close();
@@ -110,12 +111,12 @@ class AppProvider extends Component {
             if (!Array.isArray(data)) {
               const m = this.state[state].filter(x => x.id !== data.id);
               this.setState({
-                [state]: _.orderBy([data, ...m], "id", "asc")
+                [state]: _.sortBy([data, ...m], "id")
               });
             } else {
               const filtered = _.differenceBy(this.state[state], data, "id");
               this.setState({
-                [state]: _.orderBy([...data, ...filtered], "id", "asc")
+                [state]: _.sortBy([...data, ...filtered], "id")
               });
             }
           }
@@ -139,7 +140,7 @@ class AppProvider extends Component {
               if (status === 204) {
                 const filtered = _.differenceBy(this.state[state], data, "id");
                 this.setState({
-                  [state]: _.orderBy([...data, ...filtered], "id", "asc")
+                  [state]: _.sortBy([...data, ...filtered], "id")
                 });
                 success && success();
                 Loading.close();
@@ -190,8 +191,9 @@ class AppProvider extends Component {
   };
 
   componentDidMount() {
-    this.state.getAPI(["stok", "statusQC", "location", "material"], () =>
-      this.state.locationMap()
+    this.state.getAPI(
+      ["stok", "statusQC", "location", "material", "graph"],
+      () => this.state.locationMap()
     );
   }
 
