@@ -165,6 +165,7 @@ class MyTable extends Component {
       }
     });
 
+    //#region Order Data
     const orderFunction = (header, x) => {
       if (header.table) {
         console.log("test");
@@ -182,6 +183,7 @@ class MyTable extends Component {
       x => orderFunction(header[orderBy], x),
       orderDirection
     );
+    //#endregion
     //filtering with search
     const filteredData =
       Filtering(sortedData, body, searchValue, filterValue) || sortedData;
@@ -242,8 +244,7 @@ class MyTable extends Component {
             <Button.Group>
               <MyTable.Button
                 label="Select all"
-                icon="check"
-                color="blue"
+                icon="clipboard check"
                 onClick={() => this.handleSellectAll(paginatedData)}
               />
             </Button.Group>{" "}
@@ -398,10 +399,9 @@ class MyTable extends Component {
 MyTable.Button = props => {
   return (
     <Button
-      animated="fade"
-      size="mini"
+      animated="vertical"
       action={props.action}
-      color={props.color || "blue"}
+      color={props.color || "instagram"}
       onClick={props.onClick}
       disabled={props.disabled}
     >

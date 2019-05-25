@@ -42,6 +42,16 @@ class Transaction extends Component {
   };
 
   //#region EVENT
+
+  handleDelete = () => {
+    const dataToDelete = this.state.selectedRow.map(x => {
+      return { ...x, isDeleted: true };
+    });
+    this.context.deleteAPI("stok", dataToDelete, () =>
+      this.setState({ selectedRow: [] })
+    );
+  };
+
   handleOnChangeQC = _.debounce(
     (e, data) => {
       console.log("handleOnChangeQC", { e, data });
@@ -217,6 +227,7 @@ class Transaction extends Component {
 
   render() {
     document.title = this.props.match.params.tab.toUpperCase() + " - " + TITLE;
+
     //#region DESTUCTURING STATE & PROPS
     const { locationmaps, stoks, useRelation } = this.context;
     const {
@@ -227,8 +238,13 @@ class Transaction extends Component {
       currentPageModal
     } = this.state;
     //#endregion
-    const incoming = stoks.filter(x => x.statusQCID === "1");
-    const stokAll = stoks.filter(x => x.statusQCID !== "1" && x.qty > 0);
+
+    const incoming = stoks.filter(
+      x => x.statusQCID === "1" && x.isDeleted === false
+    );
+    const stokAll = stoks.filter(
+      x => x.statusQCID !== "1" && x.qty > 0 && x.isDeleted === false
+    );
 
     const materialStockHeader = [
       { key: 1, content: "TRACE ID", name: "id" },
@@ -324,6 +340,12 @@ class Transaction extends Component {
             action={INCOMING.edit}
             disabled={!(selectedRow.length === 1)}
             onClick={this.handleModal}
+          />
+          <MyTable.Button
+            label="Delete"
+            icon="x"
+            disabled={!(selectedRow.length !== 0)}
+            onClick={this.handleDelete}
           />
         </Button.Group>{" "}
         <QCButton
@@ -606,7 +628,12 @@ class Transaction extends Component {
                 selection
                 onChange={this.handleOnChangeEdit}
                 options={DinamicList(
-                  locationmaps.filter(x => x.traceID === ""),
+                  locationmaps.filter(
+                    x =>
+                      x.traceID === "" ||
+                      (selectedRow.length &&
+                        x.locationID !== selectedRow[0].locationID)
+                  ),
                   "id",
                   x => x.name
                 )}
@@ -691,13 +718,13 @@ class Transaction extends Component {
                   locationmaps.filter(
                     x =>
                       x.traceID === "" ||
-                      (selectedRowEdit.length &&
-                        x.locationID !== selectedRowEdit[0].locationID)
+                      (selectedRow.length &&
+                        x.locationID !== selectedRow[0].locationID)
                   ),
                   "id",
                   x => x.name
                 )}
-                value={selectedRowEdit.length && selectedRowEdit[0].locationID}
+                value={selectedRow.length && selectedRow[0].locationID}
               />
             </Form.Group>
           </Form>
