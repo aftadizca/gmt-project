@@ -1,10 +1,15 @@
 import React from "react";
 import Cleave from "cleave.js/react";
+import { Label } from "semantic-ui-react";
 
 const CleaveMod = props => {
   return (
     <div className="field">
-      {props.label ? <label>{props.label}</label> : ""}
+      {props.label ? (
+        <Label content={props.label} pointing="below" color="blue" />
+      ) : (
+        ""
+      )}
       <Cleave
         readOnly={props.readOnly}
         placeholder={props.placeholder}

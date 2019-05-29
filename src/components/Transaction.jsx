@@ -1,5 +1,16 @@
 import React, { Component } from "react";
-import { Tab, Icon, Label, Menu, Modal, Form, Button } from "semantic-ui-react";
+import {
+  Tab,
+  Icon,
+  Label,
+  Menu,
+  Modal,
+  Form,
+  Button,
+  Table,
+  Header,
+  Segment
+} from "semantic-ui-react";
 import MyTable from "./../_common/MyTable";
 import {
   TITLE,
@@ -9,25 +20,27 @@ import {
   INCOMING,
   STOK,
   CLEAVE_DATE_OPTIONS,
-  TAB
+  TAB,
+  OUTCOMING
 } from "../_helper/constant";
 import { AppContext } from "./../AppProvider";
 import LabelTab from "./../_common/LabelTab";
-import { NavLink } from "react-router-dom";
+import { NavLink, Link } from "react-router-dom";
 import QCButton from "../_common/QCButton";
 import { DinamicList } from "../_helper/SelectList";
-import { Toast } from "./../_helper/CostumToast";
+import { Toast, Loading } from "./../_helper/CostumToast";
 import _ from "lodash";
 import { DB } from "./../_helper/constant";
 import CleaveMod from "./../_common/CleaveMod";
 import { checkForm } from "../_helper/tool";
+import { filterWithArray } from "./../_helper/tool";
 
 class Transaction extends Component {
   static contextType = AppContext;
 
   state = {
     selectedRow: [],
-    selectedRowEdit: [],
+    selectedRowEdit: "",
     modalStatusQC: false,
     currentPageModal: 1,
     activeModal: "",
@@ -104,12 +117,13 @@ class Transaction extends Component {
 
   //handle open and close modal
   handleModal = (e, data) => {
+    //close modal and reset state
     console.log("handleModal", { e, data });
     if (data.eventPool === "Modal" && data.open) {
       this.resetModal();
       return;
     }
-
+    Loading.fire();
     switch (data.action) {
       case STOK.updateQC:
         const selectedRowEdit = this.state.selectedRow.map(x => {
@@ -127,12 +141,19 @@ class Transaction extends Component {
           );
         }
         break;
+      case OUTCOMING.view:
+        console.log(data.data);
+        this.setState({ selectedRowEdit: data.data, activeModal: data.action });
+        break;
 
       default:
-        this.setState({ activeModal: data.action });
-        this.setState({ selectedRowEdit: [...this.state.selectedRow] });
+        this.setState({
+          selectedRowEdit: [...this.state.selectedRow],
+          activeModal: data.action
+        });
         break;
     }
+    Loading.close();
   };
 
   // modal next and prev page
@@ -149,7 +170,7 @@ class Transaction extends Component {
     this.setState({
       activeModal: "",
       currentPageModal: 1,
-      selectedRowEdit: [],
+      selectedRowEdit: "",
       newStok: {
         expiredDate: "",
         lot: "",
@@ -229,7 +250,7 @@ class Transaction extends Component {
     document.title = this.props.match.params.tab.toUpperCase() + " - " + TITLE;
 
     //#region DESTUCTURING STATE & PROPS
-    const { locationmaps, stoks, useRelation } = this.context;
+    const { locationmaps, stoks, useRelation, materialouts } = this.context;
     const {
       activeModal,
       selectedRow,
@@ -237,14 +258,23 @@ class Transaction extends Component {
       newStok,
       currentPageModal
     } = this.state;
+    const {
+      match: {
+        params: { tab }
+      }
+    } = this.props;
     //#endregion
 
-    const incoming = stoks.filter(
-      x => x.statusQCID === "1" && x.isDeleted === false
-    );
-    const stokAll = stoks.filter(
-      x => x.statusQCID !== "1" && x.qty > 0 && x.isDeleted === false
-    );
+    //#region Data filtering
+    const incoming =
+      tab === "incoming" &&
+      stoks.filter(x => x.statusQCID === "1" && x.isDeleted === false);
+    const stokAll =
+      tab === "stok" &&
+      stoks.filter(x => x.statusQCID !== "1" && x.isDeleted === false);
+    const outcoming =
+      tab === "outcoming" && materialouts.filter(x => !x.isDeleted);
+    //#endregion
 
     const materialStockHeader = [
       { key: 1, content: "TRACE ID", name: "id" },
@@ -318,6 +348,32 @@ class Transaction extends Component {
         }
       ]
     });
+    const outcomingHeader = [
+      { key: 1, content: "OUTCOMING ID", name: "id" },
+      { key: 2, content: "RECEIVER", name: "receiverName" },
+      { key: 3, content: "DEPARTEMENT", name: "receiverDepartement" },
+      { key: 4, content: "DATE", name: "date" }
+    ];
+    const outcomingRow = (data, i) => ({
+      key: `row-${i}`,
+      cells: [
+        {
+          key: `id${i}`,
+          content: <Button className={"link"}>{data.id}</Button>,
+          onClick: e => this.handleModal(e, { action: OUTCOMING.view, data }),
+          className: "tablelink"
+        },
+        { key: `rec${i}`, content: data.receiverName },
+        { key: `dept${i}`, content: data.receiverDepartement },
+        {
+          key: `exp-${i}`,
+          content: new Date(Date.parse(data.date)).toLocaleDateString(
+            LOCALE_DATE,
+            OPTIONS_DATE
+          )
+        }
+      ]
+    });
 
     //#region BUTTON BAR
     const incomingButton = (
@@ -378,9 +434,34 @@ class Transaction extends Component {
         />
       </React.Fragment>
     );
+    const outcomingButton = (
+      <React.Fragment>
+        <Button.Group>
+          <MyTable.Button
+            label="Refresh"
+            icon="refresh"
+            onClick={() => this.context.getAPI(["materialout"])}
+          />
+          <MyTable.Button
+            label="Add"
+            icon="add"
+            //action={STOK.edit}
+            //onClick={this.handleModal}
+          />
+          <MyTable.Button
+            label="Edit"
+            icon="edit"
+            action={STOK.edit}
+            disabled={!(selectedRow.length === 1)}
+            onClick={this.handleModal}
+          />
+        </Button.Group>{" "}
+      </React.Fragment>
+    );
     //#endregion
+
     //#region MODAL
-    const updateStatusModal = (
+    const updateStatusModal = activeModal === STOK.updateQC && (
       <Modal
         closeOnDimmerClick={false}
         closeIcon
@@ -389,10 +470,15 @@ class Transaction extends Component {
         onClose={this.handleModal}
       >
         <Modal.Header>
-          UPDATE STATUS QC{" "}
-          <Label color="blue" horizontal size="large">
-            {currentPageModal}/{selectedRow.length}
-          </Label>
+          <Segment inverted color="blue">
+            <Header
+              as="h2"
+              icon="edit outline"
+              inverted
+              content={`UPDATE STATUS QC - 
+              ${currentPageModal} / ${selectedRow.length}`}
+            />
+          </Segment>
         </Modal.Header>
         <Modal.Content>
           <Form>
@@ -400,44 +486,35 @@ class Transaction extends Component {
               label="TRACE ID"
               name="id"
               readOnly
-              value={
-                selectedRowEdit.length &&
-                selectedRowEdit[currentPageModal - 1].id
-              }
+              value={selectedRowEdit[currentPageModal - 1].id}
             />
-            <Form.Input
+            <CleaveMod
               label="MATERIAL NAME"
               name="name"
               readOnly
-              value={
-                selectedRowEdit.length &&
-                useRelation(
-                  DB.materials,
-                  selectedRowEdit[currentPageModal - 1].materialID,
-                  "name"
-                )
-              }
+              value={useRelation(
+                DB.materials,
+                selectedRowEdit[currentPageModal - 1].materialID,
+                "name"
+              )}
             />
             <Form.Group widths="equal">
-              <Form.Input
+              <CleaveMod
                 label="STATUS QC"
                 name="statusQCID"
                 readOnly
-                color="blue"
-                inverted
                 fluid
-                value={
-                  selectedRowEdit.length &&
-                  useRelation(
-                    DB.statusQCs,
-                    selectedRowEdit[currentPageModal - 1].statusQCID,
-                    "name"
-                  )
-                }
+                value={useRelation(
+                  DB.statusQCs,
+                  selectedRowEdit[currentPageModal - 1].statusQCID,
+                  "name"
+                )}
               />
               <Form.Dropdown
                 name="locationID"
-                label="LOCATION"
+                label={
+                  <Label content="LOCATION" pointing="below" color="blue" />
+                }
                 placeholder="Select Location"
                 search
                 fluid
@@ -449,10 +526,7 @@ class Transaction extends Component {
                   "id",
                   x => x.name
                 )}
-                value={
-                  selectedRowEdit.length &&
-                  selectedRowEdit[currentPageModal - 1].locationID
-                }
+                value={selectedRowEdit[currentPageModal - 1].locationID}
               />
             </Form.Group>
           </Form>
@@ -489,7 +563,7 @@ class Transaction extends Component {
         </Modal.Actions>
       </Modal>
     );
-    const addIncomingModal = (
+    const addIncomingModal = activeModal === INCOMING.add && (
       <Modal
         closeOnDimmerClick={false}
         closeIcon
@@ -497,11 +571,22 @@ class Transaction extends Component {
         open={activeModal === INCOMING.add}
         onClose={this.handleModal}
       >
-        <Modal.Header>ADD STOCK</Modal.Header>
+        <Modal.Header>
+          <Segment inverted color="blue">
+            <Header
+              as="h2"
+              icon="add"
+              inverted
+              content="ADD INCOMING MATERIAL"
+            />
+          </Segment>
+        </Modal.Header>
         <Modal.Content>
           <Form>
             <Form.Dropdown
-              label="MATERIAL NAME"
+              label={
+                <Label content="MATERIAL NAME" pointing="below" color="blue" />
+              }
               name="materialID"
               placeholder="MATERIAL - SUPLIER"
               search
@@ -561,7 +646,7 @@ class Transaction extends Component {
         </Modal.Actions>
       </Modal>
     );
-    const editIncomingModal = (
+    const editIncomingModal = activeModal === INCOMING.edit && (
       <Modal
         closeOnDimmerClick={false}
         closeIcon
@@ -569,7 +654,16 @@ class Transaction extends Component {
         open={activeModal === INCOMING.edit}
         onClose={this.handleModal}
       >
-        <Modal.Header>EDIT INCOMING MATERIAL</Modal.Header>
+        <Modal.Header>
+          <Segment inverted color="blue">
+            <Header
+              as="h2"
+              icon="edit outline"
+              inverted
+              content="EDIT INCOMING MATERIAL"
+            />
+          </Segment>
+        </Modal.Header>
         <Modal.Content>
           <Form>
             <CleaveMod
@@ -579,7 +673,9 @@ class Transaction extends Component {
               value={selectedRow.length && selectedRow[0].id}
             />
             <Form.Dropdown
-              label="MATERIAL NAME"
+              label={
+                <Label content="MATERIAL NAME" pointing="below" color="blue" />
+              }
               name="materialID"
               placeholder="MATERIAL - SUPLIER"
               search
@@ -621,7 +717,9 @@ class Transaction extends Component {
               />
               <Form.Dropdown
                 name="locationID"
-                label="LOCATION"
+                label={
+                  <Label content="LOCATION" pointing="below" color="blue" />
+                }
                 placeholder="Select Location"
                 search
                 fluid
@@ -653,7 +751,7 @@ class Transaction extends Component {
         </Modal.Actions>
       </Modal>
     );
-    const editStokModal = (
+    const editStokModal = activeModal === STOK.edit && (
       <Modal
         closeOnDimmerClick={false}
         closeIcon
@@ -661,14 +759,23 @@ class Transaction extends Component {
         open={activeModal === STOK.edit}
         onClose={this.handleModal}
       >
-        <Modal.Header>EDIT STOK MATERIAL</Modal.Header>
+        <Modal.Header>
+          <Segment inverted color="blue">
+            <Header
+              as="h2"
+              icon="edit outline"
+              inverted
+              content="EDIT STOK MATERIAL"
+            />
+          </Segment>
+        </Modal.Header>
         <Modal.Content>
           <Form>
             <CleaveMod
               label="TRACE ID"
               name="id"
               readOnly
-              value={selectedRow.length && selectedRow[0].id}
+              value={selectedRowEdit[0].id}
             />
             <CleaveMod
               label="MATERIAL NAME"
@@ -678,7 +785,7 @@ class Transaction extends Component {
               fluid
               selection
               readOnly
-              value={selectedRowEdit.length && selectedRowEdit[0].materialID}
+              value={selectedRowEdit[0].materialID}
             />
             <Form.Group widths="equal">
               <CleaveMod
@@ -686,7 +793,7 @@ class Transaction extends Component {
                 name="qty"
                 readOnly
                 rawValue={true}
-                value={selectedRow.length && selectedRow[0].qty}
+                value={selectedRowEdit[0].qty}
                 options={CLEAVE_DATE_OPTIONS.numeric}
               />
               <CleaveMod
@@ -694,9 +801,9 @@ class Transaction extends Component {
                 name="expiredDate"
                 readOnly
                 value={
-                  selectedRowEdit.length &&
+                  selectedRow.length &&
                   new Date(
-                    Date.parse(selectedRow[0].expiredDate)
+                    Date.parse(selectedRowEdit[0].expiredDate)
                   ).toLocaleDateString(LOCALE_DATE, OPTIONS_DATE)
                 }
                 options={CLEAVE_DATE_OPTIONS.date}
@@ -705,11 +812,13 @@ class Transaction extends Component {
                 label="LOT NUMBER"
                 name="lot"
                 readOnly
-                value={selectedRow.length && selectedRow[0].lot}
+                value={selectedRowEdit[0].lot}
               />
               <Form.Dropdown
                 name="locationID"
-                label="LOCATION"
+                label={
+                  <Label content="LOCATION" pointing="below" color="blue" />
+                }
                 search
                 fluid
                 selection
@@ -719,12 +828,12 @@ class Transaction extends Component {
                     x =>
                       x.traceID === "" ||
                       (selectedRow.length &&
-                        x.locationID !== selectedRow[0].locationID)
+                        x.locationID !== selectedRowEdit[0].locationID)
                   ),
                   "id",
                   x => x.name
                 )}
-                value={selectedRow.length && selectedRow[0].locationID}
+                value={selectedRowEdit[0].locationID}
               />
             </Form.Group>
           </Form>
@@ -737,6 +846,101 @@ class Transaction extends Component {
           >
             <Icon name="save" /> SAVE
           </Button>
+        </Modal.Actions>
+      </Modal>
+    );
+    const viewOutcomingModal = activeModal === OUTCOMING.view && (
+      <Modal
+        closeOnDimmerClick={false}
+        closeIcon
+        open={activeModal === OUTCOMING.view}
+        onClose={this.handleModal}
+      >
+        <Modal.Header>
+          <Segment inverted color="blue">
+            <Header
+              as="h2"
+              icon="edit outline"
+              inverted
+              content="VIEW OUTCOMING"
+            />
+          </Segment>
+        </Modal.Header>
+        <Modal.Content scrolling>
+          <Form>
+            <Form.Group widths="equal">
+              <CleaveMod
+                label="ID"
+                name="id"
+                readOnly
+                value={selectedRowEdit.id}
+              />
+              <CleaveMod
+                label="DATE"
+                name="date"
+                readOnly
+                value={new Date(
+                  Date.parse(selectedRowEdit.date)
+                ).toLocaleDateString(LOCALE_DATE, OPTIONS_DATE)}
+                options={CLEAVE_DATE_OPTIONS.date}
+              />
+            </Form.Group>
+            <Form.Group widths="equal">
+              <CleaveMod
+                label="RECEIVER"
+                name="receiverName"
+                readOnly
+                value={selectedRowEdit.receiverName}
+              />
+              <CleaveMod
+                label="DEPARTEMENT"
+                name="receiverDepartement"
+                readOnly
+                value={selectedRowEdit.receiverDepartement}
+              />
+            </Form.Group>
+            {
+              <Table
+                headerRow={materialStockHeader}
+                renderBodyRow={materialStockRow}
+                compact
+                celled
+                size="small"
+                tableData={filterWithArray(
+                  stoks,
+                  selectedRowEdit.stokMaterialOut,
+                  "id",
+                  "stokID"
+                )}
+              />
+            }
+          </Form>
+        </Modal.Content>
+        <Modal.Actions>
+          <Button
+            color="blue"
+            onClick={this.handleSubmit}
+            action={INCOMING.edit}
+          >
+            <Icon name="print" /> PRINT
+          </Button>
+          <Link
+            to={{
+              pathname: "/print",
+              state: {
+                ...selectedRowEdit,
+                title: "OUTCOMING MATERIAL",
+                data: filterWithArray(
+                  stokAll,
+                  selectedRowEdit.stokMaterialOut,
+                  "id",
+                  "stokID"
+                )
+              }
+            }}
+          >
+            TEST
+          </Link>
         </Modal.Actions>
       </Modal>
     );
@@ -813,25 +1017,35 @@ class Transaction extends Component {
             to="/transaction/outcoming"
           >
             <Icon name="arrow circle up" /> OUTCOMING
-            <Label color="green" pointing="left">
-              19
-            </Label>
+            <LabelTab count={outcoming.length} />
           </Menu.Item>
         ),
         render: () => (
           <Tab.Pane attached={false} raised piled>
-            Tab 3 Content
+            <MyTable
+              key="outcoming"
+              title="OUTCOMING"
+              header={outcomingHeader}
+              body={outcomingRow}
+              data={outcoming}
+              selectedRow={selectedRow}
+              onSelectedChange={this.handleSelectedChange}
+              orderBy={0}
+              searchBar
+              selection
+              button={outcomingButton}
+            />
           </Tab.Pane>
         )
       }
     ];
-
     return (
       <React.Fragment>
         {updateStatusModal}
         {addIncomingModal}
         {editIncomingModal}
         {editStokModal}
+        {viewOutcomingModal}
         <Tab
           menu={{
             borderless: true,
@@ -840,7 +1054,7 @@ class Transaction extends Component {
             inverted: true
           }}
           onTabChange={this.handleTabChange}
-          activeIndex={TAB.transaction[this.props.match.params.tab]}
+          activeIndex={TAB.transaction[tab]}
           panes={panes}
         />
       </React.Fragment>

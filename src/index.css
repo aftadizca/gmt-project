@@ -261,9 +261,44 @@ code {
 }
 
 input:read-only {
-  background: rgba(0, 0, 0, 0.23) !important;
+  background-color: #2184d060 !important;
+  color: #000000 !important;
+  font-weight: bold;
+}
+.print input:read-only {
+  background-color: transparent !important;
+  color: #000000 !important;
+  font-weight: bold;
+  text-align: right;
+  border: transparent !important;
 }
 
 .ui.vertical.animated.button .visible.content {
   padding: 0 15px;
+}
+
+.tablelink {
+  cursor: pointer;
+}
+
+@media print {
+  body {
+    zoom: 0.7;
+  }
+  .menu {
+    display: none !important;
+  }
+  @page {
+    size: 9.5in x 11in landscape;
+  }
+}
+
+.link {
+  background-color: transparent !important;
+  border: none !important;
+  cursor: pointer !important;
+  display: inline !important;
+  margin: 0;
+  padding: 0;
+  color: #0055a5 !important;
 }

@@ -1,19 +1,24 @@
 import _ from "lodash";
+import { Loading } from "./CostumToast";
 
 /**
  * Remove multiple item from array
  * @param {Array} target array target
  * @param {Array} filter array to remove from target
  */
-export function filterWithArray(target, filter, key) {
-  let tar = _.cloneDeep(target);
-  _.map(filter, item => {
-    if (key) {
-      return _.remove(tar, x => x[key] === item[key]);
-    }
-    return _.remove(tar, item);
+export function filterWithArray(target, filter, keyX, keyY) {
+  Loading.fire();
+  let result = [];
+  _.each(filter, x => {
+    _.each(target, y => {
+      if (x[keyY] === y[keyX]) {
+        result.push(y);
+        return false;
+      }
+    });
   });
-  return tar;
+  Loading.close();
+  return result;
 }
 
 export function checkForm(data) {

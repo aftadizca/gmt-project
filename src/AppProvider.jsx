@@ -46,6 +46,7 @@ class AppProvider extends Component {
     [DB.locations]: [],
     [DB.stoks]: [],
     [DB.graphs]: [],
+    [DB.materialouts]: [],
     getAPI: (url, success) => {
       !this.timer && Loading.fire();
       const prom = [];
@@ -59,7 +60,6 @@ class AppProvider extends Component {
           Loading.close();
           const d = {};
           data.forEach((x, i) => {
-            console.log(url[i]);
             d[url[i] + "s"] = x.data;
           });
           this.setState(d);
@@ -192,7 +192,7 @@ class AppProvider extends Component {
 
   componentDidMount() {
     this.state.getAPI(
-      ["stok", "statusQC", "location", "material", "graph"],
+      ["stok", "statusQC", "location", "material", "graph", "materialout"],
       () => this.state.locationMap()
     );
   }

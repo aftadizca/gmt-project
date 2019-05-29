@@ -35,7 +35,8 @@ export const DB = Object.freeze({
   locationmaps: "locationmaps",
   locations: "locations",
   stoks: "stoks",
-  graphs: "graphs"
+  graphs: "graphs",
+  materialouts: "materialouts"
 });
 
 export const STOK = Object.freeze({
@@ -47,6 +48,9 @@ export const INCOMING = Object.freeze({
   add: "INCOMING_ADD",
   edit: "INCOMING_EDIT",
   updateQC: "UPDATE_QC"
+});
+export const OUTCOMING = Object.freeze({
+  view: "OUTCOMING_VIEW"
 });
 
 export const TAB = Object.freeze({

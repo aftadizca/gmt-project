@@ -7,7 +7,7 @@ const SideBarItem = ({ text, path, icon }) => {
     <React.Fragment>
       <Menu.Item as={NavLink} to={path} activeClassName="active">
         <Icon name={icon} />
-        {text}
+        {text.toUpperCase()}
       </Menu.Item>
     </React.Fragment>
   );

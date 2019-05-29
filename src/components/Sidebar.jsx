@@ -1,14 +1,25 @@
 import React from "react";
 import { Menu } from "semantic-ui-react";
-// import "../components/Sidebar.css";
+import SideBarItem from "./../_common/SideBarItem";
 
-const SideBar = ({ children, onMouseEnter, onMouseLeave }) => {
+const MySideBar = ({ children }) => {
   return (
-    <Menu icon="labeled" fixed="left" color="blue" inverted vertical>
-      <div style={{ marginTop: 100 }} />
-      {children}
+    <Menu
+      icon="labeled"
+      color="blue"
+      inverted
+      fixed="top"
+      size="tiny"
+      secondary
+      pointing
+    >
+      <div style={{ paddingLeft: "3rem" }} />
+      <SideBarItem path="/home" icon="home" text="Home" />
+      <SideBarItem path="/material" icon="boxes" text="Material" />
+      <SideBarItem path="/transaction" icon="exchange" text="Transaction" />
+      <SideBarItem path="/other" icon="settings" text="Other" />
     </Menu>
   );
 };
 
-export default SideBar;
+export default MySideBar;
