@@ -1,3 +1,4 @@
+//#region IMPORT
 import React, { Component } from "react";
 import {
   Tab,
@@ -21,7 +22,10 @@ import {
   STOK,
   CLEAVE_DATE_OPTIONS,
   TAB,
-  OUTCOMING
+  OUTCOMING,
+  NEW_STOK,
+  NEW_INCOMING,
+  MODAL_DEFAULT
 } from "../_helper/constant";
 import { AppContext } from "./../AppProvider";
 import LabelTab from "./../_common/LabelTab";
@@ -34,24 +38,20 @@ import { DB } from "./../_helper/constant";
 import CleaveMod from "./../_common/CleaveMod";
 import { checkForm } from "../_helper/tool";
 import { filterWithArray } from "./../_helper/tool";
+//#endregion
 
 class Transaction extends Component {
   static contextType = AppContext;
 
   state = {
     selectedRow: [],
+    selectedMaterial: [],
     selectedRowEdit: "",
     modalStatusQC: false,
     currentPageModal: 1,
-    activeModal: "",
-    modalError: "",
-    newStok: {
-      expiredDate: "",
-      lot: "",
-      materialID: "",
-      qty: null,
-      pallet: null
-    }
+    modal: { ...MODAL_DEFAULT },
+    newStok: { ...NEW_STOK },
+    newOutcoming: { ...NEW_INCOMING }
   };
 
   //#region EVENT
@@ -115,6 +115,19 @@ class Transaction extends Component {
     { leading: true, trailing: true }
   );
 
+  handleOnChangeAddOutcoming = _.debounce(
+    (e, data) => {
+      //console.log("handleOnChangeAdd", { e, data });
+      let newOutcoming = {
+        ...this.state.newOutcoming,
+        [data.name]: data.value
+      };
+      this.setState({ newOutcoming });
+    },
+    500,
+    { leading: true, trailing: true }
+  );
+
   //handle open and close modal
   handleModal = (e, data) => {
     //close modal and reset state
@@ -131,25 +144,68 @@ class Transaction extends Component {
         });
         //jika lokasi kosong tampilkan modal
         if (_.find(selectedRowEdit, ["locationID", "0"])) {
-          this.setState({ selectedRowEdit }, () =>
-            this.setState({ activeModal: STOK.updateQC })
-          );
+          this.setState({
+            selectedRowEdit,
+            modal: {
+              ...this.state.modal,
+              firstModal: { active: data.action, error: "" }
+            }
+          });
           //jika ada lokasi do update StatusQC
         } else {
           this.setState({ selectedRowEdit }, () =>
-            this.handleSubmit(e, { action: STOK.updateQC })
+            this.handleSubmit(e, { action: data.action })
           );
         }
         break;
       case OUTCOMING.view:
-        console.log(data.data);
-        this.setState({ selectedRowEdit: data.data, activeModal: data.action });
+        const selectedRow = filterWithArray(
+          this.context.stoks,
+          this.state.newOutcoming.stokMaterialOut,
+          "id",
+          "stokID"
+        );
+        this.setState({
+          selectedRowEdit: data.data,
+          modal: {
+            ...this.state.modal,
+            firstModal: { active: data.action, error: "" }
+          },
+          selectedRow
+        });
+        break;
+      case OUTCOMING.add:
+        this.setState({
+          modal: {
+            ...this.state.modal,
+            firstModal: { active: data.action, error: "" }
+          }
+        });
+        break;
+      case OUTCOMING.addMaterial:
+        this.setState({
+          modal: {
+            ...this.state.modal,
+            secondModal: { active: data.action, error: "" }
+          }
+        });
+        break;
+      case OUTCOMING.closeSecondModal:
+        this.setState({
+          modal: {
+            ...this.state.modal,
+            secondModal: { active: "", error: "" }
+          }
+        });
         break;
 
       default:
         this.setState({
           selectedRowEdit: [...this.state.selectedRow],
-          activeModal: data.action
+          modal: {
+            ...this.state.modal,
+            firstModal: { active: data.action, error: "" }
+          }
         });
         break;
     }
@@ -168,16 +224,13 @@ class Transaction extends Component {
   //reset modal state
   resetModal = () => {
     this.setState({
-      activeModal: "",
+      selectedRow: [],
       currentPageModal: 1,
       selectedRowEdit: "",
-      newStok: {
-        expiredDate: "",
-        lot: "",
-        materialID: "",
-        qty: null,
-        pallet: null
-      }
+      selectedMaterial: [],
+      modal: { ...MODAL_DEFAULT },
+      newStok: { ...NEW_STOK },
+      newOutcoming: { ...NEW_INCOMING }
     });
   };
 
@@ -206,7 +259,9 @@ class Transaction extends Component {
         this.context.postAPI(
           "stok",
           newStok,
-          () => this.resetModal(),
+          () => {
+            this.resetModal();
+          },
           () => Toast("Opps.. Something wrong.. Try Again!", "error").fire()
         );
         break;
@@ -230,6 +285,23 @@ class Transaction extends Component {
         );
         break;
 
+      case OUTCOMING.add:
+        const newOutcoming = {
+          ...this.state.newOutcoming,
+          stokMaterialOut: this.state.selectedMaterial.map(x => {
+            return { stokID: x.id };
+          })
+        };
+        this.context.postAPI(
+          "materialout",
+          newOutcoming,
+          () => {
+            this.resetModal();
+            this.context.getAPI(["stok"]);
+          },
+          () => Toast("Opps.. Something wrong.. Try Again!", "error").fire()
+        );
+        break;
       default:
         break;
     }
@@ -238,6 +310,9 @@ class Transaction extends Component {
   //handle selection in Table
   handleSelectedChange = data => {
     this.setState({ selectedRow: data });
+  };
+  handleSelectedStok = data => {
+    this.setState({ selectedMaterial: data });
   };
 
   handleTabChange = () => {
@@ -252,11 +327,13 @@ class Transaction extends Component {
     //#region DESTUCTURING STATE & PROPS
     const { locationmaps, stoks, useRelation, materialouts } = this.context;
     const {
-      activeModal,
       selectedRow,
       selectedRowEdit,
       newStok,
-      currentPageModal
+      currentPageModal,
+      newOutcoming,
+      selectedMaterial,
+      modal: { firstModal, secondModal }
     } = this.state;
     const {
       match: {
@@ -265,17 +342,18 @@ class Transaction extends Component {
     } = this.props;
     //#endregion
 
-    //#region Data filtering
+    //#region DATA PREPARATION
     const incoming =
       tab === "incoming" &&
-      stoks.filter(x => x.statusQCID === "1" && x.isDeleted === false);
+      stoks.filter(x => x.statusQCID === "1" && !x.isDeleted && !x.isOut);
     const stokAll =
       tab === "stok" &&
-      stoks.filter(x => x.statusQCID !== "1" && x.isDeleted === false);
+      stoks.filter(x => x.statusQCID !== "1" && !x.isDeleted && !x.isOut);
     const outcoming =
       tab === "outcoming" && materialouts.filter(x => !x.isDeleted);
     //#endregion
 
+    //#region HEADER & BODY BUILDER
     const materialStockHeader = [
       { key: 1, content: "TRACE ID", name: "id" },
       {
@@ -374,6 +452,7 @@ class Transaction extends Component {
         }
       ]
     });
+    //#endregion
 
     //#region BUTTON BAR
     const incomingButton = (
@@ -445,8 +524,8 @@ class Transaction extends Component {
           <MyTable.Button
             label="Add"
             icon="add"
-            //action={STOK.edit}
-            //onClick={this.handleModal}
+            action={OUTCOMING.add}
+            onClick={this.handleModal}
           />
           <MyTable.Button
             label="Edit"
@@ -461,12 +540,12 @@ class Transaction extends Component {
     //#endregion
 
     //#region MODAL
-    const updateStatusModal = activeModal === STOK.updateQC && (
+    const updateStatusModal = firstModal.active === STOK.updateQC && (
       <Modal
         closeOnDimmerClick={false}
         closeIcon
         size="small"
-        open={activeModal === STOK.updateQC}
+        open={firstModal.active === STOK.updateQC}
         onClose={this.handleModal}
       >
         <Modal.Header>
@@ -563,12 +642,12 @@ class Transaction extends Component {
         </Modal.Actions>
       </Modal>
     );
-    const addIncomingModal = activeModal === INCOMING.add && (
+    const addIncomingModal = firstModal.active === INCOMING.add && (
       <Modal
         closeOnDimmerClick={false}
         closeIcon
         size="small"
-        open={activeModal === INCOMING.add}
+        open={firstModal.active === INCOMING.add}
         onClose={this.handleModal}
       >
         <Modal.Header>
@@ -646,12 +725,12 @@ class Transaction extends Component {
         </Modal.Actions>
       </Modal>
     );
-    const editIncomingModal = activeModal === INCOMING.edit && (
+    const editIncomingModal = firstModal.active === INCOMING.edit && (
       <Modal
         closeOnDimmerClick={false}
         closeIcon
         size="small"
-        open={activeModal === INCOMING.edit}
+        open={firstModal.active === INCOMING.edit}
         onClose={this.handleModal}
       >
         <Modal.Header>
@@ -751,12 +830,12 @@ class Transaction extends Component {
         </Modal.Actions>
       </Modal>
     );
-    const editStokModal = activeModal === STOK.edit && (
+    const editStokModal = firstModal.active === STOK.edit && (
       <Modal
         closeOnDimmerClick={false}
         closeIcon
         size="small"
-        open={activeModal === STOK.edit}
+        open={firstModal.active === STOK.edit}
         onClose={this.handleModal}
       >
         <Modal.Header>
@@ -849,11 +928,11 @@ class Transaction extends Component {
         </Modal.Actions>
       </Modal>
     );
-    const viewOutcomingModal = activeModal === OUTCOMING.view && (
+    const viewOutcomingModal = firstModal.active === OUTCOMING.view && (
       <Modal
         closeOnDimmerClick={false}
         closeIcon
-        open={activeModal === OUTCOMING.view}
+        open={firstModal.active === OUTCOMING.view}
         onClose={this.handleModal}
       >
         <Modal.Header>
@@ -944,6 +1023,127 @@ class Transaction extends Component {
         </Modal.Actions>
       </Modal>
     );
+    const addMaterialOutcomingModal = (
+      <Modal
+        closeOnDimmerClick={false}
+        size="large"
+        open={secondModal.active === OUTCOMING.addMaterial}
+      >
+        <Modal.Header>
+          <Segment inverted color="blue">
+            <Header
+              as="h2"
+              icon="check circle"
+              inverted
+              content="SELECT MATERIAL"
+            />
+          </Segment>
+        </Modal.Header>
+        <Modal.Content scrolling>
+          <Segment basic>
+            <MyTable
+              key="stock"
+              title="STOCK"
+              header={materialStockHeader}
+              body={materialStockRow}
+              data={stoks.filter(
+                x => x.statusQCID !== "1" && !x.isDeleted && !x.isOut
+              )}
+              selectedRow={selectedMaterial}
+              onSelectedChange={this.handleSelectedStok}
+              orderBy={0}
+              searchBar
+              selection
+            />
+          </Segment>
+        </Modal.Content>
+        <Modal.Actions>
+          <Button
+            color="blue"
+            action={OUTCOMING.closeSecondModal}
+            onClick={this.handleModal}
+          >
+            OK
+          </Button>
+        </Modal.Actions>
+      </Modal>
+    );
+    const addOutcomingModal = firstModal.active === OUTCOMING.add && (
+      <Modal
+        closeOnDimmerClick={false}
+        closeIcon
+        open={firstModal.active === OUTCOMING.add}
+        onClose={this.handleModal}
+      >
+        <Modal.Header>
+          <Segment inverted color="blue">
+            <Header
+              as="h2"
+              icon="edit outline"
+              inverted
+              content="ADD OUTCOMING"
+            />
+          </Segment>
+        </Modal.Header>
+        <Modal.Content scrolling>
+          <Form>
+            <Form.Group widths="equal">
+              <CleaveMod
+                label="RECEIVER"
+                name="receiverName"
+                placeholder="RECEIVER NAME"
+                onChange={this.handleOnChangeAddOutcoming}
+              />
+              <CleaveMod
+                label="DEPARTEMENT"
+                placeholder="DEPARTEMENT"
+                name="receiverDepartement"
+                onChange={this.handleOnChangeAddOutcoming}
+              />
+            </Form.Group>
+            <Table
+              headerRow={materialStockHeader}
+              renderBodyRow={materialStockRow}
+              compact
+              celled
+              size="small"
+              tableData={selectedMaterial}
+            />
+
+            {selectedMaterial.length ? (
+              ""
+            ) : (
+              <Segment basic textAlign="center">
+                No material selected
+              </Segment>
+            )}
+
+            <Segment basic textAlign="center">
+              {addMaterialOutcomingModal}
+              <MyTable.Button
+                label="Add/Remove"
+                action={OUTCOMING.addMaterial}
+                icon="add"
+                onClick={this.handleModal}
+              />
+            </Segment>
+          </Form>
+        </Modal.Content>
+        <Modal.Actions>
+          <Button
+            color="blue"
+            onClick={this.handleSubmit}
+            disabled={
+              !(checkForm(newOutcoming) && selectedMaterial.length !== 0)
+            }
+            action={OUTCOMING.add}
+          >
+            <Icon name="print" /> SAVE
+          </Button>
+        </Modal.Actions>
+      </Modal>
+    );
+
     //#endregion
 
     const panes = [
@@ -1028,7 +1228,9 @@ class Transaction extends Component {
               header={outcomingHeader}
               body={outcomingRow}
               data={outcoming}
-              selectedRow={selectedRow}
+              selectedRow={
+                firstModal.active !== OUTCOMING.addMaterial && selectedRow
+              }
               onSelectedChange={this.handleSelectedChange}
               orderBy={0}
               searchBar
@@ -1039,6 +1241,7 @@ class Transaction extends Component {
         )
       }
     ];
+
     return (
       <React.Fragment>
         {updateStatusModal}
@@ -1046,6 +1249,7 @@ class Transaction extends Component {
         {editIncomingModal}
         {editStokModal}
         {viewOutcomingModal}
+        {addOutcomingModal}
         <Tab
           menu={{
             borderless: true,

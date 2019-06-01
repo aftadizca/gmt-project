@@ -39,6 +39,7 @@ export const DB = Object.freeze({
   materialouts: "materialouts"
 });
 
+//#region ACTION MODAL
 export const STOK = Object.freeze({
   edit: "STOK_EDIT",
   updateQC: "UPDATE_QC"
@@ -50,8 +51,12 @@ export const INCOMING = Object.freeze({
   updateQC: "UPDATE_QC"
 });
 export const OUTCOMING = Object.freeze({
-  view: "OUTCOMING_VIEW"
+  view: "OUTCOMING_VIEW",
+  add: "OUTCOMING_ADD",
+  addMaterial: "OUTCOMING_ADDMAT",
+  closeSecondModal: "OUTCOMING_C"
 });
+//#endregion
 
 export const TAB = Object.freeze({
   transaction: {
@@ -76,6 +81,26 @@ export const MONTH_NAME = Object.freeze([
   "DEC"
 ]);
 
+export const NEW_STOK = {
+  expiredDate: "",
+  lot: "",
+  materialID: "",
+  qty: null,
+  pallet: null
+};
+
+export const NEW_INCOMING = {
+  receiverName: "",
+  receiverDepartement: "",
+  stokMaterialOut: []
+};
+
+export const MODAL_DEFAULT = {
+  firstModal: { active: "", error: "" },
+  secondModal: { active: "", error: "" }
+};
+
+//#region LINE CHART SETTING
 defaults.global.defaultFontFamily = "'Nanum Gothic', sans-serif";
 defaults.global.defaultFontStyle = "bold";
 defaults.global.elements.line.borderWidth = 2;
@@ -92,5 +117,5 @@ defaults.line.scales.xAxes[0] = {
   ...defaults.line.scales.xAxes[0],
   gridLines: { display: false }
 };
-console.log({ defaults });
 export { Line };
+//#endregion

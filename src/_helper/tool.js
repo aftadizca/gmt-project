@@ -1,5 +1,4 @@
 import _ from "lodash";
-import { Loading } from "./CostumToast";
 
 /**
  * Remove multiple item from array
@@ -7,7 +6,6 @@ import { Loading } from "./CostumToast";
  * @param {Array} filter array to remove from target
  */
 export function filterWithArray(target, filter, keyX, keyY) {
-  Loading.fire();
   let result = [];
   _.each(filter, x => {
     _.each(target, y => {
@@ -17,7 +15,6 @@ export function filterWithArray(target, filter, keyX, keyY) {
       }
     });
   });
-  Loading.close();
   return result;
 }
 

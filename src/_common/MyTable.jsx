@@ -400,6 +400,7 @@ MyTable.Button = props => {
   return (
     <Button
       animated="vertical"
+      type="button"
       action={props.action}
       color={props.color || "instagram"}
       onClick={props.onClick}
