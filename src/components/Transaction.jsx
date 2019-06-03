@@ -494,6 +494,46 @@ class Transaction extends Component {
         }
       ]
     });
+    const materialStockRowPlain = (data, i) => ({
+      key: `row-${i}`,
+      cells: [
+        data.id,
+        {
+          key: `material-${i}`,
+          content: useRelation(DB.materials, data.materialID, "name")
+        },
+        {
+          key: `suplier-${i}`,
+          content: useRelation(DB.materials, data.materialID, "suplier")
+        },
+        {
+          key: `location-${i}`,
+          content: useRelation(DB.locationmaps, data.locationID, "name") || (
+            <Icon name="question" color="red" size="small" />
+          )
+        },
+        data.lot,
+        {
+          key: `comingDate-${i}`,
+          content: new Date(Date.parse(data.comingDate)).toLocaleDateString(
+            LOCALE_DATE,
+            OPTIONS_DATE
+          )
+        },
+        {
+          key: `exp-${i}`,
+          content: new Date(Date.parse(data.expiredDate)).toLocaleDateString(
+            LOCALE_DATE,
+            OPTIONS_DATE
+          )
+        },
+        data.qty,
+        {
+          key: `statusQC-${i}`,
+          content: useRelation(DB.statusQCs, data.statusQCID, "name")
+        }
+      ]
+    });
     const outcomingHeader = [
       { key: 1, content: "OUTCOMING ID", name: "id" },
       { key: 2, content: "RECEIVER", name: "receiverName" },
@@ -1029,7 +1069,6 @@ class Transaction extends Component {
                 value={new Date(
                   Date.parse(selectedRowEdit.date)
                 ).toLocaleDateString(LOCALE_DATE, OPTIONS_DATE)}
-                options={CLEAVE_DATE_OPTIONS.date}
               />
             </Form.Group>
             <Form.Group widths="equal">
@@ -1049,7 +1088,7 @@ class Transaction extends Component {
             {
               <Table
                 headerRow={materialStockHeader}
-                renderBodyRow={materialStockRow}
+                renderBodyRow={materialStockRowPlain}
                 compact
                 celled
                 size="small"
@@ -1071,23 +1110,6 @@ class Transaction extends Component {
           >
             <Icon name="print" /> PRINT
           </Button>
-          <Link
-            to={{
-              pathname: "/print",
-              state: {
-                ...selectedRowEdit,
-                title: "OUTCOMING MATERIAL",
-                data: filterWithArray(
-                  stokAll,
-                  selectedRowEdit.stokMaterialOut,
-                  "id",
-                  "stokID"
-                )
-              }
-            }}
-          >
-            TEST
-          </Link>
         </Modal.Actions>
       </Modal>
     );

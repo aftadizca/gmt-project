@@ -1,7 +1,6 @@
 import React, { Component } from "react";
-import { Redirect } from "react-router-dom";
 import { Document, Page, Text, View, BlobProvider } from "@react-pdf/renderer";
-import { Button } from "semantic-ui-react";
+import { Button, Modal } from "semantic-ui-react";
 import { PDF_STYLE } from "../_helper/constant";
 import _ from "lodash";
 
@@ -52,9 +51,7 @@ class Print extends Component {
         <BlobProvider document={MyDocument}>
           {data => {
             console.log({ data });
-            return data.loading ? (
-              <div>Loading</div>
-            ) : (
+            return (
               <Button onClick={() => this.redirect(data.url)}>DOWNLOAD</Button>
             );
           }}
