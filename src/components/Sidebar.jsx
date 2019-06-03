@@ -1,6 +1,7 @@
 import React from "react";
-import { Menu } from "semantic-ui-react";
+import { Menu, Header } from "semantic-ui-react";
 import SideBarItem from "./../_common/SideBarItem";
+import logo from "./../warehouse.svg";
 
 const MySideBar = ({ children }) => {
   return (
@@ -12,8 +13,11 @@ const MySideBar = ({ children }) => {
       size="tiny"
       secondary
       pointing
+      className="sidebarx"
     >
-      <div style={{ paddingLeft: "3rem" }} />
+      <Menu.Item icon>
+        <Header as="h4" className="logo" image={logo} content="GMT" />
+      </Menu.Item>
       <SideBarItem path="/home" icon="home" text="Home" />
       <SideBarItem path="/material" icon="boxes" text="Material" />
       <SideBarItem path="/transaction" icon="exchange" text="Transaction" />

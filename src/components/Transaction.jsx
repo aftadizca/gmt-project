@@ -46,6 +46,7 @@ class Transaction extends Component {
   state = {
     selectedRow: [],
     selectedMaterial: [],
+    selectedMaterial2: [],
     selectedRowEdit: "",
     modalStatusQC: false,
     currentPageModal: 1,
@@ -127,6 +128,31 @@ class Transaction extends Component {
     500,
     { leading: true, trailing: true }
   );
+  handleOnChangeEditOutcoming = _.debounce(
+    (e, data) => {
+      console.log("handleEdit", { data });
+      let newOutcoming;
+      if (data.value) {
+        newOutcoming = [
+          {
+            ...this.state.newOutcoming,
+            [data.name]: data.value
+          }
+        ];
+      } else {
+        newOutcoming = [
+          {
+            ...this.state.newOutcoming,
+            [data.name]: data.placeholder
+          }
+        ];
+      }
+
+      this.setState({ newOutcoming });
+    },
+    500,
+    { leading: true, trailing: true }
+  );
 
   //handle open and close modal
   handleModal = (e, data) => {
@@ -198,6 +224,23 @@ class Transaction extends Component {
           }
         });
         break;
+      case OUTCOMING.edit:
+        const selectedMaterial = filterWithArray(
+          this.context.stoks,
+          this.state.selectedRow[0].stokMaterialOut,
+          "id",
+          "stokID"
+        );
+        this.setState({
+          modal: {
+            ...this.state.modal,
+            firstModal: { active: data.action, error: "" }
+          },
+          newOutcoming: { ...this.state.selectedRow[0] },
+          selectedMaterial: selectedMaterial,
+          selectedMaterial2: selectedMaterial
+        });
+        break;
 
       default:
         this.setState({
@@ -209,7 +252,7 @@ class Transaction extends Component {
         });
         break;
     }
-    Loading.close();
+    Loading.clickConfirm();
   };
 
   // modal next and prev page
@@ -228,6 +271,7 @@ class Transaction extends Component {
       currentPageModal: 1,
       selectedRowEdit: "",
       selectedMaterial: [],
+      selectedMaterial2: [],
       modal: { ...MODAL_DEFAULT },
       newStok: { ...NEW_STOK },
       newOutcoming: { ...NEW_INCOMING }
@@ -238,6 +282,7 @@ class Transaction extends Component {
   handleSubmit = (e, data) => {
     console.log("handleSubmit", { e, data });
     const { selectedRowEdit } = this.state;
+    let newOutcoming = {};
     switch (data.action) {
       case STOK.updateQC:
         this.context.putAPI(
@@ -247,8 +292,9 @@ class Transaction extends Component {
             this.resetModal();
             this.setState({ selectedRow: [] });
             this.context.locationMap();
+            Toast("Item successfully edited!");
           },
-          response => Toast(response.data, "error").fire()
+          response => Toast(response.data, "error")
         );
         break;
       case INCOMING.add:
@@ -262,7 +308,7 @@ class Transaction extends Component {
           () => {
             this.resetModal();
           },
-          () => Toast("Opps.. Something wrong.. Try Again!", "error").fire()
+          () => Toast("Opps.. Something wrong.. Try Again!", "error")
         );
         break;
 
@@ -280,13 +326,14 @@ class Transaction extends Component {
             this.resetModal();
             this.setState({ selectedRow: [], selectedRowEdit: [] });
             this.context.locationMap();
+            Toast("Item successfully edited!");
           },
-          response => Toast(response.data, "error").fire()
+          response => Toast(response.data, "error")
         );
         break;
 
       case OUTCOMING.add:
-        const newOutcoming = {
+        newOutcoming = {
           ...this.state.newOutcoming,
           stokMaterialOut: this.state.selectedMaterial.map(x => {
             return { stokID: x.id };
@@ -297,9 +344,30 @@ class Transaction extends Component {
           newOutcoming,
           () => {
             this.resetModal();
-            this.context.getAPI(["stok"]);
+            this.context.getAPI(["stok"], () =>
+              Toast("Item successfully edited!")
+            );
           },
-          () => Toast("Opps.. Something wrong.. Try Again!", "error").fire()
+          () => Toast("Opps.. Something wrong.. Try Again!", "error")
+        );
+        break;
+      case OUTCOMING.edit:
+        newOutcoming = {
+          ...this.state.newOutcoming,
+          stokMaterialOut: this.state.selectedMaterial.map(x => {
+            return { stokID: x.id };
+          })
+        };
+        this.context.putAPI(
+          "materialout",
+          newOutcoming,
+          () => {
+            this.resetModal();
+            this.context.getAPI(["stok"], () =>
+              Toast("Item successfully edited!")
+            );
+          },
+          () => Toast("Opps.. Something wrong.. Try Again!", "error")
         );
         break;
       default:
@@ -530,7 +598,7 @@ class Transaction extends Component {
           <MyTable.Button
             label="Edit"
             icon="edit"
-            action={STOK.edit}
+            action={OUTCOMING.edit}
             disabled={!(selectedRow.length === 1)}
             onClick={this.handleModal}
           />
@@ -1023,7 +1091,8 @@ class Transaction extends Component {
         </Modal.Actions>
       </Modal>
     );
-    const addMaterialOutcomingModal = (
+    const addMaterialOutcomingModal = secondModal.active ===
+      OUTCOMING.addMaterial && (
       <Modal
         closeOnDimmerClick={false}
         size="large"
@@ -1041,14 +1110,24 @@ class Transaction extends Component {
         </Modal.Header>
         <Modal.Content scrolling>
           <Segment basic>
+            {console.log(...selectedMaterial)}
             <MyTable
               key="stock"
               title="STOCK"
               header={materialStockHeader}
               body={materialStockRow}
-              data={stoks.filter(
-                x => x.statusQCID !== "1" && !x.isDeleted && !x.isOut
-              )}
+              data={
+                firstModal.active === OUTCOMING.edit
+                  ? [
+                      ...this.state.selectedMaterial2,
+                      ...stoks.filter(
+                        x => x.statusQCID !== "1" && !x.isDeleted && !x.isOut
+                      )
+                    ]
+                  : stoks.filter(
+                      x => x.statusQCID !== "1" && !x.isDeleted && !x.isOut
+                    )
+              }
               selectedRow={selectedMaterial}
               onSelectedChange={this.handleSelectedStok}
               orderBy={0}
@@ -1137,6 +1216,88 @@ class Transaction extends Component {
               !(checkForm(newOutcoming) && selectedMaterial.length !== 0)
             }
             action={OUTCOMING.add}
+          >
+            <Icon name="print" /> SAVE
+          </Button>
+        </Modal.Actions>
+      </Modal>
+    );
+    const editOutcomingModal = firstModal.active === OUTCOMING.edit && (
+      <Modal
+        closeOnDimmerClick={false}
+        closeIcon
+        open={firstModal.active === OUTCOMING.edit}
+        onClose={this.handleModal}
+      >
+        <Modal.Header>
+          <Segment inverted color="blue">
+            <Header
+              as="h2"
+              icon="edit outline"
+              inverted
+              content="ADD OUTCOMING"
+            />
+          </Segment>
+        </Modal.Header>
+        <Modal.Content scrolling>
+          <Form>
+            <CleaveMod
+              label="ID"
+              name="id"
+              readOnly
+              onChange={this.handleOnChangeEditOutcoming}
+              value={newOutcoming.id}
+            />
+            <Form.Group widths="equal">
+              <CleaveMod
+                label="RECEIVER"
+                name="receiverName"
+                placeholder={newOutcoming.receiverName}
+                onChange={this.handleOnChangeEditOutcoming}
+              />
+              <CleaveMod
+                label="DEPARTEMENT"
+                placeholder={newOutcoming.receiverDepartement}
+                name="receiverDepartement"
+                onChange={this.handleOnChangeEditOutcoming}
+              />
+            </Form.Group>
+            <Table
+              headerRow={materialStockHeader}
+              renderBodyRow={materialStockRow}
+              compact
+              celled
+              size="small"
+              tableData={selectedMaterial}
+            />
+
+            {selectedMaterial.length ? (
+              ""
+            ) : (
+              <Segment basic textAlign="center">
+                No material selected
+              </Segment>
+            )}
+
+            <Segment basic textAlign="center">
+              {addMaterialOutcomingModal}
+              <MyTable.Button
+                label="Add/Remove"
+                action={OUTCOMING.addMaterial}
+                icon="add"
+                onClick={this.handleModal}
+              />
+            </Segment>
+          </Form>
+        </Modal.Content>
+        <Modal.Actions>
+          <Button
+            color="blue"
+            onClick={this.handleSubmit}
+            disabled={
+              !(checkForm(newOutcoming) && selectedMaterial.length !== 0)
+            }
+            action={OUTCOMING.edit}
           >
             <Icon name="print" /> SAVE
           </Button>
@@ -1250,6 +1411,7 @@ class Transaction extends Component {
         {editStokModal}
         {viewOutcomingModal}
         {addOutcomingModal}
+        {editOutcomingModal}
         <Tab
           menu={{
             borderless: true,
