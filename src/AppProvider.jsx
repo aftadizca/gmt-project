@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import { Loading, Toast, DeleteAlert, ToastMix } from "./_helper/CostumToast";
+import { Loading, Toast, DeleteAlert } from "./_helper/CostumToast";
 import api from "./_helper/api";
 import _ from "lodash";
 import { DB } from "./_helper/constant";

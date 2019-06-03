@@ -1,4 +1,5 @@
 import { Line, defaults } from "react-chartjs-2";
+import { StyleSheet } from "@react-pdf/renderer";
 
 export const TITLE = "GUDANG MATERIAL APP";
 
@@ -100,6 +101,57 @@ export const MODAL_DEFAULT = {
   firstModal: { active: "", error: "" },
   secondModal: { active: "", error: "" }
 };
+
+export const PDF_STYLE = StyleSheet.create({
+  page: {
+    padding: "50pt"
+  },
+  container: {
+    flexDirection: "row"
+  },
+  column: {
+    display: "flex",
+    boxSizing: "border-box",
+    flexGrow: 1,
+    alignItems: "stretch",
+    justifyContent: "stretch",
+    flexDirection: "column"
+  },
+  document: {
+    backgroundColor: "#000"
+  },
+  cell: {
+    border: "0.5pt",
+    boxSizing: "border-box",
+    padding: "3pt",
+    alignItems: "stretch",
+    justifyContent: "stretch",
+    fontWeight: "normal",
+    fontSize: "8pt"
+  },
+  header: {
+    border: "0.5pt",
+    boxSizing: "border-box",
+    alignItems: "stretch",
+    justifyContent: "stretch",
+    padding: "3pt",
+    fontWeight: "bolder",
+    fontSize: "8pt",
+    backgroundColor: "#0277bd"
+  },
+  pageCount: {
+    position: "absolute",
+    bottom: "25pt",
+    right: "50pt",
+    fontSize: "8pt"
+  },
+  title: {
+    position: "absolute",
+    top: "25pt",
+    left: "50pt",
+    fontSize: "8pt"
+  }
+});
 
 //#region LINE CHART SETTING
 defaults.global.defaultFontFamily = "'Nanum Gothic', sans-serif";
