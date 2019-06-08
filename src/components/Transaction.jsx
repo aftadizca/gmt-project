@@ -160,7 +160,7 @@ class Transaction extends Component {
   //handle open and close modal
   handleModal = (e, data) => {
     //close modal and reset state
-    console.log("handleModal", { e, data });
+    //console.log("handleModal", { e, data });
     if (data.eventPool === "Modal" && data.open) {
       this.resetModal();
       return;
@@ -283,7 +283,7 @@ class Transaction extends Component {
 
   //handle submit Form
   handleSubmit = (e, data) => {
-    console.log("handleSubmit", { e, data });
+    //console.log("handleSubmit", { e, data });
     const { selectedRowEdit } = this.state;
     let newOutcoming = {};
     switch (data.action) {

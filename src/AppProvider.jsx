@@ -190,7 +190,6 @@ class AppProvider extends Component {
       }
     },
     loadResource: () => {
-      console.log("sdsdsd");
       this.state.getAPI(
         ["stok", "statusQC", "location", "material", "graph", "materialout"],
         () => this.state.locationMap()

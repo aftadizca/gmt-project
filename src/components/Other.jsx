@@ -11,14 +11,6 @@ class Other extends Component {
     locationMap: []
   };
 
-  componentDidMount() {
-    console.log("Other DidMounted");
-  }
-
-  handleDeleteStatusQC = id => {
-    console.log(id);
-  };
-
   render() {
     document.title = this.props.match.params.tab.toUpperCase() + " - " + TITLE;
     const { statusQCs, locationmaps } = this.context;
