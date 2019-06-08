@@ -40,6 +40,7 @@ class AppProvider extends Component {
   timer = false;
 
   state = {
+    login: false,
     [DB.materials]: [],
     [DB.statusQCs]: [],
     [DB.locationmaps]: [],
@@ -186,14 +187,31 @@ class AppProvider extends Component {
       } catch (error) {
         return false;
       }
+    },
+    loadResource: () => {
+      console.log("sdsdsd");
+      this.state.getAPI(
+        ["stok", "statusQC", "location", "material", "graph", "materialout"],
+        () => this.state.locationMap()
+      );
+    },
+    setLogin: b => {
+      this.setState({ login: b });
+    },
+    auth: () => {
+      api
+        .get("account")
+        .then(response => {
+          if (response.status === 200) this.state.setLogin(true);
+        })
+        .catch(errors => {
+          this.state.setLogin(false);
+        });
     }
   };
 
   componentDidMount() {
-    this.state.getAPI(
-      ["stok", "statusQC", "location", "material", "graph", "materialout"],
-      () => this.state.locationMap()
-    );
+    this.state.auth();
   }
 
   render() {

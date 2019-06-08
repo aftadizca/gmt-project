@@ -3,7 +3,7 @@ import { Menu, Header } from "semantic-ui-react";
 import SideBarItem from "./../_common/SideBarItem";
 import logo from "./../warehouse.svg";
 
-const MySideBar = ({ children }) => {
+const MySideBar = () => {
   return (
     <Menu
       icon="labeled"
@@ -22,6 +22,10 @@ const MySideBar = ({ children }) => {
       <SideBarItem path="/material" icon="boxes" text="Material" />
       <SideBarItem path="/transaction" icon="exchange" text="Transaction" />
       <SideBarItem path="/other" icon="settings" text="Other" />
+      <Menu.Menu position="right">
+        <SideBarItem path="/logout" icon="sign out" text="Log Out" />
+        <div style={{ marginRight: "3rem" }} />
+      </Menu.Menu>
     </Menu>
   );
 };

@@ -10,7 +10,8 @@ import {
   Button,
   Table,
   Header,
-  Segment
+  Segment,
+  Ref
 } from "semantic-ui-react";
 import MyTable from "./../_common/MyTable";
 import {
@@ -29,7 +30,7 @@ import {
 } from "../_helper/constant";
 import { AppContext } from "./../AppProvider";
 import LabelTab from "./../_common/LabelTab";
-import { NavLink, Link } from "react-router-dom";
+import { NavLink } from "react-router-dom";
 import QCButton from "../_common/QCButton";
 import { DinamicList } from "../_helper/SelectList";
 import { Toast, Loading } from "./../_helper/CostumToast";
@@ -38,11 +39,13 @@ import { DB } from "./../_helper/constant";
 import CleaveMod from "./../_common/CleaveMod";
 import { checkForm } from "../_helper/tool";
 import { filterWithArray } from "./../_helper/tool";
+import Print from "./Print";
+import { createRef } from "react";
 //#endregion
 
 class Transaction extends Component {
   static contextType = AppContext;
-
+  createdRef = createRef();
   state = {
     selectedRow: [],
     selectedMaterial: [],
@@ -497,7 +500,10 @@ class Transaction extends Component {
     const materialStockRowPlain = (data, i) => ({
       key: `row-${i}`,
       cells: [
-        data.id,
+        {
+          key: `id-${i}`,
+          content: data.id
+        },
         {
           key: `material-${i}`,
           content: useRelation(DB.materials, data.materialID, "name")
@@ -512,7 +518,10 @@ class Transaction extends Component {
             <Icon name="question" color="red" size="small" />
           )
         },
-        data.lot,
+        {
+          key: `lot-${i}`,
+          content: data.lot
+        },
         {
           key: `comingDate-${i}`,
           content: new Date(Date.parse(data.comingDate)).toLocaleDateString(
@@ -527,7 +536,10 @@ class Transaction extends Component {
             OPTIONS_DATE
           )
         },
-        data.qty,
+        {
+          key: `qty-${i}`,
+          content: data.qty
+        },
         {
           key: `statusQC-${i}`,
           content: useRelation(DB.statusQCs, data.statusQCID, "name")
@@ -1036,6 +1048,9 @@ class Transaction extends Component {
         </Modal.Actions>
       </Modal>
     );
+    const dataviewOutcomingModal =
+      firstModal.active === OUTCOMING.view &&
+      filterWithArray(stoks, selectedRowEdit.stokMaterialOut, "id", "stokID");
     const viewOutcomingModal = firstModal.active === OUTCOMING.view && (
       <Modal
         closeOnDimmerClick={false}
@@ -1086,33 +1101,31 @@ class Transaction extends Component {
               />
             </Form.Group>
             {
-              <Table
-                headerRow={materialStockHeader}
-                renderBodyRow={materialStockRowPlain}
-                compact
-                celled
-                size="small"
-                tableData={filterWithArray(
-                  stoks,
-                  selectedRowEdit.stokMaterialOut,
-                  "id",
-                  "stokID"
-                )}
-              />
+              <Ref innerRef={this.createdRef}>
+                <Table
+                  headerRow={materialStockHeader}
+                  renderBodyRow={materialStockRowPlain}
+                  compact
+                  celled
+                  size="small"
+                  tableData={dataviewOutcomingModal}
+                />
+              </Ref>
             }
           </Form>
         </Modal.Content>
         <Modal.Actions>
-          <Button
-            color="blue"
-            onClick={this.handleSubmit}
-            action={INCOMING.edit}
-          >
-            <Icon name="print" /> PRINT
-          </Button>
+          <Print
+            header={materialStockHeader}
+            data={dataviewOutcomingModal.map((x, i) => {
+              return materialStockRowPlain(x, i).cells;
+            })}
+            detail={selectedRowEdit}
+          />
         </Modal.Actions>
       </Modal>
     );
+
     const addMaterialOutcomingModal = secondModal.active ===
       OUTCOMING.addMaterial && (
       <Modal

@@ -129,6 +129,23 @@ export const PDF_STYLE = StyleSheet.create({
     fontWeight: "normal",
     fontSize: "8pt"
   },
+  label: {
+    boxSizing: "border-box",
+    padding: "3pt",
+    alignItems: "stretch",
+    justifyContent: "stretch",
+    fontWeight: "normal",
+    fontSize: "8pt",
+    flexGrow: 1
+  },
+  labelValue: {
+    boxSizing: "border-box",
+    padding: "3pt",
+    justifyContent: "stretch",
+    fontWeight: "normal",
+    fontSize: "8pt",
+    flexGrow: 2
+  },
   header: {
     border: "0.5pt",
     boxSizing: "border-box",
