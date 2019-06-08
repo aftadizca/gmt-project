@@ -13,26 +13,26 @@ class AppProvider extends Component {
         case 400:
         case 401:
         case 404:
-          Loading.close();
+          Loading.clickConfirm();
           if (errCall) {
             errCall(err.response);
           } else {
-            Toast(err.response.data, "error").fire();
+            Toast(err.response.data, "error");
           }
           break;
         default:
-          Loading.close();
-          Toast("Server error !!", "error").fire();
+          Loading.clickConfirm();
+          Toast("Server error !!", "error");
           break;
       }
     } else {
       if (this.timer) {
       } else {
-        Loading.close();
+        Loading.clickConfirm();
         this.timer = setInterval(() => {
           repeatFunc();
         }, 2000);
-        Toast("Network error !!", "error", false).fire();
+        Toast("Network error !!", "error", false);
       }
     }
   };
@@ -40,11 +40,14 @@ class AppProvider extends Component {
   timer = false;
 
   state = {
+    login: false,
     [DB.materials]: [],
     [DB.statusQCs]: [],
     [DB.locationmaps]: [],
     [DB.locations]: [],
     [DB.stoks]: [],
+    [DB.graphs]: [],
+    [DB.materialouts]: [],
     getAPI: (url, success) => {
       !this.timer && Loading.fire();
       const prom = [];
@@ -55,10 +58,9 @@ class AppProvider extends Component {
         .then(data => {
           clearInterval(this.timer);
           this.timer = false;
-          Loading.close();
+          Loading.clickConfirm();
           const d = {};
           data.forEach((x, i) => {
-            console.log(url[i]);
             d[url[i] + "s"] = x.data;
           });
           this.setState(d);
@@ -79,14 +81,14 @@ class AppProvider extends Component {
           if (status === 201) {
             let x = [];
             if (Array.isArray(data)) {
-              x = [...data, ...this.state[state]];
+              x = _.sortBy([...data, ...this.state[state]], "id");
             } else {
-              x = [data, ...this.state[state]];
+              x = _.sortBy([data, ...this.state[state]], "id");
             }
             this.setState({ [state]: x });
-            Loading.close();
+            Loading.clickConfirm();
             success(data);
-            Toast("Item succesfully added!").fire();
+            Toast("Item succesfully added!");
           }
         })
         .catch(err => {
@@ -106,22 +108,21 @@ class AppProvider extends Component {
         .put(`${url}`, postdata)
         .then(({ status, data }) => {
           console.log("is array", Array.isArray(data));
-          if (status === 200) {
+          if (status === 200 || status === 201) {
             if (!Array.isArray(data)) {
               const m = this.state[state].filter(x => x.id !== data.id);
               this.setState({
-                [state]: _.orderBy([data, ...m], "id", "asc")
+                [state]: _.sortBy([data, ...m], "id")
               });
             } else {
               const filtered = _.differenceBy(this.state[state], data, "id");
               this.setState({
-                [state]: _.orderBy([...data, ...filtered], "id", "asc")
+                [state]: _.sortBy([...data, ...filtered], "id")
               });
             }
           }
-          Loading.close();
+          Loading.clickConfirm();
           success && success();
-          Toast("Item successfully edited!").fire();
         })
         .catch(err => {
           console.error("PUT ERROR", err.response);
@@ -139,11 +140,11 @@ class AppProvider extends Component {
               if (status === 204) {
                 const filtered = _.differenceBy(this.state[state], data, "id");
                 this.setState({
-                  [state]: _.orderBy([...data, ...filtered], "id", "asc")
+                  [state]: _.sortBy([...data, ...filtered], "id")
                 });
                 success && success();
-                Loading.close();
-                Toast("Successfully delete item!").fire();
+                Loading.clickConfirm();
+                Toast("Successfully delete item!");
               }
             })
             .catch(err => {
@@ -186,13 +187,31 @@ class AppProvider extends Component {
       } catch (error) {
         return false;
       }
+    },
+    loadResource: () => {
+      console.log("sdsdsd");
+      this.state.getAPI(
+        ["stok", "statusQC", "location", "material", "graph", "materialout"],
+        () => this.state.locationMap()
+      );
+    },
+    setLogin: b => {
+      this.setState({ login: b });
+    },
+    auth: () => {
+      api
+        .get("account")
+        .then(response => {
+          if (response.status === 200) this.state.setLogin(true);
+        })
+        .catch(errors => {
+          this.state.setLogin(false);
+        });
     }
   };
 
   componentDidMount() {
-    this.state.getAPI(["stok", "statusQC", "location", "material"], () =>
-      this.state.locationMap()
-    );
+    this.state.auth();
   }
 
   render() {

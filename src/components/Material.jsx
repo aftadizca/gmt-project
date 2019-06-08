@@ -5,6 +5,7 @@ import { UnitList } from "../_helper/SelectList";
 import { TypeList } from "./../_helper/SelectList";
 import { TITLE } from "../_helper/constant";
 import { AppContext } from "./../AppProvider";
+import { Toast } from "../_helper/CostumToast";
 
 class Material extends Component {
   static contextType = AppContext;
@@ -63,10 +64,11 @@ class Material extends Component {
               selectedRow: []
             });
             this.handleMaterialClear();
+            Toast("Item successfully edited!");
           },
           response =>
             this.setState({
-              modalError: { error: true, msg: response.data.error }
+              modalError: { error: true, msg: response.data }
             })
         );
       } else if (data.action === "Add") {

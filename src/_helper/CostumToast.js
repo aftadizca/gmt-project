@@ -38,4 +38,4 @@ export const Toast = (message, type = "success", timer = 5000) =>
     customClass: {
       title: "toast-title"
     }
-  });
+  }).fire();

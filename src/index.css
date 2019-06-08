@@ -4,6 +4,7 @@ body {
   background-color: lightgray;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  font-family: "Nanum Gothic", sans-serif !important;
 }
 
 code {
@@ -247,18 +248,6 @@ code {
   }
 }
 
-/* efek blink di row table */
-/* .ui.table td.active,
-.ui.table tr.active {
-  background: #2185d0b2 !important;
-  animation: blinking 1s !important;
-  -moz-animation: blinking 1s !important;
-  -webkit-animation: blinking 1s !important;
-}
-.ui.striped.selectable.selectable.selectable.table tbody tr.active:hover {
-  background: #2184d065 !important;
-} */
-
 .ui.popup {
   z-index: 900;
 }
@@ -272,5 +261,44 @@ code {
 }
 
 input:read-only {
-  background: rgba(0, 0, 0, 0.23) !important;
+  background-color: #2184d060 !important;
+  color: #000000 !important;
+  font-weight: bold;
+}
+.print input:read-only {
+  background-color: transparent !important;
+  color: #000000 !important;
+  font-weight: bold;
+  text-align: right;
+  border: transparent !important;
+}
+
+.ui.vertical.animated.button .visible.content {
+  padding: 0 15px;
+}
+
+.tablelink {
+  cursor: pointer;
+}
+
+@media print {
+  body {
+    zoom: 0.7;
+  }
+  .menu {
+    display: none !important;
+  }
+  @page {
+    size: 9.5in x 11in landscape;
+  }
+}
+
+.link {
+  background-color: transparent !important;
+  border: none !important;
+  cursor: pointer !important;
+  display: inline !important;
+  margin: 0;
+  padding: 0;
+  color: #0055a5 !important;
 }

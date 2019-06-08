@@ -7,7 +7,7 @@ const QCButton = props => {
   return (
     <Popup
       trigger={
-        <Button animated color="blue" disabled={props.disabled}>
+        <Button animated color="instagram" disabled={props.disabled}>
           <Button.Content visible>Status QC</Button.Content>
           <Button.Content hidden>
             <Icon name="check circle" />
