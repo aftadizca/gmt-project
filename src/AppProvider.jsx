@@ -156,8 +156,9 @@ class AppProvider extends Component {
     locationMap: async () => {
       return await new Promise(resolve => {
         setTimeout(() => {
+          const filteredStok = stok.filter(x => x.isOut === false);
           const locationmaps = this.state.locations.map(x => {
-            const traceID = _.find(stok, ["locationID", x.id]);
+            const traceID = _.find(filteredStok, ["locationID", x.id]);
             if (traceID) {
               const materialName = this.state[DB.materials].find(
                 x => x.id === traceID.materialID

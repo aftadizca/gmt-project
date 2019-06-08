@@ -4,7 +4,6 @@ import App from "./App";
 import "semantic-ui-css/semantic.css";
 import "@fortawesome/fontawesome-free/css/all.css";
 import "./index.css";
-import "./icon.svg";
 import * as serviceWorker from "./serviceWorker";
 import AppProvider from "./AppProvider";
 

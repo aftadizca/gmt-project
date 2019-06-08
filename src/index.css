@@ -302,3 +302,8 @@ input:read-only {
   padding: 0;
   color: #0055a5 !important;
 }
+
+.login-img {
+  width: 30% !important;
+  height: 30% !important;
+}
