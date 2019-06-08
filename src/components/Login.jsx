@@ -6,10 +6,14 @@ import {
   Button,
   Input,
   Form,
-  Message
+  Message,
+  Image,
+  Divider
 } from "semantic-ui-react";
 import { AppContext } from "../AppProvider";
+import logo from "./../warehouse.svg";
 import api from "../_helper/api";
+import { Toast } from "./../_helper/CostumToast";
 
 class Login extends Component {
   static contextType = AppContext;
@@ -38,7 +42,11 @@ class Login extends Component {
           this.context.setLogin(true);
         })
         .catch(ex => {
-          this.setState({ error: ex.response.data });
+          if (ex.response) {
+            this.setState({ error: ex.response.data });
+          } else {
+            Toast("Server not available", "error");
+          }
         });
     }
   };
@@ -52,8 +60,10 @@ class Login extends Component {
           <Form error={error !== ""} onSubmit={this.handleLogin}>
             <Segment.Group stacked raised>
               <Segment color="blue" inverted padded>
-                <Header as="h1" textAlign="center">
-                  <Header.Content>GUDANG MATERIAL</Header.Content>
+                <Header textAlign="center">
+                  <Image src={logo} className="login-img" />
+                  <Divider hidden fitted />
+                  <Header.Content as="h2">GUDANG MATERIAL</Header.Content>
                 </Header>
               </Segment>
               <Segment padded="very">
