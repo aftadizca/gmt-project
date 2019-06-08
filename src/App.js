@@ -17,7 +17,6 @@ class App extends Component {
   static contextType = AppContext;
   render() {
     const { login } = this.context;
-    console.log("LOGIN", this.context.login);
     if (!this.context.login) {
       document.body.style.backgroundImage = `url(${background})`;
       document.body.style.backgroundSize = "cover";

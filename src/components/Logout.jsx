@@ -1,4 +1,4 @@
-import React, { Component } from "react";
+import { Component } from "react";
 import api from "../_helper/api";
 import { AppContext } from "../AppProvider";
 
