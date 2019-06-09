@@ -196,7 +196,9 @@ class AppProvider extends Component {
       );
     },
     setLogin: b => {
-      this.setState({ login: b });
+      this.setState({ login: b }, () => {
+        b && this.state.loadResource();
+      });
     },
     auth: () => {
       api
@@ -211,7 +213,7 @@ class AppProvider extends Component {
   };
 
   componentDidMount() {
-    this.state.auth();
+    //this.state.auth();
   }
 
   render() {

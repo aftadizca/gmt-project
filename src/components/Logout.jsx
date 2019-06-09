@@ -7,11 +7,11 @@ class Logout extends Component {
   state = {};
 
   componentDidMount() {
-    console.log("LOGOUT MOUNT");
     api
       .get("account/logout")
       .then(response => {
         this.context.setLogin(false);
+        this.props.history.replace("/login");
       })
       .catch(ex => {});
   }

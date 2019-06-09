@@ -23,6 +23,17 @@ class Login extends Component {
     error: ""
   };
 
+  componentDidMount() {
+    api
+      .get("account")
+      .then(response => {
+        if (response.status === 200) this.context.setLogin(true);
+      })
+      .catch(errors => {
+        this.context.setLogin(false);
+      });
+  }
+
   handleOnChange = (e, data) => {
     this.setState({ [data.name]: data.value });
   };

@@ -9,12 +9,13 @@ import { Grid } from "semantic-ui-react";
 import Print from "./components/Print";
 import Login from "./components/Login";
 import { AppContext } from "./AppProvider";
-import Loader from "./components/Loader";
 import background from "./bg.jpg";
 import Logout from "./components/Logout";
+import MySideBar from "./components/Sidebar";
 
 class App extends Component {
   static contextType = AppContext;
+
   render() {
     const { login } = this.context;
     if (!this.context.login) {
@@ -31,7 +32,7 @@ class App extends Component {
           {login && (
             <Route
               path={["/home", "/material", "/transaction", "/other"]}
-              component={Loader}
+              component={MySideBar}
             />
           )}
           <Grid>
@@ -52,11 +53,10 @@ class App extends Component {
                 {login && (
                   <Redirect from="/transaction" to="/transaction/stok" />
                 )}
-                {login && <Redirect from="/" to="/home" />}
-                {login && <Redirect from="/logout" to="/login" />}
                 {login && <Redirect from="/login" to="/home" />}
+
                 <Route path="/login" component={Login} />
-                <Redirect from="/" to="/login" />
+                <Redirect to="/login" />
               </Switch>
             </Grid.Column>
             <Grid.Column width={1} />

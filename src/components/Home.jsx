@@ -32,7 +32,7 @@ class Home extends Component {
           {
             label: "CUP (pcs)",
             data: graphs.incoming && graphs.incoming.CUP,
-            borderColor: "rgba(0,150,136,1.000)",
+            borderColor: "rgba(0,150,136)",
             backgroundColor: gradien(canvas, 0, 150, 136)
           }
         ]
@@ -46,20 +46,20 @@ class Home extends Component {
           {
             label: "DUS",
             data: graphs.outcoming && graphs.outcoming.DUS,
-            borderColor: "rgba(244,67,54,1.000)",
+            borderColor: "rgba(244,67,54)",
             backgroundColor: gradien(canvas, 244, 67, 54)
           },
           {
             label: "SEAL",
-            data: graphs.outcoming && graphs.outcoming.DUS,
-            borderColor: "rgba(33,150,243,1.000)",
+            data: graphs.outcoming && graphs.outcoming.SEAL,
+            borderColor: "rgba(33,150,243)",
             backgroundColor: gradien(canvas, 33, 150, 243)
           },
 
           {
             label: "CUP",
-            data: graphs.outcoming && graphs.outcoming.DUS,
-            borderColor: "rgba(0,150,136,1.000)",
+            data: graphs.outcoming && graphs.outcoming.CUP,
+            borderColor: "rgba(0,150,136)",
             backgroundColor: gradien(canvas, 0, 150, 136)
           }
         ]

@@ -21,7 +21,7 @@ const MySideBar = () => {
       <SideBarItem path="/home" icon="home" text="Home" />
       <SideBarItem path="/material" icon="boxes" text="Material" />
       <SideBarItem path="/transaction" icon="exchange" text="Transaction" />
-      <SideBarItem path="/other" icon="settings" text="Other" />
+      <SideBarItem path="/other" icon="info" text="Other" />
       <Menu.Menu position="right">
         <SideBarItem path="/logout" icon="sign out" text="Log Out" />
         <div style={{ marginRight: "3rem" }} />
