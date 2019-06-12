@@ -1,57 +1,36 @@
 import React, { Component } from "react";
-import {
-  Grid,
-  Segment,
-  Header,
-  Button,
-  Input,
-  Form,
-  Message,
-  Image,
-  Divider
-} from "semantic-ui-react";
+import { Grid, Segment, Button, Input, Form, Message } from "semantic-ui-react";
 import { AppContext } from "../AppProvider";
-import logo from "./../warehouse.svg";
 import api from "../_helper/api";
-import { Toast } from "./../_helper/CostumToast";
+import { Toast } from "../_helper/CostumToast";
 
-class Login extends Component {
+class ChangePassword extends Component {
   static contextType = AppContext;
   state = {
-    username: "",
-    password: "",
+    cpassword: "",
+    npassword: "",
+    rnpassword: "",
     error: ""
   };
-
-  componentDidMount() {
-    api
-      .get("account")
-      .then(response => {
-        if (response.status === 200) this.context.setLogin(true);
-      })
-      .catch(errors => {
-        this.context.setLogin(false);
-      });
-  }
 
   handleOnChange = (e, data) => {
     this.setState({ [data.name]: data.value });
   };
 
   handleLogin = () => {
-    const { username, password } = this.state;
-    if (username === "" && password === "") {
-      this.setState({ error: "Username & Password required!!" });
-    } else if (username === "") {
-      this.setState({ error: "Username required!!" });
-    } else if (password === "") {
-      this.setState({ error: "Password required!!" });
+    const { cpassword, npassword, rnpassword } = this.state;
+    if (cpassword === "" || npassword === "" || rnpassword === "") {
+      this.setState({ error: "Field can't be empty" });
+    } else if (npassword !== rnpassword) {
+      this.setState({ error: "Repeat password not same" });
     } else {
       api
-        .post("account/login", { ...this.state })
+        .post("account/changepassword", {
+          ...this.state,
+          username: localStorage.getItem("name")
+        })
         .then(response => {
-          this.context.setLogin(true);
-          localStorage.setItem("name", username);
+          Toast("password has been changed");
         })
         .catch(ex => {
           if (ex.response) {
@@ -64,20 +43,13 @@ class Login extends Component {
   };
 
   render() {
-    const { username, error } = this.state;
+    const { error } = this.state;
     return (
       <Grid columns="equal" padded="vertically">
         <Grid.Column stretched />
         <Grid.Column width="6">
           <Form error={error !== ""} onSubmit={this.handleLogin}>
             <Segment.Group stacked raised>
-              <Segment color="blue" inverted padded>
-                <Header textAlign="center">
-                  <Image src={logo} className="login-img" />
-                  <Divider hidden fitted />
-                  <Header.Content as="h2">GUDANG MATERIAL</Header.Content>
-                </Header>
-              </Segment>
               <Segment padded="very">
                 <Message
                   icon="warning circle"
@@ -87,27 +59,37 @@ class Login extends Component {
                 />
                 <Input
                   fluid
-                  name="username"
-                  icon="user"
+                  name="cpassword"
+                  type="password"
+                  icon="key"
                   iconPosition="left"
-                  placeholder="USERNAME"
+                  placeholder="CURRENT PASSWORD"
                   onChange={this.handleOnChange}
-                  value={username}
                 />
                 <br />
                 <Input
                   fluid
-                  name="password"
+                  name="npassword"
                   type="password"
                   icon="key"
                   iconPosition="left"
-                  placeholder="PASSWORD"
+                  placeholder="NEW PASSWORD"
+                  onChange={this.handleOnChange}
+                />
+                <br />
+                <Input
+                  fluid
+                  name="rnpassword"
+                  type="password"
+                  icon="key"
+                  iconPosition="left"
+                  placeholder="REPEAT NEW PASSWORD"
                   onChange={this.handleOnChange}
                 />
               </Segment>
               <Segment>
                 <Button type="submit" color="blue">
-                  LOGIN
+                  SAVE
                 </Button>
               </Segment>
             </Segment.Group>
@@ -119,4 +101,4 @@ class Login extends Component {
   }
 }
 
-export default Login;
+export default ChangePassword;

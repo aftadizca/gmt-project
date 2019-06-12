@@ -12,6 +12,7 @@ import { AppContext } from "./AppProvider";
 import background from "./bg.jpg";
 import Logout from "./components/Logout";
 import MySideBar from "./components/Sidebar";
+import ChangePassword from "./components/ChangePassword";
 
 class App extends Component {
   static contextType = AppContext;
@@ -31,7 +32,13 @@ class App extends Component {
         <BrowserRouter>
           {login && (
             <Route
-              path={["/home", "/material", "/transaction", "/other"]}
+              path={[
+                "/home",
+                "/material",
+                "/transaction",
+                "/other",
+                "/changepassword"
+              ]}
               component={MySideBar}
             />
           )}
@@ -44,6 +51,13 @@ class App extends Component {
                 {login && <Route path="/logout" component={Logout} />}
                 {login && (
                   <Route name="print" path="/print" component={Print} />
+                )}
+                {login && (
+                  <Route
+                    name="changepassword"
+                    path="/changepassword"
+                    component={ChangePassword}
+                  />
                 )}
                 {login && (
                   <Route path="/transaction/:tab" component={Transaction} />

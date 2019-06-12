@@ -11,6 +11,7 @@ class Logout extends Component {
       .get("account/logout")
       .then(response => {
         this.context.setLogin(false);
+        localStorage.removeItem("name");
         this.props.history.replace("/login");
       })
       .catch(ex => {});
