@@ -28,12 +28,23 @@ class Home extends Component {
             borderColor: "rgba(33,150,243)",
             backgroundColor: gradien(canvas, 33, 150, 243)
           },
-
           {
             label: "CUP (pcs)",
             data: graphs.incoming && graphs.incoming.CUP,
             borderColor: "rgba(0,150,136)",
             backgroundColor: gradien(canvas, 0, 150, 136)
+          },
+          {
+            label: "SEDOTAN (pack)",
+            data: graphs.incoming && graphs.incoming.SEDOTAN,
+            borderColor: "rgba(255,143,0,1.000)",
+            backgroundColor: gradien(canvas, 255, 143, 0)
+          },
+          {
+            label: "LAKBAN (roll)",
+            data: graphs.incoming && graphs.incoming.LAKBAN,
+            borderColor: "rgba(216,67,21,1.000)",
+            backgroundColor: gradien(canvas, 216, 67, 21)
           }
         ]
       };
@@ -44,23 +55,35 @@ class Home extends Component {
         labels: MONTH_NAME,
         datasets: [
           {
-            label: "DUS",
+            label: "DUS (pcs)",
             data: graphs.outcoming && graphs.outcoming.DUS,
             borderColor: "rgba(244,67,54)",
             backgroundColor: gradien(canvas, 244, 67, 54)
           },
           {
-            label: "SEAL",
+            label: "SEAL (roll)",
             data: graphs.outcoming && graphs.outcoming.SEAL,
             borderColor: "rgba(33,150,243)",
             backgroundColor: gradien(canvas, 33, 150, 243)
           },
 
           {
-            label: "CUP",
+            label: "CUP (pcs)",
             data: graphs.outcoming && graphs.outcoming.CUP,
             borderColor: "rgba(0,150,136)",
             backgroundColor: gradien(canvas, 0, 150, 136)
+          },
+          {
+            label: "SEDOTAN (pack)",
+            data: graphs.outcoming && graphs.outcoming.SEDOTAN,
+            borderColor: "rgba(255,143,0,1.000)",
+            backgroundColor: gradien(canvas, 255, 143, 0)
+          },
+          {
+            label: "LAKBAN (roll)",
+            data: graphs.outcoming && graphs.outcoming.LAKBAN,
+            borderColor: "rgba(216,67,21,1.000)",
+            backgroundColor: gradien(canvas, 216, 67, 21)
           }
         ]
       };

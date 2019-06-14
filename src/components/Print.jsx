@@ -57,7 +57,7 @@ class Print extends Component {
               </View>
             ))}
           </View>
-          <Text style={PDF_STYLE.pageCount}>1/2</Text>
+          {/* <Text style={PDF_STYLE.pageCount}>1/2</Text> */}
         </Page>
       </Document>
     );

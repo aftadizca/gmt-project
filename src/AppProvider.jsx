@@ -142,9 +142,8 @@ class AppProvider extends Component {
                 this.setState({
                   [state]: _.sortBy([...data, ...filtered], "id")
                 });
-                success && success();
                 Loading.clickConfirm();
-                Toast("Successfully delete item!");
+                success && success();
               }
             })
             .catch(err => {

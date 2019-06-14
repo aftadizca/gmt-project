@@ -69,6 +69,16 @@ class Transaction extends Component {
     );
   };
 
+  handleDeleteOutcoming = () => {
+    const dataToDelete = this.state.selectedRow.map(x => {
+      return { ...x, isDeleted: true };
+    });
+    this.context.deleteAPI("materialout", dataToDelete, () => {
+      this.setState({ selectedRow: [] });
+      this.context.getAPI(["stok"]);
+    });
+  };
+
   handleOnChangeQC = _.debounce(
     (e, data) => {
       console.log("handleOnChangeQC", { e, data });
@@ -653,6 +663,13 @@ class Transaction extends Component {
             action={OUTCOMING.edit}
             disabled={!(selectedRow.length === 1)}
             onClick={this.handleModal}
+          />
+          <MyTable.Button
+            label="Delete"
+            icon="x"
+            action={OUTCOMING.delete}
+            disabled={!(selectedRow.length === 1)}
+            onClick={this.handleDeleteOutcoming}
           />
         </Button.Group>{" "}
       </React.Fragment>

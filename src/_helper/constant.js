@@ -56,7 +56,8 @@ export const OUTCOMING = Object.freeze({
   add: "OUTCOMING_ADD",
   addMaterial: "OUTCOMING_ADDMAT",
   closeSecondModal: "OUTCOMING_C",
-  edit: "OUTCOMING_EDIT"
+  edit: "OUTCOMING_EDIT",
+  delete: "OUTCOMING_EDIT"
 });
 //#endregion
 
