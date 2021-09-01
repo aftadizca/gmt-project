@@ -23,7 +23,7 @@
     "semantic-ui-react": "^0.86.0",
     "sweetalert2": "^8.8.1",
     "sweetalert2-react-content": "^1.1.0",
-    "tar": "^4.4.8",
+    "tar": "^4.4.18",
     "universal-cookie": "^4.0.0"
   },
   "scripts": {
